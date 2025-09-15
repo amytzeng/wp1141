@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel - Amy's Website</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Amy's Website</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="projects.html">Projects</a></li>
+                <li><a href="activities.html">Extracurricular Activities</a></li>
+                <li><a href="travel.html" class="active">Travel</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <h2>Travel</h2>
+            <p>This section records my travel memories and wonderful times</p>
+        </section>
+
+        <section class="travels">
+            <div class="card-grid">
+                <!-- TODO: 請根據你的實際旅遊經歷填入以下內容 -->
+                
+                <div class="card-item" onclick="openModal('travelModal1')">
+                    <div class="card-thumbnail">
+                        <span>請填入旅遊地點</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">請填入旅遊地點</div>
+                        <div class="card-time">2023年</div>
+                        <div class="card-preview">請填入旅遊天數，同行人員，以及主要參觀的景點和品嚐的美食...</div>
+                    </div>
+                </div>
+
+                <div class="card-item" onclick="openModal('travelModal2')">
+                    <div class="card-thumbnail">
+                        <span>請填入另一個旅遊地點</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">請填入另一個旅遊地點</div>
+                        <div class="card-time">2022年</div>
+                        <div class="card-preview">請填入旅遊天數，同行人員，以及主要參觀的景點和品嚐的美食...</div>
+                    </div>
+                </div>
+
+                <div class="card-item" onclick="openModal('travelModal3')">
+                    <div class="card-thumbnail">
+                        <span>請填入第三個旅遊地點</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">請填入第三個旅遊地點</div>
+                        <div class="card-time">2021年</div>
+                        <div class="card-preview">請填入旅遊天數，同行人員，以及主要參觀的景點和品嚐的美食...</div>
+                    </div>
+                </div>
+
+                <div class="card-item" onclick="openModal('travelModal4')">
+                    <div class="card-thumbnail">
+                        <span>請填入第四個旅遊地點</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">請填入第四個旅遊地點</div>
+                        <div class="card-time">2020年</div>
+                        <div class="card-preview">請填入旅遊天數，同行人員，以及主要參觀的景點和品嚐的美食...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="travel-stats">
+            <h3>旅遊統計</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h4>旅遊次數</h4>
+                    <p>請填入總共旅遊的次數</p>
+                </div>
+                
+                <div class="stat-item">
+                    <h4>去過的城市</h4>
+                    <p>請列出去過的城市或地區</p>
+                </div>
+                
+                <div class="stat-item">
+                    <h4>最喜歡的地方</h4>
+                    <p>請說明最喜歡的旅遊地點和原因</p>
+                </div>
+                
+                <div class="stat-item">
+                    <h4>下次想去的地方</h4>
+                    <p>請列出下次想去的旅遊地點</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="travel-tips">
+            <h3>旅遊心得分享</h3>
+            <div class="tips-content">
+                <h4>旅遊小貼士</h4>
+                <ul>
+                    <li>請分享你的旅遊經驗和小貼士</li>
+                    <li>例如：如何規劃行程、省錢技巧等</li>
+                </ul>
+                
+                <h4>必備物品</h4>
+                <ul>
+                    <li>請列出旅遊時必備的物品</li>
+                    <li>例如：相機、充電器、常用藥品等</li>
+                </ul>
+                
+                <h4>旅遊建議</h4>
+                <p>請分享給其他想要旅遊的人的建議</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- 彈出視窗 -->
+    <div id="travelModal1" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">請填入旅遊地點</h3>
+                <span class="close" onclick="closeModal('travelModal1')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h4>基本資訊</h4>
+                <p><strong>旅遊時間：</strong>請填入旅遊時間</p>
+                <p><strong>旅遊天數：</strong>請填入旅遊天數</p>
+                <p><strong>同行人員：</strong>請說明同行的人員（家人、朋友、同學等）</p>
+                <p><strong>旅遊方式：</strong>請說明旅遊方式（自助、跟團、自由行等）</p>
+                
+                <h4>行程安排</h4>
+                <ul>
+                    <li><strong>第一天：</strong>請描述第一天的行程</li>
+                    <li><strong>第二天：</strong>請描述第二天的行程</li>
+                    <li><strong>第三天：</strong>請描述第三天的行程</li>
+                </ul>
+                
+                <h4>景點介紹</h4>
+                <ul>
+                    <li>請列出參觀的主要景點</li>
+                    <li>例如：故宮博物院、101大樓、夜市等</li>
+                </ul>
+                
+                <h4>美食體驗</h4>
+                <ul>
+                    <li>請分享品嚐到的特色美食</li>
+                    <li>例如：小籠包、珍珠奶茶、夜市小吃等</li>
+                </ul>
+                
+                <h4>旅遊心得</h4>
+                <p>請分享這次旅遊的心得和感受</p>
+                
+                <h4>印象深刻的事</h4>
+                <p>請描述旅遊過程中印象深刻的事情</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="travelModal2" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">請填入另一個旅遊地點</h3>
+                <span class="close" onclick="closeModal('travelModal2')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h4>基本資訊</h4>
+                <p><strong>旅遊時間：</strong>請填入旅遊時間</p>
+                <p><strong>旅遊天數：</strong>請填入旅遊天數</p>
+                <p><strong>同行人員：</strong>請說明同行的人員</p>
+                <p><strong>旅遊方式：</strong>請說明旅遊方式</p>
+                
+                <h4>行程安排</h4>
+                <ul>
+                    <li><strong>第一天：</strong>請描述第一天的行程</li>
+                    <li><strong>第二天：</strong>請描述第二天的行程</li>
+                </ul>
+                
+                <h4>景點介紹</h4>
+                <ul>
+                    <li>請列出參觀的主要景點</li>
+                </ul>
+                
+                <h4>美食體驗</h4>
+                <ul>
+                    <li>請分享品嚐到的特色美食</li>
+                </ul>
+                
+                <h4>旅遊心得</h4>
+                <p>請分享這次旅遊的心得和感受</p>
+                
+                <h4>印象深刻的事</h4>
+                <p>請描述旅遊過程中印象深刻的事情</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="travelModal3" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">請填入第三個旅遊地點</h3>
+                <span class="close" onclick="closeModal('travelModal3')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h4>基本資訊</h4>
+                <p><strong>旅遊時間：</strong>請填入旅遊時間</p>
+                <p><strong>旅遊天數：</strong>請填入旅遊天數</p>
+                <p><strong>同行人員：</strong>請說明同行的人員</p>
+                <p><strong>旅遊方式：</strong>請說明旅遊方式</p>
+                
+                <h4>行程安排</h4>
+                <ul>
+                    <li><strong>第一天：</strong>請描述第一天的行程</li>
+                    <li><strong>第二天：</strong>請描述第二天的行程</li>
+                </ul>
+                
+                <h4>景點介紹</h4>
+                <ul>
+                    <li>請列出參觀的主要景點</li>
+                </ul>
+                
+                <h4>美食體驗</h4>
+                <ul>
+                    <li>請分享品嚐到的特色美食</li>
+                </ul>
+                
+                <h4>旅遊心得</h4>
+                <p>請分享這次旅遊的心得和感受</p>
+                
+                <h4>印象深刻的事</h4>
+                <p>請描述旅遊過程中印象深刻的事情</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="travelModal4" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">請填入第四個旅遊地點</h3>
+                <span class="close" onclick="closeModal('travelModal4')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h4>基本資訊</h4>
+                <p><strong>旅遊時間：</strong>請填入旅遊時間</p>
+                <p><strong>旅遊天數：</strong>請填入旅遊天數</p>
+                <p><strong>同行人員：</strong>請說明同行的人員</p>
+                <p><strong>旅遊方式：</strong>請說明旅遊方式</p>
+                
+                <h4>行程安排</h4>
+                <ul>
+                    <li><strong>第一天：</strong>請描述第一天的行程</li>
+                    <li><strong>第二天：</strong>請描述第二天的行程</li>
+                </ul>
+                
+                <h4>景點介紹</h4>
+                <ul>
+                    <li>請列出參觀的主要景點</li>
+                </ul>
+                
+                <h4>美食體驗</h4>
+                <ul>
+                    <li>請分享品嚐到的特色美食</li>
+                </ul>
+                
+                <h4>旅遊心得</h4>
+                <p>請分享這次旅遊的心得和感受</p>
+                
+                <h4>印象深刻的事</h4>
+                <p>請描述旅遊過程中印象深刻的事情</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Personal Website. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // 點擊視窗外部關閉彈出視窗
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>
