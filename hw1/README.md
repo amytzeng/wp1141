@@ -30,7 +30,7 @@ hw1/
 
 ### 1. **簡約優雅**
 - 採用簡潔的設計風格、大量留白空間，讓內容更易閱讀
-- 參考 Trending Colors Palette 的配色
+- 參考 Trending Colors Palette (https://coolors.co/palettes/trending) 的配色
 
 ### 2. **用戶體驗優先**
 - **直觀的導航**：清晰的選單結構和快速導航
