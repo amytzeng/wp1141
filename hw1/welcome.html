@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Amy's Website</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 歡迎頁面專用樣式 */
+        .welcome-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1d1c48 0%, #2a2855 50%, #1d1c48 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .welcome-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .welcome-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            font-weight: 500;
+            color: white;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+        }
+
+        .enter-button {
+            background: linear-gradient(135deg, #2a2855 0%, #1d1c48 100%);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: 2px solid white;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .enter-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #1d1c48 0%, #2a2855 100%);
+        }
+
+        .photo-placeholder {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 4px dashed white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .photo-placeholder p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .welcome-title {
+                font-size: 2.5rem;
+            }
+            
+            .welcome-photo,
+            .photo-placeholder {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <!-- TODO: 請將你的照片檔案放入 images 資料夾，然後修改下面的 src 路徑 -->
+        <div class="photo-container">
+            <img src="images/welcome-photo.jpg" alt="Amy's Photo" class="welcome-photo">
+            <!-- 如果沒有照片，可以暫時使用下面的佔位符 -->
+            <!-- <div class="photo-placeholder">
+                <p>請在這裡放入你的照片</p>
+                <p>建議尺寸：200x200px</p>
+                <p>圓形顯示</p>
+            </div> -->
+        </div>
+        
+        <h1 class="welcome-title">Amy Tzeng</h1>
+        <p class="welcome-subtitle">Welcome to My Personal Website</p>
+        
+        <a href="index.html" class="enter-button">Enter Website</a>
+    </div>
+</body>
+</html>

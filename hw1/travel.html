@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Travel - Amy's Website</title>
+
+    <!-- Main CSS -->
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
     <header>
@@ -22,280 +27,108 @@
     <main>
         <section class="page-header">
             <h2>Travel</h2>
-            <p>This section records my travel memories and wonderful times</p>
+            <p>Places I've ever been to!</p>
         </section>
 
-        <section class="travels">
-            <div class="card-grid">
-                <!-- TODO: 請根據你的實際旅遊經歷填入以下內容 -->
-                
-                <div class="card-item" onclick="openModal('travelModal1')">
-                    <div class="card-thumbnail">
-                        <span>請填入旅遊地點</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-title">請填入旅遊地點</div>
-                        <div class="card-time">2023年</div>
-                        <div class="card-preview">請填入旅遊天數，同行人員，以及主要參觀的景點和品嚐的美食...</div>
-                    </div>
-                </div>
+        <!-- You can keep or remove the old travel cards here -->
 
-                <div class="card-item" onclick="openModal('travelModal2')">
-                    <div class="card-thumbnail">
-                        <span>請填入另一個旅遊地點</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-title">請填入另一個旅遊地點</div>
-                        <div class="card-time">2022年</div>
-                        <div class="card-preview">請填入旅遊天數，同行人員，以及主要參觀的景點和品嚐的美食...</div>
-                    </div>
-                </div>
-
-                <div class="card-item" onclick="openModal('travelModal3')">
-                    <div class="card-thumbnail">
-                        <span>請填入第三個旅遊地點</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-title">請填入第三個旅遊地點</div>
-                        <div class="card-time">2021年</div>
-                        <div class="card-preview">請填入旅遊天數，同行人員，以及主要參觀的景點和品嚐的美食...</div>
-                    </div>
-                </div>
-
-                <div class="card-item" onclick="openModal('travelModal4')">
-                    <div class="card-thumbnail">
-                        <span>請填入第四個旅遊地點</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-title">請填入第四個旅遊地點</div>
-                        <div class="card-time">2020年</div>
-                        <div class="card-preview">請填入旅遊天數，同行人員，以及主要參觀的景點和品嚐的美食...</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="travel-stats">
-            <h3>旅遊統計</h3>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <h4>旅遊次數</h4>
-                    <p>請填入總共旅遊的次數</p>
-                </div>
-                
-                <div class="stat-item">
-                    <h4>去過的城市</h4>
-                    <p>請列出去過的城市或地區</p>
-                </div>
-                
-                <div class="stat-item">
-                    <h4>最喜歡的地方</h4>
-                    <p>請說明最喜歡的旅遊地點和原因</p>
-                </div>
-                
-                <div class="stat-item">
-                    <h4>下次想去的地方</h4>
-                    <p>請列出下次想去的旅遊地點</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="travel-tips">
-            <h3>旅遊心得分享</h3>
-            <div class="tips-content">
-                <h4>旅遊小貼士</h4>
-                <ul>
-                    <li>請分享你的旅遊經驗和小貼士</li>
-                    <li>例如：如何規劃行程、省錢技巧等</li>
-                </ul>
-                
-                <h4>必備物品</h4>
-                <ul>
-                    <li>請列出旅遊時必備的物品</li>
-                    <li>例如：相機、充電器、常用藥品等</li>
-                </ul>
-                
-                <h4>旅遊建議</h4>
-                <p>請分享給其他想要旅遊的人的建議</p>
-            </div>
+        <!-- ======= Interactive World Map ======= -->
+        <section class="travel-map">
+            <h3>My Interactive World Map</h3>
+            <div id="map"></div>
         </section>
     </main>
 
-    <!-- 彈出視窗 -->
-    <div id="travelModal1" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">請填入旅遊地點</h3>
-                <span class="close" onclick="closeModal('travelModal1')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <h4>基本資訊</h4>
-                <p><strong>旅遊時間：</strong>請填入旅遊時間</p>
-                <p><strong>旅遊天數：</strong>請填入旅遊天數</p>
-                <p><strong>同行人員：</strong>請說明同行的人員（家人、朋友、同學等）</p>
-                <p><strong>旅遊方式：</strong>請說明旅遊方式（自助、跟團、自由行等）</p>
-                
-                <h4>行程安排</h4>
-                <ul>
-                    <li><strong>第一天：</strong>請描述第一天的行程</li>
-                    <li><strong>第二天：</strong>請描述第二天的行程</li>
-                    <li><strong>第三天：</strong>請描述第三天的行程</li>
-                </ul>
-                
-                <h4>景點介紹</h4>
-                <ul>
-                    <li>請列出參觀的主要景點</li>
-                    <li>例如：故宮博物院、101大樓、夜市等</li>
-                </ul>
-                
-                <h4>美食體驗</h4>
-                <ul>
-                    <li>請分享品嚐到的特色美食</li>
-                    <li>例如：小籠包、珍珠奶茶、夜市小吃等</li>
-                </ul>
-                
-                <h4>旅遊心得</h4>
-                <p>請分享這次旅遊的心得和感受</p>
-                
-                <h4>印象深刻的事</h4>
-                <p>請描述旅遊過程中印象深刻的事情</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="travelModal2" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">請填入另一個旅遊地點</h3>
-                <span class="close" onclick="closeModal('travelModal2')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <h4>基本資訊</h4>
-                <p><strong>旅遊時間：</strong>請填入旅遊時間</p>
-                <p><strong>旅遊天數：</strong>請填入旅遊天數</p>
-                <p><strong>同行人員：</strong>請說明同行的人員</p>
-                <p><strong>旅遊方式：</strong>請說明旅遊方式</p>
-                
-                <h4>行程安排</h4>
-                <ul>
-                    <li><strong>第一天：</strong>請描述第一天的行程</li>
-                    <li><strong>第二天：</strong>請描述第二天的行程</li>
-                </ul>
-                
-                <h4>景點介紹</h4>
-                <ul>
-                    <li>請列出參觀的主要景點</li>
-                </ul>
-                
-                <h4>美食體驗</h4>
-                <ul>
-                    <li>請分享品嚐到的特色美食</li>
-                </ul>
-                
-                <h4>旅遊心得</h4>
-                <p>請分享這次旅遊的心得和感受</p>
-                
-                <h4>印象深刻的事</h4>
-                <p>請描述旅遊過程中印象深刻的事情</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="travelModal3" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">請填入第三個旅遊地點</h3>
-                <span class="close" onclick="closeModal('travelModal3')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <h4>基本資訊</h4>
-                <p><strong>旅遊時間：</strong>請填入旅遊時間</p>
-                <p><strong>旅遊天數：</strong>請填入旅遊天數</p>
-                <p><strong>同行人員：</strong>請說明同行的人員</p>
-                <p><strong>旅遊方式：</strong>請說明旅遊方式</p>
-                
-                <h4>行程安排</h4>
-                <ul>
-                    <li><strong>第一天：</strong>請描述第一天的行程</li>
-                    <li><strong>第二天：</strong>請描述第二天的行程</li>
-                </ul>
-                
-                <h4>景點介紹</h4>
-                <ul>
-                    <li>請列出參觀的主要景點</li>
-                </ul>
-                
-                <h4>美食體驗</h4>
-                <ul>
-                    <li>請分享品嚐到的特色美食</li>
-                </ul>
-                
-                <h4>旅遊心得</h4>
-                <p>請分享這次旅遊的心得和感受</p>
-                
-                <h4>印象深刻的事</h4>
-                <p>請描述旅遊過程中印象深刻的事情</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="travelModal4" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">請填入第四個旅遊地點</h3>
-                <span class="close" onclick="closeModal('travelModal4')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <h4>基本資訊</h4>
-                <p><strong>旅遊時間：</strong>請填入旅遊時間</p>
-                <p><strong>旅遊天數：</strong>請填入旅遊天數</p>
-                <p><strong>同行人員：</strong>請說明同行的人員</p>
-                <p><strong>旅遊方式：</strong>請說明旅遊方式</p>
-                
-                <h4>行程安排</h4>
-                <ul>
-                    <li><strong>第一天：</strong>請描述第一天的行程</li>
-                    <li><strong>第二天：</strong>請描述第二天的行程</li>
-                </ul>
-                
-                <h4>景點介紹</h4>
-                <ul>
-                    <li>請列出參觀的主要景點</li>
-                </ul>
-                
-                <h4>美食體驗</h4>
-                <ul>
-                    <li>請分享品嚐到的特色美食</li>
-                </ul>
-                
-                <h4>旅遊心得</h4>
-                <p>請分享這次旅遊的心得和感受</p>
-                
-                <h4>印象深刻的事</h4>
-                <p>請描述旅遊過程中印象深刻的事情</p>
-            </div>
-        </div>
-    </div>
-
     <footer>
-        <p>&copy; 2024 Personal Website. All rights reserved.</p>
+        <p>&copy; <a href="welcome.html">2025</a> Amy's Website. All rights reserved.</p>
     </footer>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
     <script>
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('show');
-        }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
-        }
 
-        // 點擊視窗外部關閉彈出視窗
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('show');
+        // 初始化地圖
+        const map = L.map('map', {
+            minZoom: 2,   // 最小縮放層級
+            maxZoom: 10   // 最大縮放層級
+        }).setView([20, 0], 2);
+        // 設定地圖可拖動範圍（整個世界緯度 -90~90，經度 -180~180）
+        map.setMaxBounds([
+            [-90, -180],
+            [90, 180]
+        ]);
+
+        // 可選：拖動到邊界自動反彈
+        map.options.maxBoundsViscosity = 1.0;
+
+        // 加入 OpenStreetMap 磚圖
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+
+        // 限制地圖邊界（經緯度範圍）
+        const southWest = L.latLng(-90, -180);
+        const northEast = L.latLng(90, 180);
+        const bounds = L.latLngBounds(southWest, northEast);
+        map.setMaxBounds(bounds);
+        map.on('drag', function() {
+            map.panInsideBounds(bounds, { animate: false });
+        });
+
+        // Pins
+        const pins = [
+            {   
+                name: 'Seattle, USA',
+                coords: [47.6062, -122.3321],
+                date: 'March 2025',
+                attractions: 'University of Washington, Lake Sammamish',
+                photos: ['images/seattle1.jpg', 'images/seattle2.jpg']
+            },
+            {   
+                name: 'Vancouver, Canada',
+                coords: [49.2827, -123.1207],
+                date: 'July 2025',
+                attractions: 'Stanley Park, University of British Columbia',
+                photos: ['images/cad_1.jpg', 'images/cad_2.jpg']
+            },
+            {   
+                name: 'Xiamen, China', coords: [24.4798, 118.0895],
+                date: 'August 2025',
+                attractions: 'Bank of China, Xiamen University',
+                photos: ['images/xm_1.jpg', 'images/xm_2.jpg']
+            },
+            {   
+                name: 'Beijing, China', coords: [39.9042, 116.4074],
+                date: 'July 2024',
+                attractions: 'Peking University, Xiaomi',
+                photos: ['images/bej_1.jpg', 'images/bej_2.jpg']
+            },
+            {   
+                name: 'Taipei, Taiwan', coords: [25.0330, 121.5654],
+                attractions: 'Taipei 101, Zhongshan District',
+                photos: ['images/tpe_1.jpeg', 'images/tpe_2.jpeg']
             }
-        }
+        ];
+
+        pins.forEach(pin => {
+            const popupContent = `
+                <div class="popup-card">
+                    <h3>${pin.name}</h3>
+                    <p><strong>Date:</strong> ${pin.date || 'N/A'}</p>
+                    <p><strong>Attractions:</strong> ${pin.attractions}</p>
+                    <div class="photos">
+                        ${pin.photos.map(src => `<img src="${src}" alt="${pin.name} photo">`).join('')}
+                    </div>
+                </div>
+            `;
+            L.marker(pin.coords).addTo(map).bindPopup(popupContent);
+        });
+
+        
     </script>
 </body>
 </html>

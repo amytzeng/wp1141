@@ -28,20 +28,20 @@ h1 {
 
 h2 {
     font-size: 2rem;
-    border-bottom: 3px solid #2c3e50;
+    border-bottom: 3px solid #000814;
     padding-bottom: 0.5rem;
     margin-bottom: 2rem;
 }
 
 h3 {
     font-size: 1.5rem;
-    color: #34495e;
+    color: #001d3d;
     margin-bottom: 1rem;
 }
 
 h4 {
     font-size: 1.2rem;
-    color: #7f8c8d;
+    color: #003566;
     margin-bottom: 0.5rem;
 }
 
@@ -56,6 +56,16 @@ header {
 header h1 {
     color: white;
     margin-bottom: 1rem;
+}
+
+header h1 a {
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+}
+
+header h1 a:hover {
+    opacity: 0.8;
 }
 
 /* 導航樣式 */
@@ -157,7 +167,7 @@ main {
 }
 
 .info h3 {
-    color: #3498db;
+    color: #001d3d;
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
 }
@@ -750,4 +760,103 @@ footer {
     .activity-item {
         padding: 1rem;
     }
+}
+
+
+/* --- 世界地圖區域 --- */
+#map {
+    height: 600px;          /* 地圖高度，可自行調整 */
+    width: 100%;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    margin-top: 20px;
+  }
+  
+  /* 彈出卡片樣式 */
+  .popup-card {
+    max-width: 250px;
+    font-family: Arial, sans-serif;
+  }
+  .popup-card h3 {
+    margin: 0 0 5px;
+    font-size: 1.1rem;
+  }
+  .popup-card p {
+    margin: 4px 0;
+    font-size: 0.9rem;
+  }
+  .popup-card .photos {
+    display: flex;
+    gap: 5px;
+    margin-top: 8px;
+  }
+  .popup-card .photos img {
+    max-width: 100px;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+  
+  /* --- 調整 activities 頁面 modal 內圖片大小 --- */
+.photo-group figure img {
+    width: 120px;        /* 你可以改成自己想要的寬度，例如 100px */
+    height: auto;        /* 高度自動依比例 */
+    border-radius: 8px;  /* 保持圓角 */
+    object-fit: cover;   /* 保持裁切不變形 */
+}
+/* --- Activities 頁面 Modal 內照片大小 --- */
+.modal-body .photo-group figure img {
+    width: 180px !important;   /* 或 100px，看你要多小 */
+    height: auto !important;
+    max-width: none !important;
+    display: block;
+}
+.modal-body .photo-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;   /* 螢幕太窄會自動換行 */
+}
+
+/* ---- Modal 內的照片固定大小 ---- */
+.modal-body .photo-group {
+    display: flex;
+    flex-wrap: wrap;      /* 螢幕窄時會自動換行 */
+    gap: 10px;
+    justify-content: center;
+}
+
+.modal-body .photo-group figure {
+    margin: 0;
+    text-align: center;
+}
+
+.modal-body .photo-group figure img {
+    width: 120px !important;  /* ✅ 你想要的寬度，例：100~150px */
+    height: auto !important;
+    max-width: none !important;  /* 避免 Bootstrap/瀏覽器的 max-width:100% */
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.modal-body .photo-group figcaption {
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+/* ---- 活動卡片縮圖大小統一 ---- */
+.card-thumbnail {
+    width: 100%;
+    height: 160px;           /* ✅ 依需求可調，例如 180px */
+    overflow: hidden;
+    border-radius: 8px;
+    background: #eee;        /* 沒有圖時的背景 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;       /* 讓圖片自動裁切填滿，不變形 */
 }
