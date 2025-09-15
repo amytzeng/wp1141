@@ -13,21 +13,7 @@ hw1/
 ├── travel.html         # 旅遊記錄（互動地圖）
 ├── styles.css          # 樣式檔案
 ├── images/             # 圖片資料夾
-│   ├── profile.jpg     # 個人照片
-│   ├── welcome-photo.jpg # 歡迎頁面照片
-│   ├── welcome_background.jpg # 歡迎頁面背景
-│   ├── cal_2.jpg       # 助教活動照片
-│   ├── gtm_1.png       # 導師計畫照片
-│   ├── tkd_1.JPG       # 跆拳道照片
-│   ├── cad_1.JPG       # 加拿大青年大使照片
-│   ├── spch_3.JPEG     # 演講比賽照片
-│   ├── elite_2.jpg     # 菁英營照片
-│   ├── imc_2.JPEG      # 資管營照片
-│   ├── flower_bot.jpeg # 專案照片
-│   ├── seattle1.jpg, seattle2.jpg # 西雅圖照片
-│   ├── bej_1.jpg, bej_2.jpg # 北京照片
-│   ├── xm_1.jpg, xm_2.jpg # 廈門照片
-│   ├── tpe_1.JPEG, tpe_2.JPEG # 台北照片
+│   ├── ...             # 活動照片
 │   └── ...             # 其他活動照片
 └── README.md           # 說明文件
 ```
@@ -40,6 +26,34 @@ hw1/
 - **互動地圖**：旅遊頁面使用 Leaflet 地圖顯示去過的地方
 - **現代化配色**：使用深色主題配色方案（#1d1c48 漸層）
 
+## 網頁設計理念
+
+### 1. **簡約而優雅**
+- 採用簡潔的設計風格，避免過度裝飾
+- 使用大量留白空間，讓內容更易閱讀
+- 統一的視覺語言和配色方案
+
+### 2. **用戶體驗優先**
+- **直觀的導航**：清晰的選單結構和快速導航
+- **漸進式資訊展示**：卡片預覽 → 彈出視窗詳情
+- **響應式設計**：確保在所有裝置上都有良好的使用體驗
+
+### 3. **視覺層次分明**
+- **色彩層次**：深色背景配淺色文字，提高可讀性
+- **字體層次**：不同大小的標題和內容文字
+- **空間層次**：合理的間距和分組
+
+
+### 4. **互動性設計**
+- **懸停效果**：按鈕和卡片的 hover 狀態
+- **彈出視窗**：避免頁面跳轉，保持用戶在當前頁面
+- **地圖互動**：點擊標記查看詳細資訊
+
+### 5. **內容為王**
+- **視覺化展示**：用圖片和卡片展示活動經歷
+- **結構化資訊**：清晰的時間軸和分類
+- **個人化元素**：真實的照片和個人經歷
+
 ## 頁面說明
 
 ### 1. 歡迎頁面 (welcome.html)
@@ -49,51 +63,20 @@ hw1/
 - **設計**：深色漸層背景，居中佈局
 
 ### 2. 首頁 (index.html)
-- **個人基本資料展示**：
-  - 姓名：Amy Tzeng
-  - 教育背景：台大資管系（2023-至今）、台大植微系（2022-2023）、中山女高數理資優班（2019-2022）
-  - 聯絡方式：Email、電話
-  - 技能語言：C++、Python、Microsoft Office、Canva、Powerdirector
-  - 語言能力：英文（IELTS 8.0、TOEFL iBT 98、TOEIC 930）、中文母語
+- **個人基本資料展示**：教育背景、聯絡方式、技能語言
 - **快速導航**：Projects、Extracurricular Activities、Travel
-- **注意**：首頁的 "Amy's Website" 標題沒有連結到歡迎頁面
 
 ### 3. 專案作品 (projects.html)
-- **展示三個主要專案**：
-  - **Gender Analysis Research**：研究助理，使用 Python 進行網路貼文情感分析
-  - **Flower Bot**：後端開發專案，JSON 轉 DOCX 格式功能
-  - **How Flaxseed Affect Lung Cancer Cell**：亞麻籽對肺癌細胞影響研究，主導研究員
+- **展示三個主要專案**：研究專案、後端開發、科學研究
 - **每個專案包含**：角色、時間、簡介、技術、成果
-- **注意**：此頁面的 "Amy's Website" 標題有連結到歡迎頁面
 
 ### 4. 課外活動 (activities.html)
-- **卡片式佈局展示各類活動**，每個卡片都有預覽圖片：
-  - **學術活動**：
-    - Calculus & Statistics Tutor（助教）- 使用 `cal_2.jpg`
-    - Global Talent Mentoring（導師計畫）- 使用 `gtm_1.png`
-  - **社團活動**：
-    - NTU Taekwondo Varsity Team（跆拳道校隊）- 使用 `tkd_1.JPG`
-    - Student Association of Dept. of IM（資管系學會）- 使用文字標籤
-  - **志工服務**：
-    - OCAC Taiwan Youth Ambassador（青年大使）- 使用 `cad_1.JPG`
-  - **競賽活動**：
-    - NTU Speech Contest（演講比賽）- 使用 `spch_3.JPEG`
-  - **其他活動**：
-    - NTU x PKU Elite Camp（菁英營）- 使用 `elite_2.jpg`
-    - IM Camp for High School Students（資管營）- 使用 `imc_2.JPEG`
-- **彈出視窗功能**：點擊卡片查看詳細資訊和照片
-- **注意**：此頁面的 "Amy's Website" 標題沒有連結到歡迎頁面
+- **卡片式佈局展示各類活動**：學術、社團、志工、競賽等
+- **每個卡片都有預覽圖片**和詳細彈出視窗
 
 ### 5. 旅遊記錄 (travel.html)
-- **互動式世界地圖**：使用 Leaflet 地圖庫
-- **標記去過的城市**：
-  - 西雅圖（Seattle, USA）- March 2025
-  - 溫哥華（Vancouver, Canada）- July 2025
-  - 廈門（Xiamen, China）- August 2025
-  - 北京（Beijing, China）- July 2024
-  - 台北（Taipei, Taiwan）
+- **互動式世界地圖**：標記去過的城市
 - **地圖功能**：點擊標記查看旅遊照片和資訊
-- **注意**：此頁面的 "Amy's Website" 標題沒有連結到歡迎頁面
 
 ## 導航結構
 
@@ -106,7 +89,8 @@ hw1/
 
 - **HTML5**：語義化標籤和現代化結構
 - **CSS3**：Flexbox、Grid、動畫效果、漸層背景
-- **JavaScript**：彈出視窗互動、地圖功能
+- **TypeScript**：型別安全的彈出視窗互動和地圖功能
+- **JavaScript**：編譯後的 TypeScript 代碼
 - **Leaflet**：互動地圖庫（CDN 載入）
 - **響應式設計**：支援各種螢幕尺寸
 
