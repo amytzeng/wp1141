@@ -1,0 +1,28 @@
+{
+  "name": "tower-defense-game",
+  "version": "1.0.0",
+  "description": "A tower defense game built with HTML5 Canvas and JavaScript",
+  "main": "index.html",
+  "scripts": {
+    "start": "node start.js",
+    "dev": "npx http-server -p 3000 -o -c-1",
+    "build": "echo 'No build process needed for this static game'",
+    "serve": "npx http-server -p 8080 -o",
+    "game": "npx http-server -p 3000 -o"
+  },
+  "keywords": [
+    "tower-defense",
+    "game",
+    "html5",
+    "canvas",
+    "javascript"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

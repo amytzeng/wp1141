@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塔防遊戲</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 開始頁面 -->
+    <div id="start-screen" class="screen">
+        <div class="start-content">
+            <h1>🎮 塔防遊戲</h1>
+            <p>建造塔防，防禦敵人入侵！</p>
+            <button id="enter-game" class="start-btn">進入遊戲</button>
+            <button id="game-guide" class="start-btn">遊戲說明</button>
+        </div>
+    </div>
+    
+    <!-- 遊戲說明頁面 -->
+    <div id="guide-screen" class="screen" style="display: none;">
+        <div class="guide-content">
+            <div class="guide-header">
+                <h1>遊戲說明</h1>
+                <button id="mute-btn-guide" class="mute-btn">🔊</button>
+            </div>
+            <div class="guide-section">
+                <h2>遊戲目標</h2>
+                <p>在怪物抵達終點前將它們全部消滅！每隻怪物到達終點會損失一條生命，每關有5條生命。</p>
+            </div>
+            
+            <div class="guide-section">
+                <h2>介面介紹</h2>
+                <div class="interface-guide">
+                    <div class="guide-item">
+                        <h3>遊戲資訊</h3>
+                        <p>• 關卡：顯示當前關卡</p>
+                        <p>• 生命：剩餘生命數（每關5條）</p>
+                        <p>• 金幣：用於購買塔防</p>
+                        <p>• 波次：當前波次/總波次</p>
+                        <p>• 時間：波次倒數計時</p>
+                        <p>• 分數：擊殺怪物和時間獎勵</p>
+                    </div>
+                    <div class="guide-item">
+                        <h3>控制按鈕</h3>
+                        <p>• 開始波次：開始敵人生成</p>
+                        <p>• 暫停：暫停/繼續遊戲</p>
+                        <p>• 快轉：2倍速度遊戲</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="guide-section">
+                <h2>塔防系統</h2>
+                <div class="tower-guide">
+                    <div class="tower-info">
+                        <h3>基礎塔 (20金幣)</h3>
+                        <p>• 傷害：20</p>
+                        <p>• 射程：80</p>
+                        <p>• 射速：1秒</p>
+                    </div>
+                    <div class="tower-info">
+                        <h3>快速塔 (40金幣)</h3>
+                        <p>• 傷害：15</p>
+                        <p>• 射程：70</p>
+                        <p>• 射速：0.5秒</p>
+                    </div>
+                    <div class="tower-info">
+                        <h3>重型塔 (70金幣)</h3>
+                        <p>• 傷害：40</p>
+                        <p>• 射程：100</p>
+                        <p>• 射速：1.5秒</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="guide-section">
+                <h2>怪物類型</h2>
+                <div class="enemy-guide">
+                    <div class="enemy-info">
+                        <h3>紅色怪物 (基礎)</h3>
+                        <p>• 生命：50</p>
+                        <p>• 速度：慢</p>
+                        <p>• 獎勵：1金幣</p>
+                    </div>
+                    <div class="enemy-info">
+                        <h3>黃色怪物 (快速)</h3>
+                        <p>• 生命：30</p>
+                        <p>• 速度：快</p>
+                        <p>• 獎勵：3金幣</p>
+                    </div>
+                    <div class="enemy-info">
+                        <h3>藍色怪物 (坦克)</h3>
+                        <p>• 生命：100</p>
+                        <p>• 速度：很慢</p>
+                        <p>• 獎勵：5金幣</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="guide-section">
+                <h2>分數與金幣</h2>
+                <p>• 擊殺怪物：每金幣=10分</p>
+                <p>• 波次完成：20金幣 + 剩餘時間×2金幣</p>
+                <p>• 時間獎勵：剩餘時間×2金幣</p>
+                <p>• 商店金幣：關卡分數÷10</p>
+            </div>
+            
+            <div class="guide-section">
+                <h2>操作說明</h2>
+                <p>1. 點擊右側塔防選擇要建造的塔防類型</p>
+                <p>2. 在草地上點擊放置塔防</p>
+                <p>3. 點擊"開始波次"開始敵人生成</p>
+                <p>4. 使用快轉功能加速遊戲</p>
+                <p>5. 在商店購買和裝備塔防皮膚</p>
+            </div>
+            
+            <button id="back-to-start-from-guide" class="back-btn">返回主選單</button>
+        </div>
+    </div>
+
+    <div id="game-container" class="screen" style="display: none;">
+        <div id="game-header">
+            <div id="level-info">
+                <span>關卡: <span id="current-level">1</span>/10</span>
+            </div>
+            <div id="lives-info">
+                <span>生命: <span id="lives">5</span></span>
+            </div>
+            <div id="coins-info">
+                <span>金幣: <span id="coins">100</span></span>
+            </div>
+            <div id="wave-info">
+                <span>波次: <span id="current-wave">1</span>/<span id="total-waves">5</span></span>
+            </div>
+            <div id="timer-info">
+                <span>時間: <span id="timer">0</span>s</span>
+            </div>
+            <div id="score-info">
+                <span>分數: <span id="score">0</span></span>
+            </div>
+        </div>
+        
+        <div id="game-board">
+            <canvas id="game-canvas" width="700" height="400"></canvas>
+        </div>
+        
+        <div id="tower-panel">
+            <h3>建造塔防</h3>
+            <div class="tower-options">
+                <div class="tower-option" data-tower="basic">
+                    <div class="tower-icon basic-tower"></div>
+                    <div class="tower-info">
+                        <div class="tower-name">基礎塔</div>
+                        <div class="tower-cost">20 金幣</div>
+                    </div>
+                </div>
+                <div class="tower-option" data-tower="rapid">
+                    <div class="tower-icon rapid-tower"></div>
+                    <div class="tower-info">
+                        <div class="tower-name">快速塔</div>
+                        <div class="tower-cost">40 金幣</div>
+                    </div>
+                </div>
+                <div class="tower-option" data-tower="heavy">
+                    <div class="tower-icon heavy-tower"></div>
+                    <div class="tower-info">
+                        <div class="tower-name">重型塔</div>
+                        <div class="tower-cost">70 金幣</div>
+                    </div>
+                </div>
+                <div class="tower-option" data-tower="ice" style="display: none;">
+                    <div class="tower-icon ice-tower"></div>
+                    <div class="tower-info">
+                        <div class="tower-name">冰霜塔</div>
+                        <div class="tower-cost">60 金幣</div>
+                    </div>
+                </div>
+                <div class="tower-option" data-tower="laser" style="display: none;">
+                    <div class="tower-icon laser-tower"></div>
+                    <div class="tower-info">
+                        <div class="tower-name">雷射塔</div>
+                        <div class="tower-cost">100 金幣</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="game-controls">
+            <button id="start-wave">開始波次</button>
+            <button id="pause-game">暫停</button>
+            <button id="fast-forward">快轉</button>
+            <button id="next-level" style="display: none;">下一關</button>
+        </div>
+    </div>
+    
+    <!-- 暫停彈窗 -->
+    <div id="pause-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>遊戲暫停</h2>
+            <p>選擇你的操作</p>
+            <div class="pause-buttons">
+                <button id="resume-game">繼續遊戲</button>
+                <button id="restart-from-pause">重新開始</button>
+                <button id="back-to-menu">回主選單</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 關卡結果彈窗 -->
+    <div id="level-result-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="level-result-title">關卡完成</h2>
+            <div id="level-result-stats">
+                <p>分數: <span id="result-score">0</span></p>
+                <p>獲得金幣: <span id="result-coins">0</span></p>
+            </div>
+                <div id="level-result-buttons">
+                    <button id="result-next-level" style="display: none;">下一關</button>
+                    <button id="result-restart">重新開始</button>
+                    <button id="result-shop" style="display: none;">商店</button>
+                    <button id="result-main-menu">回主選單</button>
+                </div>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="game-over-title">遊戲結束</h2>
+            <p id="game-over-message"></p>
+            <button id="restart-game">重新開始</button>
+            <button id="next-level-btn">下一關</button>
+        </div>
+    </div>
+    
+
+    <!-- 關卡選擇頁面 -->
+    <div id="level-select-screen" class="screen" style="display: none;">
+        <div class="level-select-content">
+            <div class="level-select-header">
+                <h2>選擇關卡</h2>
+                <div class="header-controls">
+                    <div class="shop-currency">
+                        <span>商店金幣: <span id="shop-coins">0</span></span>
+                    </div>
+                    <button id="mute-btn-level" class="mute-btn">🔊</button>
+                </div>
+            </div>
+            <div class="level-select-tabs">
+                <button class="level-tab active" data-tab="levels">關卡選擇</button>
+                <button class="level-tab" data-tab="shop">商店</button>
+            </div>
+            
+            <div id="levels-tab" class="tab-content active">
+                <div class="level-buttons">
+                    <button class="level-btn unlocked" data-level="1">
+                        <div class="level-info">
+                            <div class="level-number">關卡 1</div>
+                            <div class="level-status">森林關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="2">
+                        <div class="level-info">
+                            <div class="level-number">關卡 2</div>
+                            <div class="level-status">沙漠關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="3">
+                        <div class="level-info">
+                            <div class="level-number">關卡 3</div>
+                            <div class="level-status">山脈關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="4">
+                        <div class="level-info">
+                            <div class="level-number">關卡 4</div>
+                            <div class="level-status">城市關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="5">
+                        <div class="level-info">
+                            <div class="level-number">關卡 5</div>
+                            <div class="level-status">最終關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="6">
+                        <div class="level-info">
+                            <div class="level-number">關卡 6</div>
+                            <div class="level-status">火山關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="7">
+                        <div class="level-info">
+                            <div class="level-number">關卡 7</div>
+                            <div class="level-status">冰雪關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="8">
+                        <div class="level-info">
+                            <div class="level-number">關卡 8</div>
+                            <div class="level-status">雷電關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="9">
+                        <div class="level-info">
+                            <div class="level-number">關卡 9</div>
+                            <div class="level-status">暗影關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="10">
+                        <div class="level-info">
+                            <div class="level-number">關卡 10</div>
+                            <div class="level-status">終極關卡</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="shop-tab" class="tab-content">
+                <div class="shop-tabs">
+                    <button class="shop-tab active" data-tower="basic">基礎塔</button>
+                    <button class="shop-tab" data-tower="rapid">快速塔</button>
+                    <button class="shop-tab" data-tower="heavy">重型塔</button>
+                </div>
+                <div class="shop-items" id="shop-items">
+                    <!-- 商店物品將由JavaScript動態生成 -->
+                </div>
+            </div>
+            
+            <button id="back-to-start" class="back-btn">回首頁</button>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
