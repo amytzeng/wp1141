@@ -20,10 +20,7 @@
     <!-- 遊戲說明頁面 -->
     <div id="guide-screen" class="screen" style="display: none;">
         <div class="guide-content">
-            <div class="guide-header">
-                <h1>遊戲說明</h1>
-                <button id="mute-btn-guide" class="mute-btn">🔊</button>
-            </div>
+            <h1>遊戲說明</h1>
             <div class="guide-section">
                 <h2>遊戲目標</h2>
                 <p>在怪物抵達終點前將它們全部消滅！每隻怪物到達終點會損失一條生命，每關有5條生命。</p>
@@ -122,7 +119,7 @@
     <div id="game-container" class="screen" style="display: none;">
         <div id="game-header">
             <div id="level-info">
-                <span>關卡: <span id="current-level">1</span>/10</span>
+                <span>關卡: <span id="current-level">1</span>/5</span>
             </div>
             <div id="lives-info">
                 <span>生命: <span id="lives">5</span></span>
@@ -169,20 +166,6 @@
                         <div class="tower-cost">70 金幣</div>
                     </div>
                 </div>
-                <div class="tower-option" data-tower="ice" style="display: none;">
-                    <div class="tower-icon ice-tower"></div>
-                    <div class="tower-info">
-                        <div class="tower-name">冰霜塔</div>
-                        <div class="tower-cost">60 金幣</div>
-                    </div>
-                </div>
-                <div class="tower-option" data-tower="laser" style="display: none;">
-                    <div class="tower-icon laser-tower"></div>
-                    <div class="tower-info">
-                        <div class="tower-name">雷射塔</div>
-                        <div class="tower-cost">100 金幣</div>
-                    </div>
-                </div>
             </div>
         </div>
         
@@ -215,12 +198,12 @@
                 <p>分數: <span id="result-score">0</span></p>
                 <p>獲得金幣: <span id="result-coins">0</span></p>
             </div>
-                <div id="level-result-buttons">
-                    <button id="result-next-level" style="display: none;">下一關</button>
-                    <button id="result-restart">重新開始</button>
-                    <button id="result-shop" style="display: none;">商店</button>
-                    <button id="result-main-menu">回主選單</button>
-                </div>
+            <div id="level-result-buttons">
+                <button id="result-next-level" style="display: none;">下一關</button>
+                <button id="result-restart">重新開始</button>
+                <button id="result-shop" style="display: none;">商店</button>
+                <button id="result-main-menu">回主選單</button>
+            </div>
         </div>
     </div>
 
@@ -239,11 +222,8 @@
         <div class="level-select-content">
             <div class="level-select-header">
                 <h2>選擇關卡</h2>
-                <div class="header-controls">
-                    <div class="shop-currency">
-                        <span>商店金幣: <span id="shop-coins">0</span></span>
-                    </div>
-                    <button id="mute-btn-level" class="mute-btn">🔊</button>
+                <div class="shop-currency">
+                    <span>商店金幣: <span id="shop-coins">0</span></span>
                 </div>
             </div>
             <div class="level-select-tabs">
@@ -281,36 +261,6 @@
                         <div class="level-info">
                             <div class="level-number">關卡 5</div>
                             <div class="level-status">最終關卡</div>
-                        </div>
-                    </button>
-                    <button class="level-btn locked" data-level="6">
-                        <div class="level-info">
-                            <div class="level-number">關卡 6</div>
-                            <div class="level-status">火山關卡</div>
-                        </div>
-                    </button>
-                    <button class="level-btn locked" data-level="7">
-                        <div class="level-info">
-                            <div class="level-number">關卡 7</div>
-                            <div class="level-status">冰雪關卡</div>
-                        </div>
-                    </button>
-                    <button class="level-btn locked" data-level="8">
-                        <div class="level-info">
-                            <div class="level-number">關卡 8</div>
-                            <div class="level-status">雷電關卡</div>
-                        </div>
-                    </button>
-                    <button class="level-btn locked" data-level="9">
-                        <div class="level-info">
-                            <div class="level-number">關卡 9</div>
-                            <div class="level-status">暗影關卡</div>
-                        </div>
-                    </button>
-                    <button class="level-btn locked" data-level="10">
-                        <div class="level-info">
-                            <div class="level-number">關卡 10</div>
-                            <div class="level-status">終極關卡</div>
                         </div>
                     </button>
                 </div>

@@ -10,7 +10,7 @@ class TowerDefenseGame {
         this.lives = 5;
         this.coins = 100;
         this.currentWave = 1;
-        this.totalWaves = 5;
+        this.totalWaves = 7;
         this.gameState = 'menu'; // menu, playing, paused, gameOver
         this.selectedTower = null;
         this.waveStarted = false;
@@ -34,13 +34,6 @@ class TowerDefenseGame {
         this.mouseX = 0;
         this.mouseY = 0;
         
-        // 通知系統
-        this.notifications = [];
-        this.notificationTimeout = null;
-        
-        // 音效控制
-        this.isMuted = localStorage.getItem('gameMuted') === 'true';
-        
         // 音效系統
         this.audioContext = null;
         this.sounds = {};
@@ -60,23 +53,17 @@ class TowerDefenseGame {
         this.towerTypes = {
             basic: { cost: 20, damage: 20, range: 80, fireRate: 1000, color: '#f39c12' },
             rapid: { cost: 40, damage: 15, range: 70, fireRate: 500, color: '#9b59b6' },
-            heavy: { cost: 70, damage: 40, range: 100, fireRate: 1500, color: '#e74c3c' },
-            ice: { cost: 60, damage: 25, range: 90, fireRate: 800, color: '#3498db' }, // 冰霜塔，第七關出現
-            laser: { cost: 100, damage: 60, range: 120, fireRate: 2000, color: '#e67e22' } // 雷射塔，第七關出現
+            heavy: { cost: 70, damage: 40, range: 100, fireRate: 1500, color: '#e74c3c' }
         };
         
         // 怪物配置
         this.enemyTypes = {
-            basic: { health: 80, speed: 0.7, reward: 1, color: '#e74c3c' },
-            fast: { health: 50, speed: 1.3, reward: 3, color: '#f39c12' },
-            tank: { health: 150, speed: 0.4, reward: 5, color: '#3498db' },
-            flying: { health: 60, speed: 1.8, reward: 4, color: '#9b59b6' }, // 飛行敵人，第六關出現
-            armored: { health: 300, speed: 0.3, reward: 8, color: '#2c3e50' }, // 裝甲敵人，第八關出現
-            boss: { health: 1500, speed: 0.15, reward: 50, color: '#8e44ad' } // Boss敵人
+            basic: { health: 50, speed: 0.5, reward: 1, color: '#e74c3c' },
+            fast: { health: 30, speed: 1, reward: 3, color: '#f39c12' },
+            tank: { health: 100, speed: 0.3, reward: 5, color: '#3498db' }
         };
         
         this.initializeEventListeners();
-        this.updateMuteButtons();
         this.showStartScreen();
     }
     
@@ -143,59 +130,9 @@ class TowerDefenseGame {
     }
     
     playSound(soundName) {
-        if (!this.isMuted && this.sounds[soundName]) {
+        if (this.sounds[soundName]) {
             this.sounds[soundName]();
         }
-    }
-    
-    showNotification(message, type = 'info') {
-        const notification = {
-            id: Date.now(),
-            message: message,
-            type: type,
-            time: Date.now()
-        };
-        
-        this.notifications.push(notification);
-        
-        // 顯示通知
-        this.displayNotification(notification);
-        
-        // 3秒後自動移除
-        setTimeout(() => {
-            this.removeNotification(notification.id);
-        }, 3000);
-    }
-    
-    displayNotification(notification) {
-        // 創建通知元素
-        const notificationEl = document.createElement('div');
-        notificationEl.className = `notification notification-${notification.type}`;
-        notificationEl.id = `notification-${notification.id}`;
-        notificationEl.textContent = notification.message;
-        
-        // 添加到頁面
-        document.body.appendChild(notificationEl);
-        
-        // 動畫顯示
-        setTimeout(() => {
-            notificationEl.classList.add('show');
-        }, 100);
-    }
-    
-    removeNotification(id) {
-        const notificationEl = document.getElementById(`notification-${id}`);
-        if (notificationEl) {
-            notificationEl.classList.add('hide');
-            setTimeout(() => {
-                if (notificationEl.parentNode) {
-                    notificationEl.parentNode.removeChild(notificationEl);
-                }
-            }, 300);
-        }
-        
-        // 從數組中移除
-        this.notifications = this.notifications.filter(n => n.id !== id);
     }
     
     initializeLevels() {
@@ -214,10 +151,10 @@ class TowerDefenseGame {
                 ],
                 waves: [
                     { enemies: [{ type: 'basic', count: 5, delay: 1000 }] },
-                    { enemies: [{ type: 'basic', count: 12, delay: 800 }] },
-                    { enemies: [{ type: 'fast', count: 10, delay: 600 }] },
-                    { enemies: [{ type: 'basic', count: 15, delay: 700 }, { type: 'fast', count: 8, delay: 1000 }] },
-                    { enemies: [{ type: 'tank', count: 5, delay: 2000 }, { type: 'basic', count: 12, delay: 500 }] }
+                    { enemies: [{ type: 'basic', count: 8, delay: 800 }] },
+                    { enemies: [{ type: 'fast', count: 6, delay: 600 }] },
+                    { enemies: [{ type: 'basic', count: 10, delay: 700 }, { type: 'fast', count: 5, delay: 1000 }] },
+                    { enemies: [{ type: 'tank', count: 3, delay: 2000 }, { type: 'basic', count: 8, delay: 500 }] }
                 ]
             },
             {
@@ -234,10 +171,10 @@ class TowerDefenseGame {
                 ],
                 waves: [
                     { enemies: [{ type: 'basic', count: 6, delay: 900 }] },
-                    { enemies: [{ type: 'fast', count: 12, delay: 700 }] },
-                    { enemies: [{ type: 'tank', count: 4, delay: 1500 }] },
-                    { enemies: [{ type: 'basic', count: 18, delay: 600 }, { type: 'fast', count: 10, delay: 800 }] },
-                    { enemies: [{ type: 'tank', count: 6, delay: 1200 }, { type: 'fast', count: 15, delay: 500 }] }
+                    { enemies: [{ type: 'fast', count: 8, delay: 700 }] },
+                    { enemies: [{ type: 'tank', count: 2, delay: 1500 }] },
+                    { enemies: [{ type: 'basic', count: 12, delay: 600 }, { type: 'fast', count: 6, delay: 800 }] },
+                    { enemies: [{ type: 'tank', count: 4, delay: 1200 }, { type: 'fast', count: 10, delay: 500 }] }
                 ]
             },
             {
@@ -256,10 +193,10 @@ class TowerDefenseGame {
                 ],
                 waves: [
                     { enemies: [{ type: 'basic', count: 8, delay: 800 }] },
-                    { enemies: [{ type: 'fast', count: 15, delay: 600 }] },
-                    { enemies: [{ type: 'tank', count: 5, delay: 1000 }] },
-                    { enemies: [{ type: 'basic', count: 20, delay: 500 }, { type: 'fast', count: 12, delay: 700 }] },
-                    { enemies: [{ type: 'tank', count: 8, delay: 1000 }, { type: 'fast', count: 18, delay: 400 }] }
+                    { enemies: [{ type: 'fast', count: 10, delay: 600 }] },
+                    { enemies: [{ type: 'tank', count: 3, delay: 1000 }] },
+                    { enemies: [{ type: 'basic', count: 15, delay: 500 }, { type: 'fast', count: 8, delay: 700 }] },
+                    { enemies: [{ type: 'tank', count: 5, delay: 1000 }, { type: 'fast', count: 12, delay: 400 }] }
                 ]
             },
             {
@@ -276,10 +213,10 @@ class TowerDefenseGame {
                 ],
                 waves: [
                     { enemies: [{ type: 'fast', count: 8, delay: 600 }] },
-                    { enemies: [{ type: 'basic', count: 18, delay: 700 }] },
-                    { enemies: [{ type: 'tank', count: 6, delay: 800 }] },
-                    { enemies: [{ type: 'fast', count: 20, delay: 400 }, { type: 'basic', count: 15, delay: 600 }] },
-                    { enemies: [{ type: 'tank', count: 8, delay: 800 }, { type: 'fast', count: 20, delay: 300 }] }
+                    { enemies: [{ type: 'basic', count: 12, delay: 700 }] },
+                    { enemies: [{ type: 'tank', count: 4, delay: 800 }] },
+                    { enemies: [{ type: 'fast', count: 15, delay: 400 }, { type: 'basic', count: 10, delay: 600 }] },
+                    { enemies: [{ type: 'tank', count: 6, delay: 800 }, { type: 'fast', count: 15, delay: 300 }] }
                 ]
             },
             {
@@ -298,177 +235,11 @@ class TowerDefenseGame {
                 ],
                 waves: [
                     { enemies: [{ type: 'basic', count: 10, delay: 600 }] },
-                    { enemies: [{ type: 'fast', count: 18, delay: 500 }] },
-                    { enemies: [{ type: 'tank', count: 8, delay: 800 }] },
-                    { enemies: [{ type: 'basic', count: 25, delay: 400 }, { type: 'fast', count: 20, delay: 500 }] },
-                    { enemies: [{ type: 'tank', count: 12, delay: 600 }, { type: 'fast', count: 25, delay: 300 }] }
+                    { enemies: [{ type: 'fast', count: 12, delay: 500 }] },
+                    { enemies: [{ type: 'tank', count: 5, delay: 800 }] },
+                    { enemies: [{ type: 'basic', count: 20, delay: 400 }, { type: 'fast', count: 15, delay: 500 }] },
+                    { enemies: [{ type: 'tank', count: 8, delay: 600 }, { type: 'fast', count: 20, delay: 300 }] }
                 ]
-            },
-            {
-                name: "火山關卡",
-                path: [
-                    { x: 0, y: 150 },
-                    { x: 100, y: 150 },
-                    { x: 100, y: 50 },
-                    { x: 250, y: 50 },
-                    { x: 250, y: 200 },
-                    { x: 400, y: 200 },
-                    { x: 400, y: 100 },
-                    { x: 550, y: 100 },
-                    { x: 550, y: 250 },
-                    { x: 700, y: 250 }
-                ],
-                waves: [
-                    { enemies: [{ type: 'tank', count: 4, delay: 1000 }] },
-                    { enemies: [{ type: 'basic', count: 20, delay: 500 }] },
-                    { enemies: [{ type: 'fast', count: 18, delay: 400 }] },
-                    { enemies: [{ type: 'tank', count: 10, delay: 600 }, { type: 'basic', count: 15, delay: 300 }] },
-                    { enemies: [{ type: 'fast', count: 25, delay: 250 }, { type: 'tank', count: 8, delay: 500 }] },
-                    { enemies: [{ type: 'basic', count: 30, delay: 200 }, { type: 'fast', count: 20, delay: 300 }] },
-                    { enemies: [{ type: 'tank', count: 15, delay: 400 }, { type: 'fast', count: 30, delay: 150 }, { type: 'basic', count: 25, delay: 100 }] }
-                ],
-                newEnemy: 'flying' // 第六關新增飛行敵人
-            },
-            {
-                name: "冰雪關卡",
-                path: [
-                    { x: 0, y: 300 },
-                    { x: 120, y: 300 },
-                    { x: 120, y: 180 },
-                    { x: 240, y: 180 },
-                    { x: 240, y: 60 },
-                    { x: 360, y: 60 },
-                    { x: 360, y: 240 },
-                    { x: 480, y: 240 },
-                    { x: 480, y: 120 },
-                    { x: 600, y: 120 },
-                    { x: 600, y: 300 },
-                    { x: 700, y: 300 }
-                ],
-                waves: [
-                    { enemies: [{ type: 'fast', count: 10, delay: 500 }] },
-                    { enemies: [{ type: 'tank', count: 8, delay: 800 }] },
-                    { enemies: [{ type: 'basic', count: 25, delay: 300 }] },
-                    { enemies: [{ type: 'fast', count: 20, delay: 350 }, { type: 'tank', count: 6, delay: 600 }] },
-                    { enemies: [{ type: 'basic', count: 30, delay: 200 }, { type: 'fast', count: 25, delay: 250 }] },
-                    { enemies: [{ type: 'tank', count: 12, delay: 400 }, { type: 'basic', count: 20, delay: 300 }] },
-                    { enemies: [{ type: 'fast', count: 35, delay: 100 }, { type: 'tank', count: 18, delay: 300 }, { type: 'basic', count: 30, delay: 80 }] }
-                ],
-                newTowers: ['ice', 'laser'] // 第七關新增冰霜塔和雷射塔
-            },
-            {
-                name: "雷電關卡",
-                path: [
-                    { x: 0, y: 200 },
-                    { x: 80, y: 200 },
-                    { x: 80, y: 80 },
-                    { x: 200, y: 80 },
-                    { x: 200, y: 320 },
-                    { x: 320, y: 320 },
-                    { x: 320, y: 160 },
-                    { x: 440, y: 160 },
-                    { x: 440, y: 280 },
-                    { x: 560, y: 280 },
-                    { x: 560, y: 120 },
-                    { x: 700, y: 120 }
-                ],
-                waves: [
-                    { enemies: [{ type: 'basic', count: 12, delay: 400 }] },
-                    { enemies: [{ type: 'tank', count: 10, delay: 700 }] },
-                    { enemies: [{ type: 'fast', count: 22, delay: 300 }] },
-                    { enemies: [{ type: 'basic', count: 25, delay: 250 }, { type: 'fast', count: 18, delay: 400 }] },
-                    { enemies: [{ type: 'tank', count: 15, delay: 500 }, { type: 'fast', count: 25, delay: 200 }] },
-                    { enemies: [{ type: 'basic', count: 35, delay: 150 }, { type: 'tank', count: 12, delay: 400 }] },
-                    { enemies: [{ type: 'fast', count: 40, delay: 80 }, { type: 'tank', count: 20, delay: 250 }, { type: 'basic', count: 30, delay: 60 }] }
-                ],
-                newEnemy: 'armored' // 第八關新增裝甲敵人
-            },
-            {
-                name: "暗影關卡",
-                path: [
-                    { x: 0, y: 100 },
-                    { x: 150, y: 100 },
-                    { x: 150, y: 250 },
-                    { x: 300, y: 250 },
-                    { x: 300, y: 50 },
-                    { x: 450, y: 50 },
-                    { x: 450, y: 200 },
-                    { x: 600, y: 200 },
-                    { x: 600, y: 350 },
-                    { x: 700, y: 350 }
-                ],
-                waves: [
-                    { enemies: [{ type: 'tank', count: 8, delay: 600 }] },
-                    { enemies: [{ type: 'fast', count: 20, delay: 400 }] },
-                    { enemies: [{ type: 'basic', count: 30, delay: 250 }] },
-                    { enemies: [{ type: 'tank', count: 15, delay: 400 }, { type: 'fast', count: 25, delay: 300 }] },
-                    { enemies: [{ type: 'basic', count: 40, delay: 150 }, { type: 'tank', count: 18, delay: 350 }] },
-                    { enemies: [{ type: 'fast', count: 35, delay: 100 }, { type: 'basic', count: 25, delay: 200 }] },
-                    { enemies: [{ type: 'tank', count: 25, delay: 200 }, { type: 'fast', count: 45, delay: 60 }, { type: 'basic', count: 35, delay: 50 }] }
-                ]
-            },
-            {
-                name: "終極關卡",
-                path: [
-                    { x: 0, y: 200 },
-                    { x: 100, y: 200 },
-                    { x: 100, y: 100 },
-                    { x: 200, y: 100 },
-                    { x: 200, y: 300 },
-                    { x: 300, y: 300 },
-                    { x: 300, y: 50 },
-                    { x: 400, y: 50 },
-                    { x: 400, y: 250 },
-                    { x: 500, y: 250 },
-                    { x: 500, y: 150 },
-                    { x: 600, y: 150 },
-                    { x: 600, y: 350 },
-                    { x: 700, y: 350 }
-                ],
-                waves: [
-                    { enemies: [{ type: 'basic', count: 18, delay: 300 }] },
-                    { enemies: [{ type: 'fast', count: 30, delay: 250 }] },
-                    { enemies: [{ type: 'tank', count: 20, delay: 400 }] },
-                    { enemies: [{ type: 'basic', count: 40, delay: 200 }, { type: 'fast', count: 30, delay: 300 }] },
-                    { enemies: [{ type: 'tank', count: 25, delay: 300 }, { type: 'fast', count: 35, delay: 150 }] },
-                    { enemies: [{ type: 'basic', count: 50, delay: 100 }, { type: 'tank', count: 20, delay: 250 }] },
-                    { enemies: [{ type: 'fast', count: 50, delay: 50 }, { type: 'tank', count: 30, delay: 150 }, { type: 'basic', count: 40, delay: 40 }] }
-                ]
-            },
-            {
-                name: "Boss關卡",
-                path: [
-                    { x: 0, y: 200 },
-                    { x: 100, y: 200 },
-                    { x: 100, y: 100 },
-                    { x: 200, y: 100 },
-                    { x: 200, y: 300 },
-                    { x: 300, y: 300 },
-                    { x: 300, y: 50 },
-                    { x: 400, y: 50 },
-                    { x: 400, y: 250 },
-                    { x: 500, y: 250 },
-                    { x: 500, y: 150 },
-                    { x: 600, y: 150 },
-                    { x: 600, y: 350 },
-                    { x: 700, y: 350 }
-                ],
-                waves: [
-                    { enemies: [{ type: 'basic', count: 30, delay: 400 }] },
-                    { enemies: [{ type: 'fast', count: 35, delay: 300 }] },
-                    { enemies: [{ type: 'tank', count: 25, delay: 500 }] },
-                    { enemies: [{ type: 'flying', count: 20, delay: 400 }] },
-                    { enemies: [{ type: 'armored', count: 15, delay: 600 }] },
-                    { enemies: [{ type: 'basic', count: 40, delay: 200 }, { type: 'fast', count: 30, delay: 300 }] },
-                    { enemies: [{ type: 'tank', count: 30, delay: 300 }, { type: 'flying', count: 25, delay: 200 }] },
-                    { enemies: [{ type: 'armored', count: 20, delay: 400 }, { type: 'fast', count: 40, delay: 150 }] },
-                    { enemies: [{ type: 'basic', count: 50, delay: 100 }, { type: 'tank', count: 25, delay: 200 }] },
-                    { enemies: [{ type: 'flying', count: 30, delay: 100 }, { type: 'armored', count: 15, delay: 300 }] },
-                    { enemies: [{ type: 'fast', count: 60, delay: 50 }, { type: 'tank', count: 35, delay: 100 }, { type: 'basic', count: 45, delay: 30 }] },
-                    { enemies: [{ type: 'flying', count: 40, delay: 80 }, { type: 'armored', count: 25, delay: 150 }, { type: 'fast', count: 50, delay: 40 }] },
-                    { enemies: [{ type: 'boss', count: 1, delay: 0 }] } // Boss波次
-                ],
-                isBoss: true
             }
         ];
     }
@@ -509,7 +280,7 @@ class TowerDefenseGame {
         document.querySelectorAll('.tower-option').forEach(option => {
             option.addEventListener('click', (e) => {
                 const towerType = e.currentTarget.dataset.tower;
-                if (towerType && this.towerTypes[towerType] && this.coins >= this.towerTypes[towerType].cost) {
+                if (this.coins >= this.towerTypes[towerType].cost) {
                     this.selectedTower = towerType;
                     document.querySelectorAll('.tower-option').forEach(opt => opt.classList.remove('selected'));
                     e.currentTarget.classList.add('selected');
@@ -556,15 +327,6 @@ class TowerDefenseGame {
             this.toggleFastForward();
         });
         
-        // 靜音按鈕 (只在主選單和關卡選擇頁面)
-        document.getElementById('mute-btn-level').addEventListener('click', () => {
-            this.toggleMute();
-        });
-        
-        document.getElementById('mute-btn-guide').addEventListener('click', () => {
-            this.toggleMute();
-        });
-        
         // 關卡選擇標籤
         document.querySelectorAll('.level-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
@@ -584,7 +346,6 @@ class TowerDefenseGame {
         document.getElementById('result-next-level').addEventListener('click', () => {
             this.nextLevelFromResult();
         });
-        
         
         document.getElementById('result-restart').addEventListener('click', () => {
             this.restartFromResult();
@@ -660,12 +421,6 @@ class TowerDefenseGame {
             const level = parseInt(btn.dataset.level);
             btn.classList.remove('unlocked', 'locked');
             
-            // 隱藏boss關卡（第11關）
-            if (level === 11) {
-                btn.style.display = 'none';
-                return;
-            }
-            
             if (this.isLevelUnlocked(level)) {
                 btn.classList.add('unlocked');
                 btn.disabled = false;
@@ -697,26 +452,11 @@ class TowerDefenseGame {
         this.maxTimer = 0;
         this.gameState = 'playing';
         
-        // 檢查新敵人通知
-        if (this.currentLevelData.newEnemy) {
-            const enemyName = this.currentLevelData.newEnemy === 'flying' ? '飛行敵人' : '裝甲敵人';
-            this.showNotification(`🆕 新敵人出現：${enemyName}！`, 'warning');
-        }
-        
-        // 檢查新塔防通知
-        if (this.currentLevelData.newTowers) {
-            this.showNotification('🆕 新塔防解鎖：冰霜塔和雷射塔！', 'success');
-            // 顯示新塔防
-            document.querySelector('.tower-option[data-tower="ice"]').style.display = 'block';
-            document.querySelector('.tower-option[data-tower="laser"]').style.display = 'block';
-        }
-        
         this.updateUI();
         
         // 更新塔防圖標顏色
         this.updateTowerIcons();
         
-        // 啟動遊戲循環
         this.gameLoop();
     }
     
@@ -728,12 +468,6 @@ class TowerDefenseGame {
         document.getElementById('total-waves').textContent = this.totalWaves;
         document.getElementById('timer').textContent = Math.floor(this.timer);
         document.getElementById('score').textContent = this.score;
-        
-        // 更新關卡總數顯示
-        const levelInfo = document.querySelector('#level-info span');
-        if (levelInfo) {
-            levelInfo.textContent = `關卡: ${this.currentLevel}/10`;
-        }
         
         // 更新開始波次按鈕狀態
         const startWaveBtn = document.getElementById('start-wave');
@@ -759,20 +493,20 @@ class TowerDefenseGame {
         // 更新塔防選項狀態
         document.querySelectorAll('.tower-option').forEach(option => {
             const towerType = option.dataset.tower;
-            if (towerType && this.towerTypes[towerType]) {
-                const cost = this.towerTypes[towerType].cost;
-                if (this.coins < cost) {
-                    option.classList.add('disabled');
-                } else {
-                    option.classList.remove('disabled');
-                }
+            const cost = this.towerTypes[towerType].cost;
+            if (this.coins < cost) {
+                option.classList.add('disabled');
+            } else {
+                option.classList.remove('disabled');
             }
         });
     }
     
     gameLoop() {
-        this.update();
-        this.render();
+        if (this.gameState === 'playing') {
+            this.update();
+            this.render();
+        }
         requestAnimationFrame(() => this.gameLoop());
     }
     
@@ -1125,9 +859,7 @@ class TowerDefenseGame {
                 totalEnemies += enemyGroup.count;
                 for (let i = 0; i < enemyGroup.count; i++) {
                     setTimeout(() => {
-                        if (this.enemyTypes[enemyGroup.type]) {
-                            this.enemies.push(new Enemy(this.currentLevelData.path, enemyGroup.type, this.enemyTypes[enemyGroup.type]));
-                        }
+                        this.enemies.push(new Enemy(this.currentLevelData.path, enemyGroup.type, this.enemyTypes[enemyGroup.type]));
                     }, delay);
                     delay += enemyGroup.delay;
                 }
@@ -1185,13 +917,6 @@ class TowerDefenseGame {
         if (!this.completedLevels.includes(this.currentLevel)) {
             this.completedLevels.push(this.currentLevel);
             localStorage.setItem('completedLevels', JSON.stringify(this.completedLevels));
-        }
-        
-        // 如果完成第十關，解鎖boss關卡
-        if (this.currentLevel === 10 && !this.completedLevels.includes(11)) {
-            this.completedLevels.push(11);
-            localStorage.setItem('completedLevels', JSON.stringify(this.completedLevels));
-            this.showNotification('🎉 Boss關卡已解鎖！', 'success');
         }
         
         // 計算商店金幣獎勵
@@ -1258,29 +983,6 @@ class TowerDefenseGame {
             btn.textContent = '快轉';
             btn.classList.remove('active');
         }
-    }
-    
-    toggleMute() {
-        this.isMuted = !this.isMuted;
-        localStorage.setItem('gameMuted', this.isMuted.toString());
-        this.updateMuteButtons();
-    }
-    
-    updateMuteButtons() {
-        // 更新主選單和關卡選擇頁面的靜音按鈕
-        const muteButtons = ['mute-btn-level', 'mute-btn-guide'];
-        muteButtons.forEach(btnId => {
-            const btn = document.getElementById(btnId);
-            if (btn) {
-                if (this.isMuted) {
-                    btn.textContent = '🔇';
-                    btn.classList.add('muted');
-                } else {
-                    btn.textContent = '🔊';
-                    btn.classList.remove('muted');
-                }
-            }
-        });
     }
     
     
@@ -1375,7 +1077,7 @@ class TowerDefenseGame {
             score.textContent = this.currentLevelScore;
             coins.textContent = Math.floor(this.currentLevelScore / 10);
             
-            if (this.currentLevel < 11) {
+            if (this.currentLevel < 5) {
                 nextBtn.style.display = 'inline-block';
             } else {
                 nextBtn.style.display = 'none';
@@ -1396,7 +1098,6 @@ class TowerDefenseGame {
         document.getElementById('level-result-modal').style.display = 'none';
         this.nextLevel();
     }
-    
     
     restartFromResult() {
         document.getElementById('level-result-modal').style.display = 'none';
