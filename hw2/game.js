@@ -33,6 +33,7 @@ class TowerDefenseGame {
         this.shopTabsInitialized = false;
         this.mouseX = 0;
         this.mouseY = 0;
+        this.gameLoopRunning = false;
         
         // 音效系統
         this.audioContext = null;
@@ -54,16 +55,16 @@ class TowerDefenseGame {
         // 塔防配置
         this.towerTypes = {
             basic: { cost: 20, damage: 20, range: 80, fireRate: 1000, color: '#f39c12' },
-            rapid: { cost: 40, damage: 15, range: 70, fireRate: 500, color: '#9b59b6' },
-            heavy: { cost: 70, damage: 40, range: 100, fireRate: 1500, color: '#e74c3c' }
+            rapid: { cost: 40, damage: 10, range: 70, fireRate: 300, color: '#9b59b6' },
+            heavy: { cost: 70, damage: 40, range: 120, fireRate: 2000, color: '#e74c3c' }
         };
         
         // 怪物配置
         this.enemyTypes = {
-            basic: { health: 50, speed: 0.5, reward: 1, color: '#e74c3c' },
-            fast: { health: 30, speed: 1, reward: 3, color: '#f39c12' },
-            tank: { health: 100, speed: 0.3, reward: 5, color: '#3498db' },
-            boss: { health: 1000, speed: 0.2, reward: 50, color: '#8e44ad' } // Boss敵人
+            basic: { health: 70, speed: 0.5, reward: 1, color: '#e74c3c' },
+            fast: { health: 50, speed: 1, reward: 3, color: '#f39c12' },
+            tank: { health: 300, speed: 0.3, reward: 5, color: '#3498db' },
+            boss: { health: 10000, speed: 0.1, reward: 50, color: '#8e44ad' } // Boss敵人
         };
         
         this.initializeEventListeners();
@@ -574,15 +575,7 @@ class TowerDefenseGame {
             this.mouseY = e.clientY - rect.top;
         });
         
-        // 鍵盤事件
-        document.addEventListener('keydown', (e) => {
-            if (e.key === ' ') {
-                e.preventDefault();
-                this.togglePause();
-            } else if (e.key === 'r' || e.key === 'R') {
-                this.restartGame();
-            }
-        });
+        
     }
     
     showStartScreen() {
@@ -633,6 +626,7 @@ class TowerDefenseGame {
     }
     
     initializeLevel() {
+        console.log('initializeLevel 開始');
         document.getElementById('level-select-screen').style.display = 'none';
         document.getElementById('game-container').style.display = 'block';
         this.currentLevelData = this.levels[this.currentLevel - 1];
@@ -655,13 +649,36 @@ class TowerDefenseGame {
         this.gameState = 'playing';
         this.allEnemiesSpawned = false;
         
+        // 重置快轉狀態
+        this.gameSpeed = 1;
+        this.isFastForward = false;
+        const fastForwardBtn = document.getElementById('fast-forward');
+        if (fastForwardBtn) {
+            fastForwardBtn.textContent = '快轉';
+            fastForwardBtn.classList.remove('active');
+        }
+        
+        console.log('initializeLevel 狀態:', {
+            currentWave: this.currentWave,
+            waveInProgress: this.waveInProgress,
+            allEnemiesSpawned: this.allEnemiesSpawned,
+            waveStarted: this.waveStarted,
+            enemiesLength: this.enemies.length,
+            gameSpeed: this.gameSpeed,
+            isFastForward: this.isFastForward,
+            gameLoopRunning: this.gameLoopRunning
+        });
+        
         this.updateUI();
         
         // 更新塔防圖標顏色
         this.updateTowerIcons();
         
         // 開始遊戲循環（但波次不會自動開始）
-        this.gameLoop();
+        if (!this.gameLoopRunning) {
+            this.gameLoopRunning = true;
+            this.gameLoop();
+        }
     }
     
     startLevel() {
@@ -796,7 +813,8 @@ class TowerDefenseGame {
         // 總是更新UI（包括計時器顯示）
         this.updateUI();
         
-        if (this.waveInProgress && this.enemies.length === 0 && this.allEnemiesSpawned) {
+        if (this.waveInProgress && this.enemies.length === 0 && this.allEnemiesSpawned && this.waveStarted) {
+            console.log(`波次完成檢查: waveInProgress=${this.waveInProgress}, enemies.length=${this.enemies.length}, allEnemiesSpawned=${this.allEnemiesSpawned}, waveStarted=${this.waveStarted}, currentWave=${this.currentWave}`);
             this.endWaveWithReward(false);  // forceOnly = false → 給獎勵並清除敵人
             
             // 確保最後波次完成關卡
@@ -806,7 +824,7 @@ class TowerDefenseGame {
         }
 
         // 檢查是否所有波次完成且敵人已清空
-        if (this.currentWave >= this.totalWaves && this.enemies.length === 0 && this.gameState === 'playing') {
+        if (this.currentWave >= this.totalWaves && this.enemies.length === 0 && this.gameState === 'playing' && this.waveStarted) {
             this.levelComplete();
             this.waveInProgress = false; // 確保波次狀態重置
         }
@@ -1070,9 +1088,9 @@ class TowerDefenseGame {
             // 設定計時器
             this.timer = 60;
             this.maxTimer = 60;
-            this.currentWave++;
             this.waveInProgress = true;
             this.waveStarted = true;
+            this.currentWave++; // 在波次開始後才遞增
     
             console.log(`開始波次 ${this.currentWave}, 計時器: ${this.timer}秒`);
         }
@@ -1118,7 +1136,7 @@ class TowerDefenseGame {
     forceEndWave() {
         // 強制結束波次，清除所有敵人
         // 時間到時不給金幣獎勵
-        this.enemies = [];
+        // this.enemies = [];
         this.waveInProgress = false;
         this.timer = 0; // 重置計時器
         this.maxTimer = 0;
@@ -1230,7 +1248,6 @@ class TowerDefenseGame {
             btn.classList.remove('active');
         }
     }
-    
     
     updateShop() {
         // 添加商店標籤事件（只添加一次）
