@@ -75,19 +75,19 @@ class TowerDefenseGame {
     initializeShopData() {
         return {
             basic: [
-                { id: 'default', name: '預設', color: '#f39c12', price: 0 },
-                { id: 'red', name: '紅色', color: '#e74c3c', price: 50 },
-                { id: 'blue', name: '藍色', color: '#3498db', price: 50 }
+                { id: 'default', name: '預設', color: '#f39c12', price: 0, bonus: { damage: 0, range: 0, fireRate: 0 }, description: '標準基礎塔，平衡的攻擊力和射程' },
+                { id: 'red', name: '紅色', color: '#e74c3c', price: 50, bonus: { damage: 5, range: 0, fireRate: 0 }, description: '攻擊型皮膚，提升攻擊力，適合對付高血量敵人' },
+                { id: 'blue', name: '藍色', color: '#3498db', price: 50, bonus: { damage: 0, range: 10, fireRate: 0 }, description: '射程型皮膚，擴大攻擊範圍，覆蓋更多區域' }
             ],
             rapid: [
-                { id: 'default', name: '預設', color: '#9b59b6', price: 0 },
-                { id: 'green', name: '綠色', color: '#27ae60', price: 75 },
-                { id: 'orange', name: '橙色', color: '#e67e22', price: 75 }
+                { id: 'default', name: '預設', color: '#9b59b6', price: 0, bonus: { damage: 0, range: 0, fireRate: 0 }, description: '標準快速塔，高射速低傷害，適合清理小兵' },
+                { id: 'green', name: '綠色', color: '#27ae60', price: 75, bonus: { damage: 0, range: 0, fireRate: -50 }, description: '極速型皮膚，大幅提升射速，火力更密集' },
+                { id: 'orange', name: '橙色', color: '#e67e22', price: 75, bonus: { damage: 3, range: 0, fireRate: 0 }, description: '強化型皮膚，提升攻擊力，平衡射速和傷害' }
             ],
             heavy: [
-                { id: 'default', name: '預設', color: '#e74c3c', price: 0 },
-                { id: 'purple', name: '紫色', color: '#8e44ad', price: 100 },
-                { id: 'gold', name: '金色', color: '#f1c40f', price: 100 }
+                { id: 'default', name: '預設', color: '#e74c3c', price: 0, bonus: { damage: 0, range: 0, fireRate: 0 }, description: '標準重型塔，高傷害低射速，對付坦克敵人' },
+                { id: 'purple', name: '紫色', color: '#8e44ad', price: 100, bonus: { damage: 10, range: 0, fireRate: 0 }, description: '毀滅型皮膚，極高攻擊力，一擊必殺' },
+                { id: 'gold', name: '金色', color: '#f1c40f', price: 100, bonus: { damage: 0, range: 20, fireRate: -200 }, description: '王者型皮膚，超遠射程和快速射擊，全能型' }
             ]
         };
     }
@@ -1295,10 +1295,22 @@ class TowerDefenseGame {
                 actionButtons = `<button class="skin-btn equipped-btn">已裝備</button>`;
             }
             
+            // 生成屬性加成描述
+            let bonusText = '';
+            if (skin.bonus) {
+                const bonuses = [];
+                if (skin.bonus.damage > 0) bonuses.push(`攻擊力 +${skin.bonus.damage}`);
+                if (skin.bonus.range > 0) bonuses.push(`射程 +${skin.bonus.range}`);
+                if (skin.bonus.fireRate < 0) bonuses.push(`射速 +${Math.abs(skin.bonus.fireRate)}ms`);
+                bonusText = bonuses.length > 0 ? `<div class="skin-bonus">${bonuses.join(', ')}</div>` : '';
+            }
+            
             item.innerHTML = `
                 <div class="tower-skin" style="background: ${skin.color}"></div>
                 <div class="skin-name">${skin.name}</div>
+                <div class="skin-description">${skin.description}</div>
                 <div class="skin-price">${skin.price === 0 ? '免費' : skin.price + ' 金幣'}</div>
+                ${bonusText}
                 <div class="skin-actions">
                     ${actionButtons}
                 </div>
@@ -1325,6 +1337,13 @@ class TowerDefenseGame {
         localStorage.setItem('equippedSkins', JSON.stringify(this.equippedSkins));
         this.updateShopItems(towerType);
         this.updateTowerIcons();
+        
+        // 更新已建造塔防的屬性
+        this.towers.forEach(tower => {
+            if (tower.type === towerType) {
+                tower.updateSkinBonus();
+            }
+        });
     }
     
     showLevelResult(success) {
@@ -1415,12 +1434,30 @@ class Tower {
         this.x = x;
         this.y = y;
         this.type = type;
-        this.damage = config.damage;
-        this.range = config.range;
-        this.fireRate = config.fireRate;
+        this.baseDamage = config.damage;
+        this.baseRange = config.range;
+        this.baseFireRate = config.fireRate;
         this.color = config.color;
         this.lastFire = 0;
         this.target = null;
+        
+        // 計算裝備皮膚的屬性加成
+        this.updateSkinBonus();
+    }
+    
+    updateSkinBonus() {
+        const equippedSkin = window.game.equippedSkins[this.type];
+        const skinData = window.game.shopData[this.type].find(s => s.id === equippedSkin);
+        
+        if (skinData && skinData.bonus) {
+            this.damage = this.baseDamage + skinData.bonus.damage;
+            this.range = this.baseRange + skinData.bonus.range;
+            this.fireRate = this.baseFireRate + skinData.bonus.fireRate;
+        } else {
+            this.damage = this.baseDamage;
+            this.range = this.baseRange;
+            this.fireRate = this.baseFireRate;
+        }
     }
     
     update(enemies, bullets, gameSpeed = 1) {
