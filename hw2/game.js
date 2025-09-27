@@ -164,13 +164,19 @@ class TowerDefenseGame {
     }
     
     toggleMute() {
+        const wasMuted = this.isMuted;
         this.isMuted = !this.isMuted;
         localStorage.setItem('gameMuted', this.isMuted.toString());
         this.updateMuteButton();
+        
+        // 如果從靜音狀態解除，播放提示音
+        if (wasMuted && !this.isMuted) {
+            this.playSound('towerPlace');
+        }
     }
     
     updateMuteButton() {
-        const muteButtons = ['mute-btn', 'mute-btn-level', 'mute-btn-guide'];
+        const muteButtons = ['mute-btn', 'mute-btn-level', 'mute-btn-guide', 'mute-btn-game'];
         muteButtons.forEach(btnId => {
             const muteBtn = document.getElementById(btnId);
             if (muteBtn) {
@@ -435,6 +441,12 @@ class TowerDefenseGame {
         
         // 遊戲說明頁面靜音按鈕
         document.getElementById('mute-btn-guide').addEventListener('click', () => {
+            this.unlockAudio();
+            this.toggleMute();
+        });
+        
+        // 遊戲頁面靜音按鈕
+        document.getElementById('mute-btn-game').addEventListener('click', () => {
             this.unlockAudio();
             this.toggleMute();
         });
@@ -841,8 +853,8 @@ class TowerDefenseGame {
             this.drawPauseScreen();
         }
         
-        // 繪製波次狀態
-        if (this.waveInProgress) {
+        // 繪製波次狀態（只要遊戲進行中且有敵人，就顯示敵人數量）
+        if (this.gameState === 'playing' && this.enemies.length > 0) {
             this.drawWaveStatus();
         }
     }
@@ -1150,7 +1162,7 @@ class TowerDefenseGame {
         }
         
         // 計算商店金幣獎勵
-        const shopCoinsEarned = Math.floor(this.currentLevelScore / 10);
+        const shopCoinsEarned = Math.floor(this.currentLevelScore / 100);
         this.shopCoins += shopCoinsEarned;
         localStorage.setItem('shopCoins', this.shopCoins.toString());
         
@@ -1309,7 +1321,7 @@ class TowerDefenseGame {
         if (success) {
             title.textContent = '關卡完成！';
             score.textContent = this.currentLevelScore;
-            coins.textContent = Math.floor(this.currentLevelScore / 10);
+            coins.textContent = Math.floor(this.currentLevelScore / 100);
             
             if (this.currentLevel < 10) {
                 nextBtn.style.display = 'inline-block';
