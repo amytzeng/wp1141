@@ -9,8 +9,8 @@ class TowerDefenseGame {
         this.currentLevel = 1;
         this.lives = 5;
         this.coins = 100;
-        this.currentWave = 1;
-        this.totalWaves = 7;
+        this.currentWave = 0;
+        this.totalWaves = 5; // 將在 startLevel 中動態設定
         this.gameState = 'menu'; // menu, playing, paused, gameOver
         this.selectedTower = null;
         this.waveStarted = false;
@@ -37,6 +37,8 @@ class TowerDefenseGame {
         // 音效系統
         this.audioContext = null;
         this.sounds = {};
+        this.isMuted = localStorage.getItem('gameMuted') === 'true';
+        this.audioUnlocked = false;
         this.initAudio();
         
         // 遊戲物件
@@ -60,10 +62,12 @@ class TowerDefenseGame {
         this.enemyTypes = {
             basic: { health: 50, speed: 0.5, reward: 1, color: '#e74c3c' },
             fast: { health: 30, speed: 1, reward: 3, color: '#f39c12' },
-            tank: { health: 100, speed: 0.3, reward: 5, color: '#3498db' }
+            tank: { health: 100, speed: 0.3, reward: 5, color: '#3498db' },
+            boss: { health: 1000, speed: 0.2, reward: 50, color: '#8e44ad' } // Boss敵人
         };
         
         this.initializeEventListeners();
+        this.updateMuteButton();
         this.showStartScreen();
     }
     
@@ -90,9 +94,10 @@ class TowerDefenseGame {
     initAudio() {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            console.log('音效系統初始化成功，狀態:', this.audioContext.state);
             this.createSounds();
         } catch (e) {
-            console.log('音效系統初始化失敗');
+            console.log('音效系統初始化失敗:', e);
         }
     }
     
@@ -106,6 +111,7 @@ class TowerDefenseGame {
             waveStart: this.createTone(1000, 0.5, 'sine'),
             gameOver: this.createTone(150, 1, 'sawtooth')
         };
+        console.log('音效創建完成:', Object.keys(this.sounds));
     }
     
     createTone(frequency, duration, type = 'sine') {
@@ -130,9 +136,53 @@ class TowerDefenseGame {
     }
     
     playSound(soundName) {
-        if (this.sounds[soundName]) {
-            this.sounds[soundName]();
+        console.log('嘗試播放音效:', soundName, '靜音:', this.isMuted, '解鎖:', this.audioUnlocked, '音效存在:', !!this.sounds[soundName]);
+        if (!this.isMuted && this.audioUnlocked && this.sounds[soundName]) {
+            try {
+                this.sounds[soundName]();
+                console.log('音效播放成功:', soundName);
+            } catch (e) {
+                console.log('音效播放失敗:', e);
+            }
         }
+    }
+    
+    unlockAudio() {
+        if (!this.audioUnlocked && this.audioContext) {
+            if (this.audioContext.state === 'suspended') {
+                this.audioContext.resume().then(() => {
+                    this.audioUnlocked = true;
+                    console.log('音效已解鎖');
+                }).catch(e => {
+                    console.log('音效解鎖失敗:', e);
+                });
+            } else {
+                this.audioUnlocked = true;
+                console.log('音效已解鎖');
+            }
+        }
+    }
+    
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        localStorage.setItem('gameMuted', this.isMuted.toString());
+        this.updateMuteButton();
+    }
+    
+    updateMuteButton() {
+        const muteButtons = ['mute-btn', 'mute-btn-level', 'mute-btn-guide'];
+        muteButtons.forEach(btnId => {
+            const muteBtn = document.getElementById(btnId);
+            if (muteBtn) {
+                if (this.isMuted) {
+                    muteBtn.textContent = '🔇';
+                    muteBtn.classList.add('muted');
+                } else {
+                    muteBtn.textContent = '🔊';
+                    muteBtn.classList.remove('muted');
+                }
+            }
+        });
     }
     
     initializeLevels() {
@@ -240,6 +290,124 @@ class TowerDefenseGame {
                     { enemies: [{ type: 'basic', count: 20, delay: 400 }, { type: 'fast', count: 15, delay: 500 }] },
                     { enemies: [{ type: 'tank', count: 8, delay: 600 }, { type: 'fast', count: 20, delay: 300 }] }
                 ]
+            },
+            {
+                name: "火山關卡",
+                path: [
+                    { x: 0, y: 150 },
+                    { x: 100, y: 150 },
+                    { x: 100, y: 50 },
+                    { x: 250, y: 50 },
+                    { x: 250, y: 200 },
+                    { x: 400, y: 200 },
+                    { x: 400, y: 100 },
+                    { x: 550, y: 100 },
+                    { x: 550, y: 250 },
+                    { x: 700, y: 250 }
+                ],
+                waves: [
+                    { enemies: [{ type: 'tank', count: 4, delay: 1000 }] },
+                    { enemies: [{ type: 'basic', count: 20, delay: 500 }] },
+                    { enemies: [{ type: 'fast', count: 18, delay: 400 }] },
+                    { enemies: [{ type: 'tank', count: 10, delay: 600 }, { type: 'basic', count: 15, delay: 300 }] },
+                    { enemies: [{ type: 'fast', count: 25, delay: 250 }, { type: 'tank', count: 8, delay: 500 }] }
+                ]
+            },
+            {
+                name: "冰雪關卡",
+                path: [
+                    { x: 0, y: 300 },
+                    { x: 120, y: 300 },
+                    { x: 120, y: 180 },
+                    { x: 240, y: 180 },
+                    { x: 240, y: 60 },
+                    { x: 360, y: 60 },
+                    { x: 360, y: 240 },
+                    { x: 480, y: 240 },
+                    { x: 480, y: 120 },
+                    { x: 600, y: 120 },
+                    { x: 600, y: 300 },
+                    { x: 700, y: 300 }
+                ],
+                waves: [
+                    { enemies: [{ type: 'fast', count: 10, delay: 500 }] },
+                    { enemies: [{ type: 'tank', count: 8, delay: 800 }] },
+                    { enemies: [{ type: 'basic', count: 25, delay: 300 }] },
+                    { enemies: [{ type: 'fast', count: 20, delay: 350 }, { type: 'tank', count: 6, delay: 600 }] },
+                    { enemies: [{ type: 'basic', count: 30, delay: 200 }, { type: 'fast', count: 25, delay: 250 }] }
+                ]
+            },
+            {
+                name: "雷電關卡",
+                path: [
+                    { x: 0, y: 200 },
+                    { x: 80, y: 200 },
+                    { x: 80, y: 80 },
+                    { x: 200, y: 80 },
+                    { x: 200, y: 320 },
+                    { x: 320, y: 320 },
+                    { x: 320, y: 160 },
+                    { x: 440, y: 160 },
+                    { x: 440, y: 280 },
+                    { x: 560, y: 280 },
+                    { x: 560, y: 120 },
+                    { x: 700, y: 120 }
+                ],
+                waves: [
+                    { enemies: [{ type: 'basic', count: 12, delay: 400 }] },
+                    { enemies: [{ type: 'tank', count: 10, delay: 700 }] },
+                    { enemies: [{ type: 'fast', count: 22, delay: 300 }] },
+                    { enemies: [{ type: 'basic', count: 25, delay: 250 }, { type: 'fast', count: 18, delay: 400 }] },
+                    { enemies: [{ type: 'tank', count: 15, delay: 500 }, { type: 'fast', count: 25, delay: 200 }] }
+                ]
+            },
+            {
+                name: "暗影關卡",
+                path: [
+                    { x: 0, y: 100 },
+                    { x: 150, y: 100 },
+                    { x: 150, y: 250 },
+                    { x: 300, y: 250 },
+                    { x: 300, y: 50 },
+                    { x: 450, y: 50 },
+                    { x: 450, y: 200 },
+                    { x: 600, y: 200 },
+                    { x: 600, y: 350 },
+                    { x: 700, y: 350 }
+                ],
+                waves: [
+                    { enemies: [{ type: 'tank', count: 8, delay: 600 }] },
+                    { enemies: [{ type: 'fast', count: 20, delay: 400 }] },
+                    { enemies: [{ type: 'basic', count: 30, delay: 250 }] },
+                    { enemies: [{ type: 'tank', count: 15, delay: 400 }, { type: 'fast', count: 25, delay: 300 }] },
+                    { enemies: [{ type: 'basic', count: 40, delay: 150 }, { type: 'tank', count: 18, delay: 350 }] }
+                ]
+            },
+            {
+                name: "Boss關卡",
+                path: [
+                    { x: 0, y: 200 },
+                    { x: 100, y: 200 },
+                    { x: 100, y: 100 },
+                    { x: 200, y: 100 },
+                    { x: 200, y: 300 },
+                    { x: 300, y: 300 },
+                    { x: 300, y: 50 },
+                    { x: 400, y: 50 },
+                    { x: 400, y: 250 },
+                    { x: 500, y: 250 },
+                    { x: 500, y: 150 },
+                    { x: 600, y: 150 },
+                    { x: 600, y: 350 },
+                    { x: 700, y: 350 }
+                ],
+                waves: [
+                    { enemies: [{ type: 'basic', count: 30, delay: 400 }] },
+                    { enemies: [{ type: 'fast', count: 35, delay: 300 }] },
+                    { enemies: [{ type: 'tank', count: 25, delay: 500 }] },
+                    { enemies: [{ type: 'basic', count: 40, delay: 200 }, { type: 'fast', count: 30, delay: 300 }] },
+                    { enemies: [{ type: 'boss', count: 1, delay: 0 }] } // Boss波次
+                ]
             }
         ];
     }
@@ -247,7 +415,28 @@ class TowerDefenseGame {
     initializeEventListeners() {
         // 開始頁面
         document.getElementById('enter-game').addEventListener('click', () => {
+            this.unlockAudio();
             this.showLevelSelect();
+        });
+        
+        // 靜音按鈕
+        document.getElementById('mute-btn').addEventListener('click', () => {
+            this.unlockAudio();
+            this.toggleMute();
+            // 測試音效
+            this.playSound('towerPlace');
+        });
+        
+        // 關卡選擇頁面靜音按鈕
+        document.getElementById('mute-btn-level').addEventListener('click', () => {
+            this.unlockAudio();
+            this.toggleMute();
+        });
+        
+        // 遊戲說明頁面靜音按鈕
+        document.getElementById('mute-btn-guide').addEventListener('click', () => {
+            this.unlockAudio();
+            this.toggleMute();
         });
         
         // 遊戲說明按鈕
@@ -266,7 +455,7 @@ class TowerDefenseGame {
                 const level = parseInt(e.currentTarget.dataset.level);
                 if (this.isLevelUnlocked(level)) {
                     this.currentLevel = level;
-                    this.startLevel();
+                    this.initializeLevel();
                 }
             });
         });
@@ -431,16 +620,17 @@ class TowerDefenseGame {
         });
     }
     
-    startLevel() {
+    initializeLevel() {
         document.getElementById('level-select-screen').style.display = 'none';
         document.getElementById('game-container').style.display = 'block';
         this.currentLevelData = this.levels[this.currentLevel - 1];
+        this.totalWaves = 5; // 動態設定總波次數
         this.lives = 5;
         this.coins = 100;
         this.score = 0;
         this.currentLevelScore = 0;
         this.currentLevelCoins = 0;
-        this.currentWave = 1;
+        this.currentWave = 0;
         this.towers = [];
         this.enemies = [];
         this.bullets = [];
@@ -451,13 +641,19 @@ class TowerDefenseGame {
         this.timer = 0;
         this.maxTimer = 0;
         this.gameState = 'playing';
+        this.allEnemiesSpawned = false;
         
         this.updateUI();
         
         // 更新塔防圖標顏色
         this.updateTowerIcons();
         
+        // 開始遊戲循環（但波次不會自動開始）
         this.gameLoop();
+    }
+    
+    startLevel() {
+        this.initializeLevel();
     }
     
     updateUI() {
@@ -471,17 +667,10 @@ class TowerDefenseGame {
         
         // 更新開始波次按鈕狀態
         const startWaveBtn = document.getElementById('start-wave');
-        if (this.waveInProgress) {
-            startWaveBtn.textContent = '波次進行中...';
-            startWaveBtn.disabled = true;
-        } else if (this.currentWave > this.totalWaves) {
-            startWaveBtn.textContent = '關卡完成';
-            startWaveBtn.disabled = true;
-        } else {
-            startWaveBtn.textContent = '開始波次';
-            startWaveBtn.disabled = false;
-        }
-        
+        startWaveBtn.textContent = '開始波次';
+        startWaveBtn.disabled = false;
+        startWaveBtn.classList.remove('disabled');
+
         // 更新暫停按鈕
         const pauseBtn = document.getElementById('pause-game');
         if (this.gameState === 'paused') {
@@ -503,15 +692,13 @@ class TowerDefenseGame {
     }
     
     gameLoop() {
-        if (this.gameState === 'playing') {
-            this.update();
-            this.render();
-        }
+        this.update();
+        this.render();
         requestAnimationFrame(() => this.gameLoop());
     }
     
     update() {
-        // 更新倒數計時器
+        // 更新倒數計時器（無論遊戲狀態如何都要更新）
         if (this.waveInProgress && this.gameState === 'playing') {
             this.timer -= (1/60) * this.gameSpeed; // 假設60FPS，倒數
             if (this.timer <= 0) {
@@ -519,34 +706,58 @@ class TowerDefenseGame {
                 // 時間到，檢查是否還有敵人
                 if (this.enemies.length > 0) {
                     // 時間到但還有敵人，強制結束波次
+                    console.log(`時間到！強制結束波次 ${this.currentWave + 1}`);
                     this.forceEndWave();
                 }
             }
-            this.updateUI();
         }
         
-        // 更新敵人
-        this.enemies.forEach((enemy, index) => {
-            enemy.update(this.gameSpeed);
-            if (enemy.reachedEnd) {
-                this.lives--;
-                this.enemies.splice(index, 1);
-                this.updateUI();
-                if (this.lives <= 0) {
-                    this.gameOver(false);
+        // 只在遊戲進行中時更新遊戲邏輯
+        if (this.gameState === 'playing') {
+            // 更新敵人
+            this.enemies.forEach((enemy, index) => {
+                enemy.update(this.gameSpeed);
+                if (enemy.reachedEnd) {
+                    this.lives--;
+                    this.enemies.splice(index, 1);
+                    if (this.lives <= 0) {
+                        this.gameOver(false);
+                    }
                 }
-            }
-        });
+            });
+            
+            // 更新子彈
+            this.bullets.forEach((bullet, index) => {
+                bullet.update();
+                if (bullet.life <= 0) {
+                    this.bullets.splice(index, 1);
+                }
+            });
+            
+            // 塔防攻擊
+            this.towers.forEach(tower => {
+                tower.update(this.enemies, this.bullets, this.gameSpeed);
+            });
+            
+            // 碰撞檢測
+            this.bullets.forEach((bullet, bulletIndex) => {
+                this.enemies.forEach((enemy, enemyIndex) => {
+                    if (this.checkCollision(bullet, enemy)) {
+                        enemy.takeDamage(bullet.damage);
+                        this.bullets.splice(bulletIndex, 1);
+                        
+                        if (enemy.health <= 0) {
+                            this.addCoins(enemy.reward, enemy.x, enemy.y);
+                            this.createParticles(enemy.x, enemy.y, '#f39c12');
+                            this.playSound('enemyDeath');
+                            this.enemies.splice(enemyIndex, 1);
+                        }
+                    }
+                });
+            });
+        }
         
-        // 更新子彈
-        this.bullets.forEach((bullet, index) => {
-            bullet.update();
-            if (bullet.life <= 0) {
-                this.bullets.splice(index, 1);
-            }
-        });
-        
-        // 更新粒子效果
+        // 更新粒子效果（總是更新）
         this.particles.forEach((particle, index) => {
             particle.update();
             if (particle.life <= 0) {
@@ -554,7 +765,7 @@ class TowerDefenseGame {
             }
         });
         
-        // 更新金幣動畫
+        // 更新金幣動畫（總是更新）
         this.coinAnimations.forEach((animation, index) => {
             animation.update();
             if (animation.life <= 0) {
@@ -562,7 +773,7 @@ class TowerDefenseGame {
             }
         });
         
-        // 更新分數動畫
+        // 更新分數動畫（總是更新）
         this.scoreAnimations.forEach((animation, index) => {
             animation.update();
             if (animation.life <= 0) {
@@ -570,50 +781,22 @@ class TowerDefenseGame {
             }
         });
         
-        // 塔防攻擊
-        this.towers.forEach(tower => {
-            tower.update(this.enemies, this.bullets, this.gameSpeed);
-        });
+        // 總是更新UI（包括計時器顯示）
+        this.updateUI();
         
-        // 碰撞檢測
-        this.bullets.forEach((bullet, bulletIndex) => {
-            this.enemies.forEach((enemy, enemyIndex) => {
-                if (this.checkCollision(bullet, enemy)) {
-                    enemy.takeDamage(bullet.damage);
-                    this.bullets.splice(bulletIndex, 1);
-                    
-                    if (enemy.health <= 0) {
-                        this.addCoins(enemy.reward, enemy.x, enemy.y);
-                        this.createParticles(enemy.x, enemy.y, '#f39c12');
-                        this.playSound('enemyDeath');
-                        this.enemies.splice(enemyIndex, 1);
-                        this.updateUI();
-                    }
-                }
-            });
-        });
-        
-        // 檢查波次完成
-        if (this.enemies.length === 0 && this.waveInProgress && this.currentWave <= this.totalWaves) {
-            this.waveInProgress = false;
+        if (this.waveInProgress && this.enemies.length === 0 && this.allEnemiesSpawned) {
+            this.endWaveWithReward(false);  // forceOnly = false → 給獎勵並清除敵人
             
-            // 計算時間獎勵（基於剩餘時間）
-            const timeBonus = Math.floor(this.timer); // 每秒1金幣
-            this.coins += 20 + timeBonus; // 基礎20金幣 + 時間獎勵
-            this.score += (20 + timeBonus) * 10; // 分數獎勵
-            this.currentLevelScore += (20 + timeBonus) * 10;
-            this.currentLevelCoins += 20 + timeBonus;
-            this.scoreAnimations.push(new ScoreAnimation(350, 200, (20 + timeBonus) * 10));
-            
-            // 重置計時器
-            this.timer = 0;
-            this.maxTimer = 0;
-            
-            this.currentWave++;
-            this.updateUI();
-            if (this.currentWave > this.totalWaves) {
+            // 確保最後波次完成關卡
+            if (this.currentWave >= this.totalWaves) {
                 this.levelComplete();
             }
+        }
+
+        // 檢查是否所有波次完成且敵人已清空
+        if (this.currentWave >= this.totalWaves && this.enemies.length === 0 && this.gameState === 'playing') {
+            this.levelComplete();
+            this.waveInProgress = false; // 確保波次狀態重置
         }
     }
     
@@ -845,29 +1028,68 @@ class TowerDefenseGame {
     }
     
     startWave() {
-        if (this.currentWave <= this.totalWaves && !this.waveInProgress) {
+        // 如果上一波還有敵人，給金幣回饋（不要停止敵人生成）
+        if (this.waveInProgress && this.enemies.length > 0) {
+            this.endWaveWithReward(true); // 傳參數表示「強制結束前波給獎勵，但不要清除敵人」
+        }
+    
+        // 開啟新波次
+        if (this.currentWave < this.totalWaves && this.gameState !== 'completed') {
             this.playSound('waveStart');
-            this.waveInProgress = true;
-            this.waveStarted = true;
-            
-            const wave = this.currentLevelData.waves[this.currentWave - 1];
+    
+            const wave = this.currentLevelData.waves[this.currentWave];
             let delay = 0;
-            let totalEnemies = 0;
-            
-            // 計算總延遲和敵人數量
+    
             wave.enemies.forEach(enemyGroup => {
-                totalEnemies += enemyGroup.count;
                 for (let i = 0; i < enemyGroup.count; i++) {
                     setTimeout(() => {
-                        this.enemies.push(new Enemy(this.currentLevelData.path, enemyGroup.type, this.enemyTypes[enemyGroup.type]));
+                        if (this.gameState !== 'completed' && this.enemyTypes[enemyGroup.type]) {
+                            this.enemies.push(new Enemy(this.currentLevelData.path, enemyGroup.type, this.enemyTypes[enemyGroup.type]));
+                        }
+                        // 判斷是否最後一隻敵人生成
+                        if (i === enemyGroup.count - 1 && enemyGroup === wave.enemies[wave.enemies.length-1]) {
+                            this.allEnemiesSpawned = true;
+                        }
                     }, delay);
                     delay += enemyGroup.delay;
                 }
             });
-            
-            // 設定1分鐘倒數計時
-            this.timer = 60; // 60秒
+    
+            // 設定計時器
+            this.timer = 60;
             this.maxTimer = 60;
+            this.currentWave++;
+            this.waveInProgress = true;
+            this.waveStarted = true;
+    
+            console.log(`開始波次 ${this.currentWave}, 計時器: ${this.timer}秒`);
+        }
+    }
+    
+    
+    endWaveWithReward(forceOnly = false) {
+        // forceOnly = true → 只給金幣/分數，不清除敵人
+        this.waveInProgress = false;
+    
+        const timeBonus = Math.floor(this.timer); // 每秒1金幣
+        if (timeBonus > 0) {
+            this.coins += timeBonus;
+            this.score += timeBonus * 10;
+            this.currentLevelScore += timeBonus * 10;
+            this.currentLevelCoins += timeBonus;
+            this.scoreAnimations.push(new ScoreAnimation(350, 200, timeBonus * 10));
+        }
+    
+        if (!forceOnly) {
+            this.enemies = []; // 正常結束波次才清除敵人
+            this.timer = 0;
+            this.maxTimer = 0;
+        }
+    
+        this.updateUI();
+    
+        if (!forceOnly && this.currentWave >= this.totalWaves) {
+            this.levelComplete();
         }
     }
     
@@ -883,11 +1105,16 @@ class TowerDefenseGame {
     
     forceEndWave() {
         // 強制結束波次，清除所有敵人
+        // 時間到時不給金幣獎勵
         this.enemies = [];
         this.waveInProgress = false;
+        this.timer = 0; // 重置計時器
+        this.maxTimer = 0;
         this.currentWave++;
         this.updateUI();
-        if (this.currentWave > this.totalWaves) {
+        
+        // 只有在所有波次都完成且沒有敵人時才完成關卡
+        if (this.currentWave >= this.totalWaves) {
             this.levelComplete();
         }
     }
@@ -913,6 +1140,9 @@ class TowerDefenseGame {
     }
     
     levelComplete() {
+        // 設置遊戲狀態為完成，防止繼續生成敵人
+        this.gameState = 'completed';
+        
         // 保存關卡完成進度
         if (!this.completedLevels.includes(this.currentLevel)) {
             this.completedLevels.push(this.currentLevel);
@@ -930,23 +1160,27 @@ class TowerDefenseGame {
     
     gameOver(won) {
         if (!won) {
+            // 關卡失敗時不給任何金幣和分數
+            this.currentLevelScore = 0;
+            this.currentLevelCoins = 0;
             this.showLevelResult(false);
         }
         this.gameState = 'gameOver';
     }
     
     nextLevel() {
-        if (this.currentLevel < 5) {
+        if (this.currentLevel < 10) {
             this.currentLevel++;
-            this.startLevel();
+            // 只初始化關卡，不自動開始
+            this.initializeLevel();
         }
         document.getElementById('game-over-modal').style.display = 'none';
         this.updateLevelButtons();
     }
     
     restartGame() {
-        this.currentLevel = 1;
-        this.startLevel();
+        // 重新開始當前關卡，不回到第一關
+        this.initializeLevel();
         document.getElementById('game-over-modal').style.display = 'none';
         document.getElementById('pause-modal').style.display = 'none';
     }
@@ -1077,7 +1311,7 @@ class TowerDefenseGame {
             score.textContent = this.currentLevelScore;
             coins.textContent = Math.floor(this.currentLevelScore / 10);
             
-            if (this.currentLevel < 5) {
+            if (this.currentLevel < 10) {
                 nextBtn.style.display = 'inline-block';
             } else {
                 nextBtn.style.display = 'none';
@@ -1085,8 +1319,8 @@ class TowerDefenseGame {
             shopBtn.style.display = 'inline-block';
         } else {
             title.textContent = '關卡失敗！';
-            score.textContent = this.currentLevelScore;
-            coins.textContent = Math.floor(this.currentLevelScore / 10);
+            score.textContent = '0';
+            coins.textContent = '0';
             nextBtn.style.display = 'none';
             shopBtn.style.display = 'none';
         }
@@ -1101,7 +1335,7 @@ class TowerDefenseGame {
     
     restartFromResult() {
         document.getElementById('level-result-modal').style.display = 'none';
-        this.startLevel();
+        this.initializeLevel();
     }
     
     showShopFromResult() {
@@ -1267,26 +1501,48 @@ class Enemy {
     }
     
     render(ctx) {
+        // Boss敵人更大
+        const radius = this.type === 'boss' ? 25 : 12;
+        const barWidth = this.type === 'boss' ? 50 : 20;
+        const barHeight = this.type === 'boss' ? 8 : 4;
+        const barOffset = this.type === 'boss' ? 35 : 20;
+        
         // 繪製敵人
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.strokeStyle = '#2c3e50';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = this.type === 'boss' ? 4 : 2;
         ctx.stroke();
         
+        // Boss敵人特殊效果
+        if (this.type === 'boss') {
+            // 繪製外圈光環
+            ctx.strokeStyle = 'rgba(142, 68, 173, 0.5)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, radius + 10, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        
         // 繪製生命值條
-        const barWidth = 20;
-        const barHeight = 4;
         const healthPercent = this.health / this.maxHealth;
         
         ctx.fillStyle = '#e74c3c';
-        ctx.fillRect(this.x - barWidth / 2, this.y - 20, barWidth, barHeight);
+        ctx.fillRect(this.x - barWidth / 2, this.y - barOffset, barWidth, barHeight);
         
         ctx.fillStyle = '#27ae60';
-        ctx.fillRect(this.x - barWidth / 2, this.y - 20, barWidth * healthPercent, barHeight);
+        ctx.fillRect(this.x - barWidth / 2, this.y - barOffset, barWidth * healthPercent, barHeight);
+        
+        // Boss敵人顯示血量數字
+        if (this.type === 'boss') {
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${this.health}/${this.maxHealth}`, this.x, this.y - barOffset - 5);
+        }
     }
 }
 

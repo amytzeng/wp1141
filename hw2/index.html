@@ -14,6 +14,7 @@
             <p>建造塔防，防禦敵人入侵！</p>
             <button id="enter-game" class="start-btn">進入遊戲</button>
             <button id="game-guide" class="start-btn">遊戲說明</button>
+            <button id="mute-btn" class="mute-btn">🔊</button>
         </div>
     </div>
     
@@ -21,6 +22,7 @@
     <div id="guide-screen" class="screen" style="display: none;">
         <div class="guide-content">
             <h1>遊戲說明</h1>
+            <button id="mute-btn-guide" class="mute-btn">🔊</button>
             <div class="guide-section">
                 <h2>遊戲目標</h2>
                 <p>在怪物抵達終點前將它們全部消滅！每隻怪物到達終點會損失一條生命，每關有5條生命。</p>
@@ -119,7 +121,7 @@
     <div id="game-container" class="screen" style="display: none;">
         <div id="game-header">
             <div id="level-info">
-                <span>關卡: <span id="current-level">1</span>/5</span>
+                <span>關卡: <span id="current-level">1</span>/10</span>
             </div>
             <div id="lives-info">
                 <span>生命: <span id="lives">5</span></span>
@@ -128,7 +130,7 @@
                 <span>金幣: <span id="coins">100</span></span>
             </div>
             <div id="wave-info">
-                <span>波次: <span id="current-wave">1</span>/<span id="total-waves">5</span></span>
+                <span>波次: <span id="current-wave">0</span>/<span id="total-waves">5</span></span>
             </div>
             <div id="timer-info">
                 <span>時間: <span id="timer">0</span>s</span>
@@ -225,6 +227,7 @@
                 <div class="shop-currency">
                     <span>商店金幣: <span id="shop-coins">0</span></span>
                 </div>
+                <button id="mute-btn-level" class="mute-btn">🔊</button>
             </div>
             <div class="level-select-tabs">
                 <button class="level-tab active" data-tab="levels">關卡選擇</button>
@@ -261,6 +264,36 @@
                         <div class="level-info">
                             <div class="level-number">關卡 5</div>
                             <div class="level-status">最終關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="6">
+                        <div class="level-info">
+                            <div class="level-number">關卡 6</div>
+                            <div class="level-status">火山關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="7">
+                        <div class="level-info">
+                            <div class="level-number">關卡 7</div>
+                            <div class="level-status">冰雪關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="8">
+                        <div class="level-info">
+                            <div class="level-number">關卡 8</div>
+                            <div class="level-status">雷電關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="9">
+                        <div class="level-info">
+                            <div class="level-number">關卡 9</div>
+                            <div class="level-status">暗影關卡</div>
+                        </div>
+                    </button>
+                    <button class="level-btn locked" data-level="10">
+                        <div class="level-info">
+                            <div class="level-number">關卡 10</div>
+                            <div class="level-status">Boss關卡</div>
                         </div>
                     </button>
                 </div>
