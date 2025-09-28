@@ -57,8 +57,8 @@ class TowerDefenseGame {
         
         // 塔防配置
         this.towerTypes = {
-            basic: { cost: 20, damage: 20, range: 80, fireRate: 1000, color: '#f39c12' },
-            rapid: { cost: 40, damage: 10, range: 70, fireRate: 300, color: '#9b59b6' },
+            basic: { cost: 20, damage: 20, range: 80, fireRate: 1000, color: '#f1c40f' },
+            rapid: { cost: 40, damage: 10, range: 70, fireRate: 300, color: '#8e44ad' },
             heavy: { cost: 70, damage: 40, range: 120, fireRate: 2000, color: '#e74c3c' }
         };
         
@@ -82,19 +82,19 @@ class TowerDefenseGame {
     initializeShopData() {
         return {
             basic: [
-                { id: 'default', name: '預設', color: '#f39c12', price: 0, bonus: { damage: 0, range: 0, fireRate: 0 }, description: '標準基礎塔，平衡的攻擊力和射程' },
-                { id: 'red', name: '紅色', color: '#e74c3c', price: 50, bonus: { damage: 5, range: 0, fireRate: 0 }, description: '攻擊型皮膚，提升攻擊力，適合對付高血量敵人' },
-                { id: 'blue', name: '藍色', color: '#3498db', price: 50, bonus: { damage: 0, range: 10, fireRate: 0 }, description: '射程型皮膚，擴大攻擊範圍，覆蓋更多區域' }
+                { id: 'default', name: '預設', color: '#f1c40f', price: 0, bonus: { damage: 0, range: 0, fireRate: 0 }, description: '標準基礎塔，平衡的攻擊力和射程' },
+                { id: 'triangle', name: '三角形', color: '#e74c3c', price: 50, bonus: { damage: 8, range: 0, fireRate: 0 }, description: '攻擊型造型，大幅提升攻擊力，適合對付高血量敵人' },
+                { id: 'square', name: '正方形', color: '#3498db', price: 50, bonus: { damage: 0, range: 15, fireRate: 0 }, description: '射程型造型，擴大攻擊範圍，覆蓋更多區域' }
             ],
             rapid: [
-                { id: 'default', name: '預設', color: '#9b59b6', price: 0, bonus: { damage: 0, range: 0, fireRate: 0 }, description: '標準快速塔，高射速低傷害，適合清理小兵' },
-                { id: 'green', name: '綠色', color: '#27ae60', price: 75, bonus: { damage: 0, range: 0, fireRate: -50 }, description: '極速型皮膚，大幅提升射速，火力更密集' },
-                { id: 'orange', name: '橙色', color: '#e67e22', price: 75, bonus: { damage: 3, range: 0, fireRate: 0 }, description: '強化型皮膚，提升攻擊力，平衡射速和傷害' }
+                { id: 'default', name: '預設', color: '#8e44ad', price: 0, bonus: { damage: 0, range: 0, fireRate: 0 }, description: '標準快速塔，高射速低傷害，適合清理小兵' },
+                { id: 'triangle', name: '三角形', color: '#27ae60', price: 75, bonus: { damage: 5, range: 0, fireRate: 0 }, description: '攻擊型造型，提升攻擊力，快速擊殺敵人' },
+                { id: 'square', name: '正方形', color: '#e67e22', price: 75, bonus: { damage: 0, range: 12, fireRate: 0 }, description: '射程型造型，擴大攻擊範圍，覆蓋更多敵人' }
             ],
             heavy: [
                 { id: 'default', name: '預設', color: '#e74c3c', price: 0, bonus: { damage: 0, range: 0, fireRate: 0 }, description: '標準重型塔，高傷害低射速，對付坦克敵人' },
-                { id: 'purple', name: '紫色', color: '#8e44ad', price: 100, bonus: { damage: 10, range: 0, fireRate: 0 }, description: '毀滅型皮膚，極高攻擊力，一擊必殺' },
-                { id: 'gold', name: '金色', color: '#f1c40f', price: 100, bonus: { damage: 0, range: 20, fireRate: -200 }, description: '王者型皮膚，超遠射程和快速射擊，全能型' }
+                { id: 'triangle', name: '三角形', color: '#8e44ad', price: 100, bonus: { damage: 15, range: 0, fireRate: 0 }, description: '毀滅型造型，極高攻擊力，一擊必殺' },
+                { id: 'square', name: '正方形', color: '#f1c40f', price: 100, bonus: { damage: 0, range: 25, fireRate: 0 }, description: '王者型造型，超遠射程，覆蓋整個戰場' }
             ]
         };
     }
@@ -1030,7 +1030,7 @@ class TowerDefenseGame {
     drawTowerPreview() {
         if (!this.selectedTower) return;
         
-        // 獲取裝備的皮膚顏色
+        // 獲取裝備的造型顏色
         const equippedSkin = this.equippedSkins[this.selectedTower];
         const skinData = this.shopData[this.selectedTower].find(s => s.id === equippedSkin);
         const previewColor = skinData ? skinData.color : this.towerTypes[this.selectedTower].color;
@@ -1039,7 +1039,22 @@ class TowerDefenseGame {
         this.ctx.fillStyle = previewColor;
         this.ctx.globalAlpha = 0.7;
         this.ctx.beginPath();
-        this.ctx.arc(this.mouseX, this.mouseY, 15, 0, Math.PI * 2);
+        
+        // 根據裝備的造型繪製不同形狀
+        if (equippedSkin === 'triangle') {
+            // 繪製三角形
+            this.ctx.moveTo(this.mouseX, this.mouseY - 15);
+            this.ctx.lineTo(this.mouseX - 13, this.mouseY + 10);
+            this.ctx.lineTo(this.mouseX + 13, this.mouseY + 10);
+            this.ctx.closePath();
+        } else if (equippedSkin === 'square') {
+            // 繪製正方形
+            this.ctx.rect(this.mouseX - 12, this.mouseY - 12, 24, 24);
+        } else {
+            // 預設圓形
+            this.ctx.arc(this.mouseX, this.mouseY, 15, 0, Math.PI * 2);
+        }
+        
         this.ctx.fill();
         
         // 繪製攻擊範圍預覽
@@ -1396,8 +1411,28 @@ class TowerDefenseGame {
                 bonusText = bonuses.length > 0 ? `<div class="skin-bonus">${bonuses.join(', ')}</div>` : '';
             }
             
+            // 根據造型類型設定形狀樣式
+            let shapeStyle = '';
+            if (skin.id === 'triangle') {
+                shapeStyle = 'clip-path: polygon(50% 0%, 0% 100%, 100% 100%); border-radius: 0;';
+            } else if (skin.id === 'square') {
+                shapeStyle = 'clip-path: none; border-radius: 0;';
+            } else {
+                shapeStyle = 'clip-path: none; border-radius: 50%;';
+            }
+            
+            // 根據塔防類型決定顏色，而不是造型類型
+            let towerColor = '';
+            if (towerType === 'basic') {
+                towerColor = '#f1c40f'; // 黃色
+            } else if (towerType === 'rapid') {
+                towerColor = '#8e44ad'; // 紫色
+            } else if (towerType === 'heavy') {
+                towerColor = '#e74c3c'; // 紅色
+            }
+            
             item.innerHTML = `
-                <div class="tower-skin" style="background: ${skin.color}"></div>
+                <div class="tower-skin" style="background: ${towerColor}; ${shapeStyle}"></div>
                 <div class="skin-name">${skin.name}</div>
                 <div class="skin-description">${skin.description}</div>
                 <div class="skin-price">${skin.price === 0 ? '免費' : skin.price + ' 金幣'}</div>
@@ -1499,7 +1534,19 @@ class TowerDefenseGame {
         if (basicIcon) {
             const equippedSkin = this.equippedSkins.basic;
             const skinData = this.shopData.basic.find(s => s.id === equippedSkin);
-            basicIcon.style.background = skinData ? skinData.color : '#f39c12';
+            basicIcon.style.background = skinData ? skinData.color : '#f1c40f';
+            
+            // 更新形狀
+            if (equippedSkin === 'triangle') {
+                basicIcon.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
+                basicIcon.style.borderRadius = '0';
+            } else if (equippedSkin === 'square') {
+                basicIcon.style.clipPath = 'none';
+                basicIcon.style.borderRadius = '0';
+            } else {
+                basicIcon.style.clipPath = 'none';
+                basicIcon.style.borderRadius = '50%';
+            }
         }
         
         // 更新快速塔圖標
@@ -1507,7 +1554,19 @@ class TowerDefenseGame {
         if (rapidIcon) {
             const equippedSkin = this.equippedSkins.rapid;
             const skinData = this.shopData.rapid.find(s => s.id === equippedSkin);
-            rapidIcon.style.background = skinData ? skinData.color : '#9b59b6';
+            rapidIcon.style.background = skinData ? skinData.color : '#8e44ad';
+            
+            // 更新形狀
+            if (equippedSkin === 'triangle') {
+                rapidIcon.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
+                rapidIcon.style.borderRadius = '0';
+            } else if (equippedSkin === 'square') {
+                rapidIcon.style.clipPath = 'none';
+                rapidIcon.style.borderRadius = '0';
+            } else {
+                rapidIcon.style.clipPath = 'none';
+                rapidIcon.style.borderRadius = '50%';
+            }
         }
         
         // 更新重型塔圖標
@@ -1516,6 +1575,18 @@ class TowerDefenseGame {
             const equippedSkin = this.equippedSkins.heavy;
             const skinData = this.shopData.heavy.find(s => s.id === equippedSkin);
             heavyIcon.style.background = skinData ? skinData.color : '#e74c3c';
+            
+            // 更新形狀
+            if (equippedSkin === 'triangle') {
+                heavyIcon.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
+                heavyIcon.style.borderRadius = '0';
+            } else if (equippedSkin === 'square') {
+                heavyIcon.style.clipPath = 'none';
+                heavyIcon.style.borderRadius = '0';
+            } else {
+                heavyIcon.style.clipPath = 'none';
+                heavyIcon.style.borderRadius = '50%';
+            }
         }
     }
 }
@@ -1532,7 +1603,7 @@ class Tower {
         this.lastFire = 0;
         this.target = null;
         
-        // 計算裝備皮膚的屬性加成
+        // 計算裝備造型的屬性加成
         this.updateSkinBonus();
     }
     
@@ -1589,12 +1660,28 @@ class Tower {
     }
     
     render(ctx) {
-        // 獲取裝備的皮膚顏色
+        // 獲取裝備的造型顏色
         const equippedSkin = this.getEquippedSkinColor();
         
         ctx.fillStyle = equippedSkin;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+        
+        // 根據裝備的造型繪製不同形狀
+        const equippedSkinId = window.game.equippedSkins[this.type];
+        if (equippedSkinId === 'triangle') {
+            // 繪製三角形
+            ctx.moveTo(this.x, this.y - 15);
+            ctx.lineTo(this.x - 13, this.y + 10);
+            ctx.lineTo(this.x + 13, this.y + 10);
+            ctx.closePath();
+        } else if (equippedSkinId === 'square') {
+            // 繪製正方形
+            ctx.rect(this.x - 12, this.y - 12, 24, 24);
+        } else {
+            // 預設圓形
+            ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+        }
+        
         ctx.fill();
         
         ctx.strokeStyle = '#2c3e50';
