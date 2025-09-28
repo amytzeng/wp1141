@@ -48,6 +48,9 @@ class TowerDefenseGame {
         this.bullets = [];
         this.particles = [];
         
+        // 背景圖片緩存
+        this.backgroundImages = {};
+        
         // 關卡配置
         this.levels = this.initializeLevels();
         this.currentLevelData = this.levels[this.currentLevel - 1];
@@ -195,7 +198,8 @@ class TowerDefenseGame {
     initializeLevels() {
         return [
             {
-                name: "森林關卡",
+                name: "大坡池",
+                background: "bg/1_大坡池.jpg",
                 path: [
                     { x: 0, y: 200 },
                     { x: 150, y: 200 },
@@ -215,7 +219,8 @@ class TowerDefenseGame {
                 ]
             },
             {
-                name: "沙漠關卡",
+                name: "植物園",
+                background: "bg/2_植物園.jpg",
                 path: [
                     { x: 0, y: 100 },
                     { x: 100, y: 100 },
@@ -235,7 +240,8 @@ class TowerDefenseGame {
                 ]
             },
             {
-                name: "山脈關卡",
+                name: "華盛頓大學",
+                background: "bg/3_華盛頓大學.jpg",
                 path: [
                     { x: 0, y: 300 },
                     { x: 80, y: 300 },
@@ -257,7 +263,8 @@ class TowerDefenseGame {
                 ]
             },
             {
-                name: "城市關卡",
+                name: "頤和園",
+                background: "bg/4_頤和園.jpg",
                 path: [
                     { x: 0, y: 80 },
                     { x: 150, y: 80 },
@@ -277,7 +284,8 @@ class TowerDefenseGame {
                 ]
             },
             {
-                name: "最終關卡",
+                name: "長城",
+                background: "bg/5_長城.jpg",
                 path: [
                     { x: 0, y: 200 },
                     { x: 80, y: 200 },
@@ -299,7 +307,8 @@ class TowerDefenseGame {
                 ]
             },
             {
-                name: "火山關卡",
+                name: "小琉球",
+                background: "bg/6_小琉球.jpg",
                 path: [
                     { x: 0, y: 150 },
                     { x: 100, y: 150 },
@@ -321,7 +330,8 @@ class TowerDefenseGame {
                 ]
             },
             {
-                name: "冰雪關卡",
+                name: "溪頭",
+                background: "bg/7_溪頭.jpg",
                 path: [
                     { x: 0, y: 300 },
                     { x: 120, y: 300 },
@@ -345,7 +355,8 @@ class TowerDefenseGame {
                 ]
             },
             {
-                name: "雷電關卡",
+                name: "阿里山",
+                background: "bg/8_阿里山.jpg",
                 path: [
                     { x: 0, y: 200 },
                     { x: 80, y: 200 },
@@ -369,7 +380,8 @@ class TowerDefenseGame {
                 ]
             },
             {
-                name: "暗影關卡",
+                name: "WreckBeach",
+                background: "bg/9_WreckBeach.jpg",
                 paths: [
                     // 左側入口路徑
                     [
@@ -407,7 +419,8 @@ class TowerDefenseGame {
                 ]
             },
             {
-                name: "Boss關卡",
+                name: "Victoria",
+                background: "bg/10_Victoria.jpg",
                 path: [
                     { x: 0, y: 200 },
                     { x: 100, y: 200 },
@@ -894,6 +907,35 @@ class TowerDefenseGame {
     }
     
     drawBackground() {
+        // 如果有背景圖片，繪製背景圖片
+        if (this.currentLevelData.background) {
+            // 預載入圖片並緩存
+            if (!this.backgroundImages) {
+                this.backgroundImages = {};
+            }
+            
+            if (this.backgroundImages[this.currentLevelData.background]) {
+                // 使用已載入的圖片
+                this.ctx.drawImage(this.backgroundImages[this.currentLevelData.background], 0, 0, this.canvasWidth, this.canvasHeight);
+            } else {
+                // 載入新圖片
+                const img = new Image();
+                img.onload = () => {
+                    this.backgroundImages[this.currentLevelData.background] = img;
+                    this.ctx.drawImage(img, 0, 0, this.canvasWidth, this.canvasHeight);
+                };
+                img.onerror = () => {
+                    console.log('背景圖片載入失敗:', this.currentLevelData.background);
+                    this.drawDefaultBackground();
+                };
+                img.src = this.currentLevelData.background;
+            }
+        } else {
+            this.drawDefaultBackground();
+        }
+    }
+    
+    drawDefaultBackground() {
         // 創建漸變背景
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
         gradient.addColorStop(0, '#2ecc71');
@@ -937,7 +979,7 @@ class TowerDefenseGame {
     }
     
     drawPath() {
-        this.ctx.strokeStyle = '#8b4513';
+        this.ctx.strokeStyle = 'rgba(139, 69, 19, 0.7)'; // 70% 透明度
         this.ctx.lineWidth = 40;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
