@@ -67,6 +67,10 @@ class TowerDefenseGame {
             basic: { health: 70, speed: 0.5, reward: 1, color: '#e74c3c' },
             fast: { health: 50, speed: 1, reward: 3, color: '#f39c12' },
             tank: { health: 300, speed: 0.3, reward: 5, color: '#3498db' },
+            boss_2: { health: 1000, speed: 0.2, reward: 10, color: '#8e44ad' },
+            boss_4: { health: 2000, speed: 0.2, reward: 15, color: '#8e44ad' },
+            boss_6: { health: 4000, speed: 0.2, reward: 20, color: '#8e44ad' },
+            boss_8: { health: 5000, speed: 0.2, reward: 30, color: '#8e44ad' },
             boss: { health: 10000, speed: 0.1, reward: 50, color: '#8e44ad' } // Boss敵人
         };
         
@@ -236,7 +240,7 @@ class TowerDefenseGame {
                     { enemies: [{ type: 'fast', count: 8, delay: 700 }] },
                     { enemies: [{ type: 'tank', count: 2, delay: 1500 }] },
                     { enemies: [{ type: 'basic', count: 12, delay: 600 }, { type: 'fast', count: 6, delay: 800 }] },
-                    { enemies: [{ type: 'tank', count: 4, delay: 1200 }, { type: 'fast', count: 10, delay: 500 }] }
+                    { enemies: [{ type: 'fast', count: 10, delay: 500 }, { type: 'boss_2', count: 1, delay: 1000 }] }
                 ]
             },
             {
@@ -280,7 +284,7 @@ class TowerDefenseGame {
                     { enemies: [{ type: 'basic', count: 12, delay: 700 }] },
                     { enemies: [{ type: 'tank', count: 4, delay: 800 }] },
                     { enemies: [{ type: 'fast', count: 15, delay: 400 }, { type: 'basic', count: 10, delay: 600 }] },
-                    { enemies: [{ type: 'tank', count: 6, delay: 800 }, { type: 'fast', count: 15, delay: 300 }] }
+                    { enemies: [{ type: 'tank', count: 6, delay: 800 }, { type: 'fast', count: 5, delay: 300 }, { type: 'boss_4', count: 1, delay: 1000 }] }
                 ]
             },
             {
@@ -326,7 +330,7 @@ class TowerDefenseGame {
                     { enemies: [{ type: 'basic', count: 20, delay: 500 }] },
                     { enemies: [{ type: 'fast', count: 18, delay: 400 }] },
                     { enemies: [{ type: 'tank', count: 10, delay: 600 }, { type: 'basic', count: 15, delay: 300 }] },
-                    { enemies: [{ type: 'fast', count: 25, delay: 250 }, { type: 'tank', count: 8, delay: 500 }] }
+                    { enemies: [{ type: 'fast', count: 20, delay: 250 }, { type: 'tank', count: 6, delay: 500 }, { type: 'boss_6', count: 1, delay: 1000 }] }
                 ]
             },
             {
@@ -376,7 +380,7 @@ class TowerDefenseGame {
                     { enemies: [{ type: 'tank', count: 10, delay: 700 }] },
                     { enemies: [{ type: 'fast', count: 22, delay: 300 }] },
                     { enemies: [{ type: 'basic', count: 25, delay: 250 }, { type: 'fast', count: 18, delay: 400 }] },
-                    { enemies: [{ type: 'tank', count: 15, delay: 500 }, { type: 'fast', count: 25, delay: 200 }] }
+                    { enemies: [{ type: 'tank', count: 10, delay: 500 }, { type: 'fast', count: 20, delay: 200 }, { type: 'boss_8', count: 1, delay: 1000 }] }
                 ]
             },
             {
@@ -720,7 +724,7 @@ class TowerDefenseGame {
         document.getElementById('coins').textContent = this.coins;
         document.getElementById('current-wave').textContent = this.currentWave;
         document.getElementById('total-waves').textContent = this.totalWaves;
-        document.getElementById('timer').textContent = Math.floor(this.timer);
+        document.getElementById('timer').textContent = Math.max(0, Math.floor(this.timer));
         document.getElementById('score').textContent = this.score;
         
         // 更新開始波次按鈕狀態
@@ -1654,47 +1658,175 @@ class Enemy {
     }
     
     render(ctx) {
-        // Boss敵人更大
-        const radius = this.type === 'boss' ? 25 : 12;
-        const barWidth = this.type === 'boss' ? 50 : 20;
-        const barHeight = this.type === 'boss' ? 8 : 4;
-        const barOffset = this.type === 'boss' ? 35 : 20;
-        
-        // 繪製敵人
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.strokeStyle = '#2c3e50';
-        ctx.lineWidth = this.type === 'boss' ? 4 : 2;
-        ctx.stroke();
-        
-        // Boss敵人特殊效果
-        if (this.type === 'boss') {
-            // 繪製外圈光環
-            ctx.strokeStyle = 'rgba(142, 68, 173, 0.5)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, radius + 10, 0, Math.PI * 2);
-            ctx.stroke();
-        }
-        
-        // 繪製生命值條
-        const healthPercent = this.health / this.maxHealth;
-        
-        ctx.fillStyle = '#e74c3c';
-        ctx.fillRect(this.x - barWidth / 2, this.y - barOffset, barWidth, barHeight);
-        
-        ctx.fillStyle = '#27ae60';
-        ctx.fillRect(this.x - barWidth / 2, this.y - barOffset, barWidth * healthPercent, barHeight);
-        
-        // Boss敵人顯示血量數字
-        if (this.type === 'boss') {
+        // Boss敵人使用交錯圖片動畫
+        if (this.type === 'boss' || this.type === 'boss_2' || this.type === 'boss_4' || this.type === 'boss_6' || this.type === 'boss_8') {
+            // 根據boss類型載入對應圖片
+            if (this.type === 'boss') {
+                // 最後一關boss使用動畫效果
+                if (!this.bossImage1) {
+                    this.bossImage1 = new Image();
+                    this.bossImage1.onload = () => {
+                        console.log('Boss圖片1載入成功');
+                    };
+                    this.bossImage1.onerror = () => {
+                        console.log('Boss圖片1載入失敗');
+                    };
+                    this.bossImage1.src = 'boss/1.png';
+                }
+                
+                if (!this.bossImage2) {
+                    this.bossImage2 = new Image();
+                    this.bossImage2.onload = () => {
+                        console.log('Boss圖片2載入成功');
+                    };
+                    this.bossImage2.onerror = () => {
+                        console.log('Boss圖片2載入失敗');
+                    };
+                    this.bossImage2.src = 'boss/2.png';
+                }
+                
+                if (!this.bossImage3) {
+                    this.bossImage3 = new Image();
+                    this.bossImage3.onload = () => {
+                        console.log('Boss圖片3載入成功');
+                    };
+                    this.bossImage3.onerror = () => {
+                        console.log('Boss圖片3載入失敗');
+                    };
+                    this.bossImage3.src = 'boss/3.png';
+                }
+            } else {
+                // 其他boss使用單張圖片
+                let bossImageSrc = '';
+                if (this.type === 'boss_2') {
+                    bossImageSrc = 'boss/toco.png';
+                } else if (this.type === 'boss_4') {
+                    bossImageSrc = 'boss/boat.png';
+                } else if (this.type === 'boss_6') {
+                    bossImageSrc = 'boss/turtle.png';
+                } else if (this.type === 'boss_8') {
+                    bossImageSrc = 'boss/train.png';
+                }
+                
+                if (!this.bossImage1) {
+                    this.bossImage1 = new Image();
+                    this.bossImage1.onload = () => {
+                        console.log('Boss圖片載入成功');
+                    };
+                    this.bossImage1.onerror = () => {
+                        console.log('Boss圖片載入失敗');
+                    };
+                    this.bossImage1.src = bossImageSrc;
+                }
+            }
+            
+            // 檢查圖片是否載入完成
+            const image1Ready = this.bossImage1.complete && this.bossImage1.naturalWidth > 0;
+            const image2Ready = this.bossImage2 && this.bossImage2.complete && this.bossImage2.naturalWidth > 0;
+            const image3Ready = this.bossImage3 && this.bossImage3.complete && this.bossImage3.naturalWidth > 0;
+
+            if (image1Ready || image2Ready || image3Ready) {
+                const size = 50; // Boss圖片大小
+                
+                if (this.type === 'boss') {
+                    // 最後一關boss使用動畫效果
+                    const time = Date.now() * 0.005; // 調整動畫速度
+                    const frame = Math.floor(time) % 3; // 0, 1, 2
+                    
+                    // 根據幀數選擇圖片
+                    let currentImage = null;
+                    if (frame === 0 && image1Ready) {
+                        currentImage = this.bossImage1;
+                    } else if (frame === 1 && image2Ready) {
+                        currentImage = this.bossImage2;
+                    } else if (frame === 2 && image3Ready) {
+                        currentImage = this.bossImage3;
+                    } else if (image1Ready) {
+                        currentImage = this.bossImage1;
+                    } else if (image2Ready) {
+                        currentImage = this.bossImage2;
+                    } else if (image3Ready) {
+                        currentImage = this.bossImage3;
+                    }
+                    
+                    if (currentImage) {
+                        ctx.drawImage(currentImage, this.x - size/2, this.y - size/2, size, size);
+                    }
+                } else {
+                    // 其他boss使用單張圖片
+                    ctx.drawImage(this.bossImage1, this.x - size/2, this.y - size/2, size, size);
+                }
+                
+                // 添加動態光環效果
+                const time = Date.now() * 0.005;
+                const pulse = Math.sin(time) * 0.3 + 0.7;
+                ctx.strokeStyle = `rgba(142, 68, 173, ${pulse * 0.5})`;
+                ctx.lineWidth = 3 + Math.sin(time * 2) * 1;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 30 + Math.sin(time * 1.5) * 5, 0, Math.PI * 2);
+                ctx.stroke();
+            } else {
+                // 如果圖片都沒載入，使用原本的圓形
+                const radius = 25;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                
+                // 繪製外圈光環
+                ctx.strokeStyle = 'rgba(142, 68, 173, 0.5)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, radius + 10, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            // Boss血量條
+            const barWidth = 50;
+            const barHeight = 8;
+            const barOffset = 35;
+            const healthPercent = this.health / this.maxHealth;
+            
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(this.x - barWidth / 2, this.y - barOffset, barWidth, barHeight);
+            
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(this.x - barWidth / 2, this.y - barOffset, barWidth * healthPercent, barHeight);
+            
+            // Boss敵人顯示血量數字
             ctx.fillStyle = 'white';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
             ctx.fillText(`${this.health}/${this.maxHealth}`, this.x, this.y - barOffset - 5);
+        } else {
+            // 一般敵人
+            const radius = 12;
+            const barWidth = 20;
+            const barHeight = 4;
+            const barOffset = 20;
+            
+            // 繪製敵人
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 繪製生命值條
+            const healthPercent = this.health / this.maxHealth;
+            
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(this.x - barWidth / 2, this.y - barOffset, barWidth, barHeight);
+            
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(this.x - barWidth / 2, this.y - barOffset, barWidth * healthPercent, barHeight);
         }
     }
 }
