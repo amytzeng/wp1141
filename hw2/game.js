@@ -370,17 +370,33 @@ class TowerDefenseGame {
             },
             {
                 name: "暗影關卡",
-                path: [
-                    { x: 0, y: 100 },
-                    { x: 150, y: 100 },
-                    { x: 150, y: 250 },
-                    { x: 300, y: 250 },
-                    { x: 300, y: 50 },
-                    { x: 450, y: 50 },
-                    { x: 450, y: 200 },
-                    { x: 600, y: 200 },
-                    { x: 600, y: 350 },
-                    { x: 700, y: 350 }
+                paths: [
+                    // 左側入口路徑
+                    [
+                        { x: 0, y: 100 },
+                        { x: 150, y: 100 },
+                        { x: 150, y: 250 },
+                        { x: 300, y: 250 },
+                        { x: 300, y: 50 },
+                        { x: 450, y: 50 },
+                        { x: 450, y: 200 },
+                        { x: 600, y: 200 },
+                        { x: 600, y: 350 },
+                        { x: 700, y: 350 }
+                    ],
+                    // 右側入口路徑
+                    [
+                        { x: 700, y: 100 },
+                        { x: 550, y: 100 },
+                        { x: 550, y: 250 },
+                        { x: 400, y: 250 },
+                        { x: 400, y: 50 },
+                        { x: 250, y: 50 },
+                        { x: 250, y: 200 },
+                        { x: 100, y: 200 },
+                        { x: 100, y: 350 },
+                        { x: 0, y: 350 }
+                    ]
                 ],
                 waves: [
                     { enemies: [{ type: 'tank', count: 8, delay: 600 }] },
@@ -727,8 +743,8 @@ class TowerDefenseGame {
     }
     
     update() {
-        // 更新倒數計時器（無論遊戲狀態如何都要更新）
-        if (this.waveInProgress && this.gameState === 'playing') {
+        // 更新倒數計時器（第五波次不計時）
+        if (this.waveInProgress && this.gameState === 'playing' && this.currentWave < 5) {
             this.timer -= (1/60) * this.gameSpeed; // 假設60FPS，倒數
             if (this.timer <= 0) {
                 this.timer = 0;
@@ -926,33 +942,43 @@ class TowerDefenseGame {
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
         
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.currentLevelData.path[0].x, this.currentLevelData.path[0].y);
+        // 支援多條路徑
+        const paths = this.currentLevelData.paths || [this.currentLevelData.path];
         
-        for (let i = 1; i < this.currentLevelData.path.length; i++) {
-            this.ctx.lineTo(this.currentLevelData.path[i].x, this.currentLevelData.path[i].y);
-        }
-        
-        this.ctx.stroke();
+        paths.forEach(path => {
+            this.ctx.beginPath();
+            this.ctx.moveTo(path[0].x, path[0].y);
+            
+            for (let i = 1; i < path.length; i++) {
+                this.ctx.lineTo(path[i].x, path[i].y);
+            }
+            
+            this.ctx.stroke();
+        });
     }
     
     drawStartEndPoints() {
-        const start = this.currentLevelData.path[0];
-        const end = this.currentLevelData.path[this.currentLevelData.path.length - 1];
+        // 支援多條路徑
+        const paths = this.currentLevelData.paths || [this.currentLevelData.path];
         
-        // 起點
-        this.ctx.fillStyle = '#27ae60';
-        this.ctx.fillRect(start.x - 20, start.y - 20, 40, 40);
-        this.ctx.strokeStyle = '#2c3e50';
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeRect(start.x - 20, start.y - 20, 40, 40);
-        
-        // 終點
-        this.ctx.fillStyle = '#e74c3c';
-        this.ctx.fillRect(end.x - 20, end.y - 20, 40, 40);
-        this.ctx.strokeStyle = '#2c3e50';
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeRect(end.x - 20, end.y - 20, 40, 40);
+        paths.forEach(path => {
+            const start = path[0];
+            const end = path[path.length - 1];
+            
+            // 起點
+            this.ctx.fillStyle = '#27ae60';
+            this.ctx.fillRect(start.x - 20, start.y - 20, 40, 40);
+            this.ctx.strokeStyle = '#2c3e50';
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeRect(start.x - 20, start.y - 20, 40, 40);
+            
+            // 終點
+            this.ctx.fillStyle = '#e74c3c';
+            this.ctx.fillRect(end.x - 20, end.y - 20, 40, 40);
+            this.ctx.strokeStyle = '#2c3e50';
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeRect(end.x - 20, end.y - 20, 40, 40);
+        });
     }
     
     drawTowerPreview() {
@@ -1008,13 +1034,17 @@ class TowerDefenseGame {
     
     isOnPath(x, y) {
         const pathWidth = 40;
-        for (let i = 0; i < this.currentLevelData.path.length - 1; i++) {
-            const start = this.currentLevelData.path[i];
-            const end = this.currentLevelData.path[i + 1];
-            
-            const distance = this.pointToLineDistance(x, y, start.x, start.y, end.x, end.y);
-            if (distance < pathWidth / 2) {
-                return true;
+        const paths = this.currentLevelData.paths || [this.currentLevelData.path];
+        
+        for (let path of paths) {
+            for (let i = 0; i < path.length - 1; i++) {
+                const start = path[i];
+                const end = path[i + 1];
+                
+                const distance = this.pointToLineDistance(x, y, start.x, start.y, end.x, end.y);
+                if (distance < pathWidth / 2) {
+                    return true;
+                }
             }
         }
         return false;
@@ -1074,7 +1104,10 @@ class TowerDefenseGame {
                 for (let i = 0; i < enemyGroup.count; i++) {
                     setTimeout(() => {
                         if (this.gameState !== 'completed' && this.enemyTypes[enemyGroup.type]) {
-                            this.enemies.push(new Enemy(this.currentLevelData.path, enemyGroup.type, this.enemyTypes[enemyGroup.type]));
+                            // 隨機選擇一條路徑
+                            const paths = this.currentLevelData.paths || [this.currentLevelData.path];
+                            const selectedPath = paths[Math.floor(Math.random() * paths.length)];
+                            this.enemies.push(new Enemy(selectedPath, enemyGroup.type, this.enemyTypes[enemyGroup.type]));
                         }
                         // 判斷是否最後一隻敵人生成
                         if (i === enemyGroup.count - 1 && enemyGroup === wave.enemies[wave.enemies.length-1]) {
@@ -1085,13 +1118,18 @@ class TowerDefenseGame {
                 }
             });
     
-            // 設定計時器
-            this.timer = 60;
-            this.maxTimer = 60;
+            // 設定計時器（第五波次不設定計時器）
+            if (this.currentWave < 4) {
+                this.timer = 60;
+                this.maxTimer = 60;
+            } else {
+                this.timer = 0;
+                this.maxTimer = 0;
+            }
             this.waveInProgress = true;
             this.waveStarted = true;
             this.currentWave++; // 在波次開始後才遞增
-    
+
             console.log(`開始波次 ${this.currentWave}, 計時器: ${this.timer}秒`);
         }
     }
@@ -1124,13 +1162,20 @@ class TowerDefenseGame {
     }
     
     calculatePathLength() {
-        let length = 0;
-        for (let i = 0; i < this.currentLevelData.path.length - 1; i++) {
-            const start = this.currentLevelData.path[i];
-            const end = this.currentLevelData.path[i + 1];
-            length += Math.sqrt((end.x - start.x) ** 2 + (end.y - start.y) ** 2);
-        }
-        return length;
+        const paths = this.currentLevelData.paths || [this.currentLevelData.path];
+        let totalLength = 0;
+        
+        paths.forEach(path => {
+            let length = 0;
+            for (let i = 0; i < path.length - 1; i++) {
+                const start = path[i];
+                const end = path[i + 1];
+                length += Math.sqrt((end.x - start.x) ** 2 + (end.y - start.y) ** 2);
+            }
+            totalLength += length;
+        });
+        
+        return totalLength / paths.length; // 返回平均路徑長度
     }
     
     forceEndWave() {
