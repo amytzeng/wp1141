@@ -12,7 +12,10 @@ class TowerDefenseGame {
         this.currentWave = 0;
         this.totalWaves = 5; // 將在 startLevel 中動態設定
         this.gameState = 'menu'; // menu, playing, paused, gameOver
+        this.survivalWaveCount = 0; // Survival 模式波次計數器
         this.selectedTower = null;
+        this.shovelMode = false; // 鏟子模式
+        this.selectedTowerForUpgrade = null; // 選中要升級的塔防
         this.waveStarted = false;
         this.waveInProgress = false;
         this.timer = 0;
@@ -58,8 +61,8 @@ class TowerDefenseGame {
         // 塔防配置
         this.towerTypes = {
             basic: { cost: 20, damage: 20, range: 80, fireRate: 1000, color: '#f1c40f' },
-            rapid: { cost: 40, damage: 10, range: 70, fireRate: 300, color: '#8e44ad' },
-            heavy: { cost: 70, damage: 40, range: 120, fireRate: 2000, color: '#e74c3c' }
+            rapid: { cost: 40, damage: 10, range: 50, fireRate: 300, color: '#8e44ad' },
+            heavy: { cost: 70, damage: 80, range: 120, fireRate: 2000, color: '#e74c3c' }
         };
         
         // 怪物配置
@@ -336,19 +339,33 @@ class TowerDefenseGame {
             {
                 name: "溪頭",
                 background: "bg/7_溪頭.jpg",
-                path: [
-                    { x: 0, y: 300 },
-                    { x: 120, y: 300 },
-                    { x: 120, y: 180 },
-                    { x: 240, y: 180 },
-                    { x: 240, y: 60 },
-                    { x: 360, y: 60 },
-                    { x: 360, y: 240 },
-                    { x: 480, y: 240 },
-                    { x: 480, y: 120 },
-                    { x: 600, y: 120 },
-                    { x: 600, y: 300 },
-                    { x: 700, y: 300 }
+                paths: [
+                    // 上路徑（完整路徑）
+                    [
+                        { x: 0, y: 200 },
+                        { x: 150, y: 200 },
+                        { x: 150, y: 100 },
+                        { x: 300, y: 100 },
+                        { x: 300, y: 200 },
+                        { x: 450, y: 200 },
+                        { x: 450, y: 100 },
+                        { x: 600, y: 100 },
+                        { x: 600, y: 200 },
+                        { x: 700, y: 200 }
+                    ],
+                    // 下路徑（完整路徑）
+                    [
+                        { x: 0, y: 200 },
+                        { x: 150, y: 200 },
+                        { x: 150, y: 300 },
+                        { x: 300, y: 300 },
+                        { x: 300, y: 200 },
+                        { x: 450, y: 200 },
+                        { x: 450, y: 300 },
+                        { x: 600, y: 300 },
+                        { x: 600, y: 200 },
+                        { x: 700, y: 200 }
+                    ]
                 ],
                 waves: [
                     { enemies: [{ type: 'fast', count: 10, delay: 500 }] },
@@ -387,7 +404,7 @@ class TowerDefenseGame {
                 name: "WreckBeach",
                 background: "bg/9_WreckBeach.jpg",
                 paths: [
-                    // 左側入口路徑
+                    // 上路徑
                     [
                         { x: 0, y: 100 },
                         { x: 150, y: 100 },
@@ -400,18 +417,18 @@ class TowerDefenseGame {
                         { x: 600, y: 350 },
                         { x: 700, y: 350 }
                     ],
-                    // 右側入口路徑
+                    // 下路徑
                     [
-                        { x: 700, y: 100 },
-                        { x: 550, y: 100 },
-                        { x: 550, y: 250 },
-                        { x: 400, y: 250 },
-                        { x: 400, y: 50 },
-                        { x: 250, y: 50 },
-                        { x: 250, y: 200 },
-                        { x: 100, y: 200 },
-                        { x: 100, y: 350 },
-                        { x: 0, y: 350 }
+                        { x: 0, y: 100 },
+                        { x: 150, y: 100 },
+                        { x: 150, y: 250 },
+                        { x: 300, y: 250 },
+                        { x: 300, y: 50 },
+                        { x: 450, y: 50 },
+                        { x: 450, y: 200 },
+                        { x: 600, y: 200 },
+                        { x: 600, y: 100 },
+                        { x: 700, y: 100 }
                     ]
                 ],
                 waves: [
@@ -448,6 +465,42 @@ class TowerDefenseGame {
                     { enemies: [{ type: 'basic', count: 40, delay: 200 }, { type: 'fast', count: 30, delay: 300 }] },
                     { enemies: [{ type: 'boss', count: 1, delay: 0 }] } // Boss波次
                 ]
+            },
+            {
+                name: "Survival",
+                background: "bg/11_MOA.jpg",
+                path: [
+                    { x: 0, y: 50 },
+                    { x: 100, y: 50 },
+                    { x: 100, y: 150 },
+                    { x: 200, y: 150 },
+                    { x: 200, y: 80 },
+                    { x: 300, y: 80 },
+                    { x: 300, y: 200 },
+                    { x: 400, y: 200 },
+                    { x: 400, y: 120 },
+                    { x: 500, y: 120 },
+                    { x: 500, y: 250 },
+                    { x: 600, y: 250 },
+                    { x: 600, y: 180 },
+                    { x: 700, y: 180 },
+                    { x: 700, y: 300 },
+                    { x: 600, y: 300 },
+                    { x: 600, y: 350 },
+                    { x: 500, y: 350 },
+                    { x: 500, y: 280 },
+                    { x: 400, y: 280 },
+                    { x: 400, y: 350 },
+                    { x: 300, y: 350 },
+                    { x: 300, y: 320 },
+                    { x: 200, y: 320 },
+                    { x: 200, y: 380 },
+                    { x: 100, y: 380 },
+                    { x: 100, y: 320 },
+                    { x: 0, y: 320 }
+                ],
+                isSurvival: true,
+                waves: [] // Survival 模式不需要預定義波次
             }
         ];
     }
@@ -500,8 +553,18 @@ class TowerDefenseGame {
             btn.addEventListener('click', (e) => {
                 const level = parseInt(e.currentTarget.dataset.level);
                 if (this.isLevelUnlocked(level)) {
-                    this.currentLevel = level;
-                    this.initializeLevel();
+                    // 檢查是否需要金幣解鎖
+                    if ((level === 10 || level === 11) && !this.completedLevels.includes(level - 1) && this.shopCoins >= 100) {
+                        if (confirm(`使用100商店金幣解鎖關卡${level}？`)) {
+                            this.shopCoins -= 100;
+                            this.updateShopCoins();
+                            this.currentLevel = level;
+                            this.initializeLevel();
+                        }
+                    } else {
+                        this.currentLevel = level;
+                        this.initializeLevel();
+                    }
                 }
             });
         });
@@ -516,9 +579,25 @@ class TowerDefenseGame {
             option.addEventListener('click', (e) => {
                 const towerType = e.currentTarget.dataset.tower;
                 if (this.coins >= this.towerTypes[towerType].cost) {
-                    this.selectedTower = towerType;
-                    document.querySelectorAll('.tower-option').forEach(opt => opt.classList.remove('selected'));
-                    e.currentTarget.classList.add('selected');
+                    // 如果鏟子模式開啟，先關閉鏟子模式
+                    if (this.shovelMode) {
+                        this.shovelMode = false;
+                        document.getElementById('shovel-btn').classList.remove('active');
+                        console.log('關閉鏟子模式');
+                    }
+                    
+                    // 如果點擊的是已選中的塔，則取消選擇
+                    if (this.selectedTower === towerType) {
+                        this.selectedTower = null;
+                        document.querySelectorAll('.tower-option').forEach(opt => opt.classList.remove('selected'));
+                        console.log('取消選擇塔防:', towerType);
+                    } else {
+                        // 選擇新的塔防
+                        this.selectedTower = towerType;
+                        document.querySelectorAll('.tower-option').forEach(opt => opt.classList.remove('selected'));
+                        e.currentTarget.classList.add('selected');
+                        console.log('選擇塔防:', towerType);
+                    }
                 }
             });
         });
@@ -557,9 +636,43 @@ class TowerDefenseGame {
             this.backToMenu();
         });
         
+        // Survival 結果彈窗按鈕
+        document.getElementById('survival-restart').addEventListener('click', () => {
+            this.restartGame();
+        });
+        
+        document.getElementById('survival-main-menu').addEventListener('click', () => {
+            this.backToMenu();
+        });
+        
         // 快轉按鈕
         document.getElementById('fast-forward').addEventListener('click', () => {
             this.toggleFastForward();
+        });
+        
+        // 鏟子按鈕
+        document.getElementById('shovel-btn').addEventListener('click', () => {
+            this.toggleShovel();
+        });
+        
+        // 塔防升級對話框按鈕
+        document.getElementById('upgrade-damage').addEventListener('click', () => {
+            this.upgradeTower('damage');
+        });
+        
+        document.getElementById('upgrade-speed').addEventListener('click', () => {
+            this.upgradeTower('speed');
+        });
+        
+        document.getElementById('upgrade-cancel').addEventListener('click', () => {
+            this.hideUpgradeModal();
+        });
+        
+        // 點擊對話框背景關閉
+        document.getElementById('tower-upgrade-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'tower-upgrade-modal') {
+                this.hideUpgradeModal();
+            }
         });
         
         // 關卡選擇標籤
@@ -596,8 +709,14 @@ class TowerDefenseGame {
         
         // 畫布點擊事件
         this.canvas.addEventListener('click', (e) => {
-            if (this.gameState === 'playing' && this.selectedTower) {
-                this.placeTower(e);
+            if (this.gameState === 'playing') {
+                if (this.selectedTower) {
+                    this.placeTower(e);
+                } else if (this.shovelMode) {
+                    this.removeTower(e);
+                } else {
+                    this.handleTowerClick(e);
+                }
             }
         });
         
@@ -640,17 +759,28 @@ class TowerDefenseGame {
     
     isLevelUnlocked(level) {
         if (level === 1) return true;
+        
+        // 第十關和第十一關可以用金幣解鎖
+        if (level === 10 || level === 11) {
+            return this.completedLevels.includes(level - 1) || this.shopCoins >= 100;
+        }
+        
         return this.completedLevels.includes(level - 1);
     }
     
     updateLevelButtons() {
         document.querySelectorAll('.level-btn').forEach(btn => {
             const level = parseInt(btn.dataset.level);
-            btn.classList.remove('unlocked', 'locked');
+            btn.classList.remove('unlocked', 'locked', 'coin-unlockable');
             
             if (this.isLevelUnlocked(level)) {
                 btn.classList.add('unlocked');
                 btn.disabled = false;
+                
+                // 為可以用金幣解鎖的關卡添加特殊樣式
+                if ((level === 10 || level === 11) && !this.completedLevels.includes(level - 1) && this.shopCoins >= 100) {
+                    btn.classList.add('coin-unlockable');
+                }
             } else {
                 btn.classList.add('locked');
                 btn.disabled = true;
@@ -663,7 +793,15 @@ class TowerDefenseGame {
         document.getElementById('level-select-screen').style.display = 'none';
         document.getElementById('game-container').style.display = 'block';
         this.currentLevelData = this.levels[this.currentLevel - 1];
-        this.totalWaves = 5; // 動態設定總波次數
+        
+        // 檢查是否為 Survival 模式
+        if (this.currentLevelData.isSurvival) {
+            this.totalWaves = Infinity; // Survival 模式無限波次
+            this.survivalWaveCount = 0;
+        } else {
+            this.totalWaves = 5; // 動態設定總波次數
+        }
+        
         this.lives = 5;
         this.coins = 100;
         this.score = 0;
@@ -681,6 +819,13 @@ class TowerDefenseGame {
         this.maxTimer = 0;
         this.gameState = 'playing';
         this.allEnemiesSpawned = false;
+        
+        // 確保重新開始時不會自動開始波次
+        this.survivalWaveCount = 0;
+        
+        // 重置鏟子模式
+        this.shovelMode = false;
+        document.getElementById('shovel-btn').classList.remove('active');
         
         // 重置快轉狀態
         this.gameSpeed = 1;
@@ -722,9 +867,26 @@ class TowerDefenseGame {
         document.getElementById('current-level').textContent = this.currentLevel;
         document.getElementById('lives').textContent = this.lives;
         document.getElementById('coins').textContent = this.coins;
-        document.getElementById('current-wave').textContent = this.currentWave;
-        document.getElementById('total-waves').textContent = this.totalWaves;
-        document.getElementById('timer').textContent = Math.max(0, Math.floor(this.timer));
+        
+        // 處理 Survival 模式的波次顯示
+        if (this.currentLevelData.isSurvival) {
+            document.getElementById('current-wave').textContent = this.survivalWaveCount;
+            document.getElementById('total-waves').textContent = '∞';
+        } else {
+            document.getElementById('current-wave').textContent = this.currentWave;
+            document.getElementById('total-waves').textContent = this.totalWaves;
+        }
+        
+        // Survival 模式不顯示計時器
+        if (this.currentLevelData.isSurvival) {
+            document.getElementById('timer').textContent = '--';
+        } else if (this.currentWave >= 5) {
+            // 第五波顯示0且不動
+            document.getElementById('timer').textContent = '0';
+        } else {
+            document.getElementById('timer').textContent = Math.max(0, Math.floor(this.timer));
+        }
+        
         document.getElementById('score').textContent = this.score;
         
         // 更新開始波次按鈕狀態
@@ -760,18 +922,24 @@ class TowerDefenseGame {
     }
     
     update() {
-        // 更新倒數計時器（第五波次不計時）
-        if (this.waveInProgress && this.gameState === 'playing' && this.currentWave < 5) {
+        // 更新倒數計時器（Survival 模式不計時，第五波次不計時）
+        if (this.waveInProgress && this.gameState === 'playing' && !this.currentLevelData.isSurvival && this.currentWave < 5 && this.timer > 0) {
             this.timer -= (1/60) * this.gameSpeed; // 假設60FPS，倒數
             if (this.timer <= 0) {
                 this.timer = 0;
                 // 時間到，檢查是否還有敵人
                 if (this.enemies.length > 0) {
                     // 時間到但還有敵人，強制結束波次
-                    console.log(`時間到！強制結束波次 ${this.currentWave + 1}`);
+                    console.log(`時間到！強制結束波次 ${this.currentWave}`);
                     this.forceEndWave();
                 }
             }
+        }
+        
+        // 第五波時確保計時器為0且不動
+        if (this.currentWave >= 5 && !this.currentLevelData.isSurvival) {
+            this.timer = 0;
+            this.maxTimer = 0;
         }
         
         // 只在遊戲進行中時更新遊戲邏輯
@@ -991,7 +1159,9 @@ class TowerDefenseGame {
         // 支援多條路徑
         const paths = this.currentLevelData.paths || [this.currentLevelData.path];
         
-        paths.forEach(path => {
+        // 如果只有一條路徑，直接繪製
+        if (paths.length === 1) {
+            const path = paths[0];
             this.ctx.beginPath();
             this.ctx.moveTo(path[0].x, path[0].y);
             
@@ -1000,7 +1170,31 @@ class TowerDefenseGame {
             }
             
             this.ctx.stroke();
-        });
+        } else {
+            // 多條路徑時，先繪製主路徑（重疊部分）
+            const mainPath = paths[0];
+            this.ctx.beginPath();
+            this.ctx.moveTo(mainPath[0].x, mainPath[0].y);
+            
+            for (let i = 1; i < mainPath.length; i++) {
+                this.ctx.lineTo(mainPath[i].x, mainPath[i].y);
+            }
+            
+            this.ctx.stroke();
+            
+            // 然後繪製分叉部分
+            for (let pathIndex = 1; pathIndex < paths.length; pathIndex++) {
+                const path = paths[pathIndex];
+                this.ctx.beginPath();
+                this.ctx.moveTo(path[0].x, path[0].y);
+                
+                for (let i = 1; i < path.length; i++) {
+                    this.ctx.lineTo(path[i].x, path[i].y);
+                }
+                
+                this.ctx.stroke();
+            }
+        }
     }
     
     drawStartEndPoints() {
@@ -1158,7 +1352,16 @@ class TowerDefenseGame {
         if (this.currentWave < this.totalWaves && this.gameState !== 'completed') {
             this.playSound('waveStart');
     
-            const wave = this.currentLevelData.waves[this.currentWave];
+            let wave;
+            if (this.currentLevelData.isSurvival) {
+                // Survival 模式：動態生成波次
+                wave = this.generateSurvivalWave();
+                this.survivalWaveCount++;
+            } else {
+                // 一般模式：使用預定義波次
+                wave = this.currentLevelData.waves[this.currentWave];
+            }
+            
             let delay = 0;
     
             wave.enemies.forEach(enemyGroup => {
@@ -1168,7 +1371,19 @@ class TowerDefenseGame {
                             // 隨機選擇一條路徑
                             const paths = this.currentLevelData.paths || [this.currentLevelData.path];
                             const selectedPath = paths[Math.floor(Math.random() * paths.length)];
-                            this.enemies.push(new Enemy(selectedPath, enemyGroup.type, this.enemyTypes[enemyGroup.type]));
+                            
+                            // 獲取敵人配置
+                            let enemyConfig = { ...this.enemyTypes[enemyGroup.type] };
+                            
+                            // Survival 模式：應用增強效果
+                            if (this.currentLevelData.isSurvival) {
+                                const enhancementLevel = Math.floor(this.survivalWaveCount / 3);
+                                enemyConfig.health = Math.floor(enemyConfig.health * (1 + enhancementLevel * 0.5));
+                                enemyConfig.speed = enemyConfig.speed * (1 + enhancementLevel * 0.2);
+                                enemyConfig.reward = Math.floor(enemyConfig.reward * (1 + enhancementLevel * 0.3));
+                            }
+                            
+                            this.enemies.push(new Enemy(selectedPath, enemyGroup.type, enemyConfig));
                         }
                         // 判斷是否最後一隻敵人生成
                         if (i === enemyGroup.count - 1 && enemyGroup === wave.enemies[wave.enemies.length-1]) {
@@ -1179,14 +1394,18 @@ class TowerDefenseGame {
                 }
             });
     
-            // 設定計時器（第五波次不設定計時器）
-            if (this.currentWave < 4) {
+            // 設定計時器（Survival 模式不設定計時器）
+            if (this.currentLevelData.isSurvival) {
+                this.timer = 0;
+                this.maxTimer = 0;
+            } else if (this.currentWave < 5) {
                 this.timer = 60;
                 this.maxTimer = 60;
             } else {
                 this.timer = 0;
                 this.maxTimer = 0;
             }
+            
             this.waveInProgress = true;
             this.waveStarted = true;
             this.currentWave++; // 在波次開始後才遞增
@@ -1195,18 +1414,54 @@ class TowerDefenseGame {
         }
     }
     
+    generateSurvivalWave() {
+        // 每三波增強敵人
+        const enhancementLevel = Math.floor(this.survivalWaveCount / 3);
+        
+        // 基礎敵人配置
+        const baseEnemies = [
+            { type: 'basic', count: 5, delay: 1000 },
+            { type: 'fast', count: 3, delay: 800 },
+            { type: 'tank', count: 1, delay: 1500 }
+        ];
+        
+        // 根據波次數量和增強等級調整
+        const waveMultiplier = 1 + (this.survivalWaveCount * 0.1);
+        const enhancedEnemies = baseEnemies.map(enemy => ({
+            ...enemy,
+            count: Math.floor(enemy.count * waveMultiplier),
+            delay: Math.max(200, enemy.delay - (enhancementLevel * 100))
+        }));
+        
+        // 每10波增加一個 boss
+        if (this.survivalWaveCount > 0 && this.survivalWaveCount % 10 === 0) {
+            enhancedEnemies.push({ type: 'boss', count: 1, delay: 0 });
+        }
+        
+        return { enemies: enhancedEnemies };
+    }
     
     endWaveWithReward(forceOnly = false) {
         // forceOnly = true → 只給金幣/分數，不清除敵人
         this.waveInProgress = false;
     
-        const timeBonus = Math.floor(this.timer); // 每秒1金幣
-        if (timeBonus > 0) {
-            this.coins += timeBonus;
-            this.score += timeBonus * 10;
-            this.currentLevelScore += timeBonus * 10;
-            this.currentLevelCoins += timeBonus;
-            this.scoreAnimations.push(new ScoreAnimation(350, 200, timeBonus * 10));
+        // Survival 模式：每波固定給50金幣
+        if (this.currentLevelData.isSurvival) {
+            this.coins += 50;
+            this.score += 500;
+            this.currentLevelScore += 500;
+            this.currentLevelCoins += 50;
+            this.scoreAnimations.push(new ScoreAnimation(350, 200, 500));
+        } else {
+            // 一般模式：時間獎勵
+            const timeBonus = Math.floor(this.timer); // 每秒1金幣
+            if (timeBonus > 0) {
+                this.coins += timeBonus;
+                this.score += timeBonus * 10;
+                this.currentLevelScore += timeBonus * 10;
+                this.currentLevelCoins += timeBonus;
+                this.scoreAnimations.push(new ScoreAnimation(350, 200, timeBonus * 10));
+            }
         }
     
         if (!forceOnly) {
@@ -1217,7 +1472,8 @@ class TowerDefenseGame {
     
         this.updateUI();
     
-        if (!forceOnly && this.currentWave >= this.totalWaves) {
+        // Survival 模式不會結束，只有一般模式才會檢查關卡完成
+        if (!forceOnly && !this.currentLevelData.isSurvival && this.currentWave >= this.totalWaves) {
             this.levelComplete();
         }
     }
@@ -1272,6 +1528,7 @@ class TowerDefenseGame {
     
     backToMenu() {
         document.getElementById('pause-modal').style.display = 'none';
+        document.getElementById('survival-result-modal').style.display = 'none';
         this.showLevelSelect();
     }
     
@@ -1295,13 +1552,47 @@ class TowerDefenseGame {
     }
     
     gameOver(won) {
-        if (!won) {
-            // 關卡失敗時不給任何金幣和分數
-            this.currentLevelScore = 0;
-            this.currentLevelCoins = 0;
-            this.showLevelResult(false);
+        if (this.currentLevelData.isSurvival) {
+            // Survival 模式：顯示特殊的結束彈窗
+            this.showSurvivalResult();
+        } else {
+            if (!won) {
+                // 關卡失敗時不給任何金幣和分數
+                this.currentLevelScore = 0;
+                this.currentLevelCoins = 0;
+                this.showLevelResult(false);
+            }
         }
         this.gameState = 'gameOver';
+    }
+    
+    showSurvivalResult() {
+        console.log('showSurvivalResult 被調用');
+        const modal = document.getElementById('survival-result-modal');
+        const title = document.getElementById('survival-result-title');
+        const waveCount = document.getElementById('survival-wave-count');
+        const score = document.getElementById('survival-result-score');
+        const coins = document.getElementById('survival-result-coins');
+        
+        console.log('彈窗元素:', modal);
+        console.log('標題元素:', title);
+        
+        if (!modal) {
+            console.error('找不到 survival-result-modal 元素');
+            return;
+        }
+        
+        title.textContent = '闖關結束！';
+        waveCount.textContent = this.survivalWaveCount;
+        score.textContent = this.currentLevelScore;
+        coins.textContent = this.currentLevelCoins;
+        
+        // 將金幣加入商店金幣
+        this.shopCoins += this.currentLevelCoins;
+        this.updateShopCoins();
+        
+        modal.style.display = 'block';
+        console.log('彈窗顯示設定完成');
     }
     
     nextLevel() {
@@ -1316,9 +1607,40 @@ class TowerDefenseGame {
     
     restartGame() {
         // 重新開始當前關卡，不回到第一關
-        this.initializeLevel();
+        console.log('restartGame 開始');
+        
+        // 重置所有遊戲狀態
+        this.gameState = 'playing';
+        this.waveStarted = false;
+        this.waveInProgress = false;
+        this.allEnemiesSpawned = false;
+        this.currentWave = 0;
+        this.survivalWaveCount = 0;
+        this.timer = 0;
+        this.maxTimer = 0;
+        
+        // 清除所有遊戲對象
+        this.enemies = [];
+        this.bullets = [];
+        this.particles = [];
+        this.towers = [];
+        this.coinAnimations = [];
+        this.scoreAnimations = [];
+        
+        // 重置遊戲速度
+        this.gameSpeed = 1;
+        this.isFastForward = false;
+        
+        // 隱藏所有模態框
         document.getElementById('game-over-modal').style.display = 'none';
         document.getElementById('pause-modal').style.display = 'none';
+        document.getElementById('survival-result-modal').style.display = 'none';
+        document.getElementById('level-result-modal').style.display = 'none';
+        
+        // 重新初始化關卡
+        this.initializeLevel();
+        
+        console.log('restartGame 完成');
     }
     
     checkCollision(bullet, enemy) {
@@ -1353,6 +1675,160 @@ class TowerDefenseGame {
             btn.textContent = '快轉';
             btn.classList.remove('active');
         }
+    }
+    
+    toggleShovel() {
+        this.shovelMode = !this.shovelMode;
+        
+        // 如果開啟鏟子模式，取消塔防選擇
+        if (this.shovelMode) {
+            this.selectedTower = null;
+            document.querySelectorAll('.tower-option').forEach(opt => opt.classList.remove('selected'));
+        }
+        
+        const shovelBtn = document.getElementById('shovel-btn');
+        if (this.shovelMode) {
+            shovelBtn.classList.add('active');
+            console.log('鏟子模式開啟');
+        } else {
+            shovelBtn.classList.remove('active');
+            console.log('鏟子模式關閉');
+        }
+    }
+    
+    removeTower(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // 檢查是否點擊到塔防
+        for (let i = this.towers.length - 1; i >= 0; i--) {
+            const tower = this.towers[i];
+            const distance = Math.sqrt((x - tower.x) ** 2 + (y - tower.y) ** 2);
+            
+            if (distance <= 20) { // 塔防半徑約20像素
+                // 計算回饋金幣（原費用的一半）
+                const refund = Math.floor(this.towerTypes[tower.type].cost / 2);
+                this.coins += refund;
+                
+                // 移除塔防
+                this.towers.splice(i, 1);
+                
+                // 播放音效
+                this.playSound('towerPlace');
+                
+                // 顯示金幣動畫
+                this.coinAnimations.push(new CoinAnimation(x, y, refund));
+                
+                console.log(`移除塔防，獲得 ${refund} 金幣回饋`);
+                this.updateUI();
+                break;
+            }
+        }
+    }
+    
+    handleTowerClick(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // 檢查是否點擊到塔防
+        for (let i = this.towers.length - 1; i >= 0; i--) {
+            const tower = this.towers[i];
+            const distance = Math.sqrt((x - tower.x) ** 2 + (y - tower.y) ** 2);
+            
+            if (distance <= 20) { // 塔防半徑約20像素
+                if (tower.canUpgrade()) {
+                    this.showUpgradeModal(tower);
+                } else {
+                    console.log('塔防已達到最高等級');
+                }
+                break;
+            }
+        }
+    }
+    
+    showUpgradeModal(tower) {
+        this.selectedTowerForUpgrade = tower;
+        const cost = tower.getUpgradeCost();
+        
+        document.getElementById('upgrade-cost-amount').textContent = cost;
+        
+        // 根據等級顯示不同的選項
+        if (tower.level < 2) {
+            document.getElementById('upgrade-title').textContent = '升級塔防';
+            document.getElementById('upgrade-options').style.display = 'flex';
+            document.getElementById('upgrade-damage').style.display = 'block';
+            document.getElementById('upgrade-damage').disabled = false;
+            document.getElementById('upgrade-speed').disabled = false;
+            document.getElementById('upgrade-damage').textContent = '攻擊力 +5';
+            document.getElementById('upgrade-speed').textContent = '攻擊速度 +5';
+        } else {
+            document.getElementById('upgrade-title').textContent = '升級到最高等級';
+            document.getElementById('upgrade-options').style.display = 'flex';
+            document.getElementById('upgrade-damage').style.display = 'none';
+            document.getElementById('upgrade-speed').disabled = false;
+            document.getElementById('upgrade-speed').textContent = '升級所有屬性';
+        }
+        
+        document.getElementById('tower-upgrade-modal').style.display = 'flex';
+    }
+    
+    hideUpgradeModal() {
+        document.getElementById('tower-upgrade-modal').style.display = 'none';
+        this.selectedTowerForUpgrade = null;
+    }
+    
+    upgradeTower(upgradeType) {
+        if (!this.selectedTowerForUpgrade) return;
+        
+        const tower = this.selectedTowerForUpgrade;
+        const cost = tower.getUpgradeCost();
+        
+        if (this.coins < cost) {
+            alert('金幣不足！');
+            return;
+        }
+        
+        // 執行升級
+        if (tower.level < 2) {
+            tower.upgrade(upgradeType);
+        } else {
+            // 第三級升級所有屬性（使用speed按鈕觸發）
+            tower.upgrade('damage');
+        }
+        
+        // 更新塔防顏色
+        this.updateTowerColor(tower);
+        
+        this.hideUpgradeModal();
+    }
+    
+    updateTowerColor(tower) {
+        // 每次升級顏色變深10%
+        const darkenFactor = 1 - (tower.level * 0.1);
+        
+        if (tower.type === 'basic') {
+            tower.color = this.darkenColor('#f1c40f', darkenFactor);
+        } else if (tower.type === 'rapid') {
+            tower.color = this.darkenColor('#8e44ad', darkenFactor);
+        } else if (tower.type === 'heavy') {
+            tower.color = this.darkenColor('#e74c3c', darkenFactor);
+        }
+    }
+    
+    darkenColor(color, factor) {
+        // 將十六進制顏色變暗
+        const hex = color.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        
+        const newR = Math.floor(r * factor);
+        const newG = Math.floor(g * factor);
+        const newB = Math.floor(b * factor);
+        
+        return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
     }
     
     updateShop() {
@@ -1533,8 +2009,9 @@ class TowerDefenseGame {
         const basicIcon = document.querySelector('.basic-tower');
         if (basicIcon) {
             const equippedSkin = this.equippedSkins.basic;
-            const skinData = this.shopData.basic.find(s => s.id === equippedSkin);
-            basicIcon.style.background = skinData ? skinData.color : '#f1c40f';
+            
+            // 根據塔防類型設定顏色，而不是造型類型
+            basicIcon.style.background = '#f1c40f'; // 黃色
             
             // 更新形狀
             if (equippedSkin === 'triangle') {
@@ -1553,8 +2030,9 @@ class TowerDefenseGame {
         const rapidIcon = document.querySelector('.rapid-tower');
         if (rapidIcon) {
             const equippedSkin = this.equippedSkins.rapid;
-            const skinData = this.shopData.rapid.find(s => s.id === equippedSkin);
-            rapidIcon.style.background = skinData ? skinData.color : '#8e44ad';
+            
+            // 根據塔防類型設定顏色，而不是造型類型
+            rapidIcon.style.background = '#8e44ad'; // 紫色
             
             // 更新形狀
             if (equippedSkin === 'triangle') {
@@ -1573,8 +2051,9 @@ class TowerDefenseGame {
         const heavyIcon = document.querySelector('.heavy-tower');
         if (heavyIcon) {
             const equippedSkin = this.equippedSkins.heavy;
-            const skinData = this.shopData.heavy.find(s => s.id === equippedSkin);
-            heavyIcon.style.background = skinData ? skinData.color : '#e74c3c';
+            
+            // 根據塔防類型設定顏色，而不是造型類型
+            heavyIcon.style.background = '#e74c3c'; // 紅色
             
             // 更新形狀
             if (equippedSkin === 'triangle') {
@@ -1603,6 +2082,11 @@ class Tower {
         this.lastFire = 0;
         this.target = null;
         
+        // 升級系統
+        this.level = 0; // 0 = 未升級, 1-3 = 升級等級
+        this.damageUpgrades = 0; // 攻擊力升級次數
+        this.speedUpgrades = 0; // 攻擊速度升級次數
+        
         // 計算裝備造型的屬性加成
         this.updateSkinBonus();
     }
@@ -1611,15 +2095,32 @@ class Tower {
         const equippedSkin = window.game.equippedSkins[this.type];
         const skinData = window.game.shopData[this.type].find(s => s.id === equippedSkin);
         
+        // 基礎屬性
+        let damage = this.baseDamage;
+        let range = this.baseRange;
+        let fireRate = this.baseFireRate;
+        
+        // 造型加成
         if (skinData && skinData.bonus) {
-            this.damage = this.baseDamage + skinData.bonus.damage;
-            this.range = this.baseRange + skinData.bonus.range;
-            this.fireRate = this.baseFireRate + skinData.bonus.fireRate;
-        } else {
-            this.damage = this.baseDamage;
-            this.range = this.baseRange;
-            this.fireRate = this.baseFireRate;
+            damage += skinData.bonus.damage;
+            range += skinData.bonus.range;
+            fireRate += skinData.bonus.fireRate;
         }
+        
+        // 升級加成
+        damage += this.damageUpgrades * 5;
+        fireRate += this.speedUpgrades * 5;
+        
+        // 第三級特殊加成
+        if (this.level === 3) {
+            damage += 5;
+            fireRate += 5;
+            range += 5;
+        }
+        
+        this.damage = damage;
+        this.range = range;
+        this.fireRate = fireRate;
     }
     
     update(enemies, bullets, gameSpeed = 1) {
@@ -1634,18 +2135,39 @@ class Tower {
     }
     
     findTarget(enemies) {
-        let closestEnemy = null;
-        let closestDistance = this.range;
+        let bestTarget = null;
+        let bestProgress = -1; // 使用負值，因為我們要找最接近終點的敵人
         
         enemies.forEach(enemy => {
-            const distance = Math.sqrt((enemy.x - this.x) ** 2 + (enemy.y - this.y) ** 2);
-            if (distance < closestDistance) {
-                closestEnemy = enemy;
-                closestDistance = distance;
+            // 檢查敵人是否在攻擊範圍內
+            const distanceToTower = Math.sqrt((enemy.x - this.x) ** 2 + (enemy.y - this.y) ** 2);
+            if (distanceToTower <= this.range) {
+                // 計算敵人到終點的進度（路徑索引越高，越接近終點）
+                const progress = enemy.pathIndex + (1 - this.getDistanceToNextPathPoint(enemy));
+                
+                // 選擇進度最高的敵人（最接近終點）
+                if (progress > bestProgress) {
+                    bestTarget = enemy;
+                    bestProgress = progress;
+                }
             }
         });
         
-        this.target = closestEnemy;
+        this.target = bestTarget;
+    }
+    
+    getDistanceToNextPathPoint(enemy) {
+        if (enemy.pathIndex >= enemy.path.length - 1) {
+            return 0; // 已經到達終點
+        }
+        
+        const currentPoint = enemy.path[enemy.pathIndex];
+        const nextPoint = enemy.path[enemy.pathIndex + 1];
+        const totalDistance = Math.sqrt((nextPoint.x - currentPoint.x) ** 2 + (nextPoint.y - currentPoint.y) ** 2);
+        const remainingDistance = Math.sqrt((enemy.x - nextPoint.x) ** 2 + (enemy.y - nextPoint.y) ** 2);
+        
+        if (totalDistance === 0) return 0;
+        return Math.max(0, Math.min(1, remainingDistance / totalDistance));
     }
     
     fire(bullets) {
@@ -1688,6 +2210,14 @@ class Tower {
         ctx.lineWidth = 2;
         ctx.stroke();
         
+        // 繪製升級等級
+        if (this.level > 0) {
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.level.toString(), this.x, this.y + 4);
+        }
+        
         // 繪製攻擊範圍（可選）
         if (this.target) {
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
@@ -1699,9 +2229,45 @@ class Tower {
     }
     
     getEquippedSkinColor() {
-        const equippedSkin = window.game.equippedSkins[this.type];
-        const skinData = window.game.shopData[this.type].find(s => s.id === equippedSkin);
-        return skinData ? skinData.color : this.color;
+        // 使用升級後的顏色
+        return this.color;
+    }
+    
+    canUpgrade() {
+        return this.level < 3;
+    }
+    
+    getUpgradeCost() {
+        if (this.level === 0) return 10;
+        if (this.level === 1) return 10;
+        if (this.level === 2) return 15;
+        return 0;
+    }
+    
+    upgrade(upgradeType) {
+        if (!this.canUpgrade()) return false;
+        
+        const cost = this.getUpgradeCost();
+        if (window.game.coins < cost) return false;
+        
+        window.game.coins -= cost;
+        this.level++;
+        
+        if (upgradeType === 'damage') {
+            this.damageUpgrades++;
+        } else if (upgradeType === 'speed') {
+            this.speedUpgrades++;
+        }
+        
+        // 第三級自動提升所有屬性
+        if (this.level === 3) {
+            this.damageUpgrades++;
+            this.speedUpgrades++;
+        }
+        
+        this.updateSkinBonus();
+        window.game.updateUI();
+        return true;
     }
 }
 
