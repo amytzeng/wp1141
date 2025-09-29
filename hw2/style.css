@@ -742,13 +742,13 @@ body {
 }
 
 .shop-item {
-    background: #34495e;
-    border: 2px solid #7f8c8d;
+    background: #929aa2;
+    border: 2px solid #deebec;
     border-radius: 10px;
     padding: 15px;
     text-align: center;
     font-size: 14px;
-    color: white;
+    color: rgb(0, 0, 0);
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -825,12 +825,12 @@ body {
 }
 
 .equip-btn {
-    background: #8fd2e6;
+    background: #1090b7;
     color: white;
 }
 
 .equip-btn:hover {
-    background: #7bbed3;
+    background: #0c7090;
 }
 
 .equipped-btn {

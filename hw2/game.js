@@ -832,7 +832,7 @@ class TowerDefenseGame {
         this.isFastForward = false;
         const fastForwardBtn = document.getElementById('fast-forward');
         if (fastForwardBtn) {
-            fastForwardBtn.textContent = '快轉';
+            fastForwardBtn.textContent = '1x';
             fastForwardBtn.classList.remove('active');
         }
         
@@ -1669,10 +1669,10 @@ class TowerDefenseGame {
         
         const btn = document.getElementById('fast-forward');
         if (this.isFastForward) {
-            btn.textContent = '正常';
+            btn.textContent = '2x';
             btn.classList.add('active');
         } else {
-            btn.textContent = '快轉';
+            btn.textContent = '1x';
             btn.classList.remove('active');
         }
     }
