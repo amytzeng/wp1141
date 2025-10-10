@@ -1,0 +1,176 @@
+.main-content {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.selection-header {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
+}
+
+.selection-info {
+  margin-bottom: 1rem;
+}
+
+.selection-title {
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.selection-hint {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.3rem;
+}
+
+.selected-date-info {
+  font-size: 0.95rem;
+  color: var(--gold-color);
+  font-weight: 500;
+}
+
+.calendar-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.calendar-container {
+  position: relative;
+  z-index: 1001;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.price-calendar-section {
+  margin-bottom: 2rem;
+}
+
+.calendar-toggle-button {
+  background: var(--primary-color);
+  color: var(--gold-color);
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.calendar-toggle-button:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.selected-outbound,
+.selected-flights-preview {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.preview-title {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.mini-flight-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: var(--secondary-color);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  flex-wrap: wrap;
+}
+
+.flight-num {
+  font-weight: 600;
+  color: var(--gold-color);
+}
+
+.flight-route {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.flight-time {
+  color: var(--text-secondary);
+}
+
+.cancel-button {
+  padding: 0.7rem 1.5rem;
+  background: transparent;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+  border-color: var(--gold-color);
+  background: var(--hover-color);
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 2rem 1rem;
+  }
+
+  .selection-header {
+    padding: 1.5rem;
+  }
+
+  .selection-title {
+    font-size: 1.5rem;
+  }
+
+  .mini-flight-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+

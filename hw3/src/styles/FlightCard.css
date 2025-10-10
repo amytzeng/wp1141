@@ -1,0 +1,220 @@
+.flight-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.flight-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border-color: var(--gold-color);
+}
+
+.flight-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.flight-number,
+.aircraft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.flight-header .label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.flight-header .value {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.flight-route {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  align-items: center;
+}
+
+.route-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.route-info.departure {
+  text-align: left;
+}
+
+.route-info.arrival {
+  text-align: right;
+}
+
+.route-info .city {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.route-info .time {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold-color);
+}
+
+.route-middle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 120px;
+}
+
+.duration {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.route-line {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.line {
+  width: 100%;
+  height: 2px;
+  background: var(--border-color);
+  position: absolute;
+}
+
+.plane-icon {
+  font-size: 1.5rem;
+  background: var(--card-bg);
+  padding: 0 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.flight-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.cabin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cabin-class {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.seats-available {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.booking-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.price .currency {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.price .amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold-color);
+}
+
+.book-button {
+  padding: 0.8rem 2rem;
+  background: linear-gradient(135deg, var(--gold-color) 0%, #b8941f 100%);
+  border: none;
+  border-radius: 8px;
+  color: var(--primary-color);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.book-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+}
+
+.book-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .flight-card {
+    padding: 1.5rem;
+  }
+
+  .flight-route {
+    gap: 1rem;
+  }
+
+  .route-info .city {
+    font-size: 1.1rem;
+  }
+
+  .route-info .time {
+    font-size: 1.3rem;
+  }
+
+  .route-middle {
+    min-width: 80px;
+  }
+
+  .flight-footer {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .booking-section {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .price .amount {
+    font-size: 1.8rem;
+  }
+}
+
