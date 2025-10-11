@@ -6,11 +6,13 @@ interface PriceCalendarProps {
   flights: Flight[]
   selectedDate: string
   cabin: CabinClass
+  departure?: string
+  destination?: string
   onDateSelect: (date: string) => void
   onDateChange: (direction: 'prev' | 'next') => void
 }
 
-function PriceCalendar({ flights, selectedDate, cabin, onDateSelect, onDateChange }: PriceCalendarProps) {
+function PriceCalendar({ flights, selectedDate, cabin, departure, destination, onDateSelect, onDateChange }: PriceCalendarProps) {
   const dateRange = useMemo(() => {
     if (!selectedDate) return []
     
@@ -84,7 +86,7 @@ function PriceCalendar({ flights, selectedDate, cabin, onDateSelect, onDateChang
   return (
     <div className="price-calendar">
       <div className="calendar-header">
-        <span className="calendar-title">去程: 台北 - 東京</span>
+        <span className="calendar-title">去程: {departure || '台北'} - {destination || '東京'}</span>
         <button className="view-full-month">+ 查看整月份票價</button>
       </div>
       
@@ -138,4 +140,3 @@ function PriceCalendar({ flights, selectedDate, cabin, onDateSelect, onDateChang
 }
 
 export default PriceCalendar
-

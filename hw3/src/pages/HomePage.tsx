@@ -6,6 +6,7 @@ import FlightList from '../components/FlightList'
 import PriceCalendar from '../components/PriceCalendar'
 import FullCalendar from '../components/FullCalendar'
 import { Flight, SearchParams, CabinClass } from '../types/Flight'
+import { extractAirportCode } from '../data/airports'
 import '../styles/HomePage.css'
 
 interface HomePageProps {
@@ -56,17 +57,27 @@ function HomePage({ onSelectFlight }: HomePageProps) {
       // 多程：显示第一程
       const firstLeg = params.multiCityLegs[0]
       const filtered = flights.filter(flight => {
-        const departureMatch = flight.departure.includes(firstLeg.departure)
-        const destinationMatch = flight.destination.includes(firstLeg.destination)
-        return departureMatch && destinationMatch
+        const departureCode = extractAirportCode(firstLeg.departure)
+        const destinationCode = extractAirportCode(firstLeg.destination)
+        const departureMatch = flight.departure.includes(departureCode)
+        const destinationMatch = flight.destination.includes(destinationCode)
+        const dateMatch = flight.departureDate === firstLeg.date
+        console.log(`多程搜尋航班: 出發地=${flight.departure}, 目的地=${flight.destination}, 日期=${flight.departureDate}`)
+        console.log(`條件: 出發地匹配=${departureMatch}, 目的地匹配=${destinationMatch}, 日期匹配=${dateMatch}`)
+        return departureMatch && destinationMatch && dateMatch
       })
       setFilteredFlights(filtered)
     } else {
       // 单程或来回
       const filtered = flights.filter(flight => {
-        const departureMatch = flight.departure.includes(params.departure)
-        const destinationMatch = flight.destination.includes(params.destination)
-        return departureMatch && destinationMatch
+        const departureCode = extractAirportCode(params.departure)
+        const destinationCode = extractAirportCode(params.destination)
+        const departureMatch = flight.departure.includes(departureCode)
+        const destinationMatch = flight.destination.includes(destinationCode)
+        const dateMatch = flight.departureDate === params.date
+        console.log(`搜尋航班: 出發地=${flight.departure}, 目的地=${flight.destination}, 日期=${flight.departureDate}`)
+        console.log(`條件: 出發地匹配=${departureMatch}, 目的地匹配=${destinationMatch}, 日期匹配=${dateMatch}`)
+        return departureMatch && destinationMatch && dateMatch
       })
       setFilteredFlights(filtered)
     }
@@ -76,6 +87,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
 
   const handleDateSelect = (date: string) => {
     if (!searchParams) return
+    
+    console.log(`日期選擇: ${date}`)
     
     if (searchParams.tripType === 'roundtrip') {
       if (!selectedDateRange.start) {
@@ -90,9 +103,12 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         
         // 重新搜索该日期的航班
         const filtered = flights.filter(flight => {
-          const departureMatch = flight.departure.includes(searchParams.departure)
-          const destinationMatch = flight.destination.includes(searchParams.destination)
-          return departureMatch && destinationMatch
+          const departureCode = extractAirportCode(searchParams.departure)
+          const destinationCode = extractAirportCode(searchParams.destination)
+          const departureMatch = flight.departure.includes(departureCode)
+          const destinationMatch = flight.destination.includes(destinationCode)
+          const dateMatch = flight.departureDate === date
+          return departureMatch && destinationMatch && dateMatch
         })
         setFilteredFlights(filtered)
       }
@@ -103,10 +119,16 @@ function HomePage({ onSelectFlight }: HomePageProps) {
       
       // 重新搜索该日期的航班
       const filtered = flights.filter(flight => {
-        const departureMatch = flight.departure.includes(searchParams.departure)
-        const destinationMatch = flight.destination.includes(searchParams.destination)
-        return departureMatch && destinationMatch
+        const departureCode = extractAirportCode(searchParams.departure)
+        const destinationCode = extractAirportCode(searchParams.destination)
+        const departureMatch = flight.departure.includes(departureCode)
+        const destinationMatch = flight.destination.includes(destinationCode)
+        const dateMatch = flight.departureDate === date
+        console.log(`日期選擇搜尋: 出發地=${flight.departure}, 目的地=${flight.destination}, 日期=${flight.departureDate}`)
+        console.log(`條件: 出發地匹配=${departureMatch}, 目的地匹配=${destinationMatch}, 日期匹配=${dateMatch}`)
+        return departureMatch && destinationMatch && dateMatch
       })
+      console.log(`日期選擇找到 ${filtered.length} 個航班`)
       setFilteredFlights(filtered)
     }
   }
@@ -290,9 +312,11 @@ function HomePage({ onSelectFlight }: HomePageProps) {
               📅 選擇其他日期
             </button>
             <PriceCalendar
-              flights={flights}
+              flights={filteredFlights}
               selectedDate={displayDate}
               cabin={searchParams.cabin}
+              departure={searchParams.departure}
+              destination={searchParams.destination}
               onDateSelect={handleDateSelect}
               onDateChange={(direction) => {
                 const currentDate = new Date(displayDate)
@@ -301,14 +325,22 @@ function HomePage({ onSelectFlight }: HomePageProps) {
                 } else {
                   currentDate.setDate(currentDate.getDate() + 7)
                 }
-                setDisplayDate(currentDate.toISOString().split('T')[0])
+                const newDate = currentDate.toISOString().split('T')[0]
+                console.log(`前七日/後七日導航: 從 ${displayDate} 到 ${newDate}`)
+                setDisplayDate(newDate)
                 
                 // 重新搜尋該日期的航班
                 const filtered = flights.filter(flight => {
-                  const departureMatch = flight.departure.includes(searchParams.departure)
-                  const destinationMatch = flight.destination.includes(searchParams.destination)
-                  return departureMatch && destinationMatch
+                  const departureCode = extractAirportCode(searchParams.departure)
+                  const destinationCode = extractAirportCode(searchParams.destination)
+                  const departureMatch = flight.departure.includes(departureCode)
+                  const destinationMatch = flight.destination.includes(destinationCode)
+                  const dateMatch = flight.departureDate === newDate
+                  console.log(`前七日/後七日搜尋: 出發地=${flight.departure}, 目的地=${flight.destination}, 日期=${flight.departureDate}`)
+                  console.log(`條件: 出發地匹配=${departureMatch}, 目的地匹配=${destinationMatch}, 日期匹配=${dateMatch}`)
+                  return departureMatch && destinationMatch && dateMatch
                 })
+                console.log(`前七日/後七日找到 ${filtered.length} 個航班`)
                 setFilteredFlights(filtered)
               }}
             />

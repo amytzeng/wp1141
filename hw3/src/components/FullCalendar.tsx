@@ -55,6 +55,11 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
     return `TWD ${price.toLocaleString()}`
   }
 
+  // 格式化日期字符串，避免時區問題
+  const formatDateString = (year: number, month: number, day: number): string => {
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  }
+
   const getCalendarDays = useMemo(() => {
     const year = currentMonth.getFullYear()
     const month = currentMonth.getMonth()
@@ -71,7 +76,7 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
       const day = prevMonth.getDate() - i
       days.push({
-        date: new Date(year, month - 1, day).toISOString().split('T')[0],
+        date: formatDateString(year, month, day),
         day,
         isCurrentMonth: false,
         isToday: false
@@ -80,13 +85,14 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
     
     // 当前月的日期
     const today = new Date()
+    const todayStr = formatDateString(today.getFullYear(), today.getMonth() + 1, today.getDate())
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day).toISOString().split('T')[0]
+      const date = formatDateString(year, month + 1, day)
       days.push({
         date,
         day,
         isCurrentMonth: true,
-        isToday: date === today.toISOString().split('T')[0]
+        isToday: date === todayStr
       })
     }
     
@@ -94,7 +100,7 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
     const remainingDays = 42 - days.length
     for (let day = 1; day <= remainingDays; day++) {
       days.push({
-        date: new Date(year, month + 1, day).toISOString().split('T')[0],
+        date: formatDateString(year, month + 2, day),
         day,
         isCurrentMonth: false,
         isToday: false

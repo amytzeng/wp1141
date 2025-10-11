@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { SearchParams, CabinClass, TripType, MultiCityLeg } from '../types/Flight'
+import AirportSelector from './AirportSelector'
+import { formatAirportDisplay, airports } from '../data/airports'
 import '../styles/SearchForm.css'
 import '../styles/FullCalendar.css'
 
@@ -11,11 +13,13 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
   const [tripType, setTripType] = useState<TripType>('roundtrip')
   const [departure, setDeparture] = useState('')
   const [destination, setDestination] = useState('')
-  const [departureDate, setDepartureDate] = useState('')
+  const [departureDate, setDepartureDate] = useState('2024-10-17')
   const [returnDate, setReturnDate] = useState('')
   const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
   const [showReturnCalendar, setShowReturnCalendar] = useState(false)
   const [showMultiCityCalendars, setShowMultiCityCalendars] = useState<boolean[]>([])
+  const [showDepartureSelector, setShowDepartureSelector] = useState(false)
+  const [showDestinationSelector, setShowDestinationSelector] = useState(false)
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [returnCurrentMonth, setReturnCurrentMonth] = useState(new Date())
   const [multiCityMonths, setMultiCityMonths] = useState<Date[]>([])
@@ -26,31 +30,14 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
   ])
 
 
-  const cities = [
-    '台北 TPE',
-    '東京 NRT',
-    '東京 HND',
-    '大阪 KIX',
-    '首爾 ICN',
-    '曼谷 BKK',
-    '新加坡 SIN',
-    '吉隆坡 KUL',
-    '澳門 MFM',
-    '香港 HKG',
-    '峇里島 DPS'
-  ]
+  // 生成所有機場的城市字符串列表
+  const allAirports = Object.values(airports).map(formatAirportDisplay)
 
-  // 获取可用的目的地（排除已选择的出发地）
-  const getAvailableDestinations = () => {
-    if (!departure) return cities
-    return cities.filter(city => city !== departure)
+  // 格式化日期字符串，避免時區問題
+  const formatDateString = (year: number, month: number, day: number): string => {
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   }
 
-  // 获取可用的出发地（排除已选择的目的地）
-  const getAvailableDepartures = () => {
-    if (!destination) return cities
-    return cities.filter(city => city !== destination)
-  }
 
   const handleAddLeg = () => {
     if (multiCityLegs.length < 4) {
@@ -91,7 +78,7 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
       const day = prevMonth.getDate() - i
       days.push({
-        date: new Date(year, monthIndex - 1, day).toISOString().split('T')[0],
+        date: formatDateString(year, monthIndex, day),
         day,
         isCurrentMonth: false,
         isToday: false
@@ -100,13 +87,14 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     
     // 当前月的日期
     const today = new Date()
+    const todayStr = formatDateString(today.getFullYear(), today.getMonth() + 1, today.getDate())
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, monthIndex, day).toISOString().split('T')[0]
+      const date = formatDateString(year, monthIndex + 1, day)
       days.push({
         date,
         day,
         isCurrentMonth: true,
-        isToday: date === today.toISOString().split('T')[0]
+        isToday: date === todayStr
       })
     }
     
@@ -114,7 +102,7 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     const remainingDays = 42 - days.length
     for (let day = 1; day <= remainingDays; day++) {
       days.push({
-        date: new Date(year, monthIndex + 1, day).toISOString().split('T')[0],
+        date: formatDateString(year, monthIndex + 2, day),
         day,
         isCurrentMonth: false,
         isToday: false
@@ -289,8 +277,8 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
                       className="form-select city-select-small"
                     >
                       <option value="">請選擇</option>
-                      {cities.filter(c => c !== leg.destination).map(city => (
-                        <option key={city} value={city}>{city}</option>
+                      {allAirports.filter(airport => airport !== leg.destination).map((airport: string) => (
+                        <option key={airport} value={airport}>{airport}</option>
                       ))}
                     </select>
                   </div>
@@ -302,8 +290,8 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
                       className="form-select city-select-small"
                     >
                       <option value="">請選擇</option>
-                      {cities.filter(c => c !== leg.departure).map(city => (
-                        <option key={city} value={city}>{city}</option>
+                      {allAirports.filter(airport => airport !== leg.departure).map((airport: string) => (
+                        <option key={airport} value={airport}>{airport}</option>
                       ))}
                     </select>
                   </div>
@@ -362,17 +350,13 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
             <div className="form-row cities-row">
               <div className="form-group">
                 <label htmlFor="departure">出發地</label>
-                <select
-                  id="departure"
-                  value={departure}
-                  onChange={(e) => setDeparture(e.target.value)}
-                  className="form-select city-select"
+                <button 
+                  type="button"
+                  className="city-select-button"
+                  onClick={() => setShowDepartureSelector(true)}
                 >
-                  <option value="">請選擇出發地</option>
-                  {getAvailableDepartures().map(city => (
-                    <option key={city} value={city}>{city}</option>
-                  ))}
-                </select>
+                  {departure || '請選擇出發地'}
+                </button>
               </div>
 
               <button 
@@ -386,17 +370,13 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
 
               <div className="form-group">
                 <label htmlFor="destination">目的地</label>
-                <select
-                  id="destination"
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                  className="form-select city-select"
+                <button 
+                  type="button"
+                  className="city-select-button"
+                  onClick={() => setShowDestinationSelector(true)}
                 >
-                  <option value="">請選擇目的地</option>
-                  {getAvailableDestinations().map(city => (
-                    <option key={city} value={city}>{city}</option>
-                  ))}
-                </select>
+                  {destination || '請選擇目的地'}
+                </button>
               </div>
             </div>
 
@@ -641,6 +621,27 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
           </div>
         </div>
       ))}
+      
+      {/* 機場選擇器彈窗 */}
+      {showDepartureSelector && (
+        <AirportSelector
+          title="請選擇出發地"
+          selectedAirport={departure}
+          onSelect={setDeparture}
+          onClose={() => setShowDepartureSelector(false)}
+          excludeAirport={destination}
+        />
+      )}
+      
+      {showDestinationSelector && (
+        <AirportSelector
+          title="請選擇目的地"
+          selectedAirport={destination}
+          onSelect={setDestination}
+          onClose={() => setShowDestinationSelector(false)}
+          excludeAirport={departure}
+        />
+      )}
     </div>
   )
 }

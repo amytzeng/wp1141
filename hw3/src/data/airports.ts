@@ -1,5 +1,11 @@
 import { Airport } from '../types/Order'
 
+export interface AirportRegion {
+  id: string
+  name: string
+  airports: Airport[]
+}
+
 export const airports: Record<string, Airport> = {
   'TPE': {
     code: 'TPE',
@@ -374,6 +380,117 @@ export const airports: Record<string, Airport> = {
   }
 }
 
+// 按地區分類的機場資料
+export const airportRegions: AirportRegion[] = [
+  {
+    id: 'taiwan',
+    name: '臺灣',
+    airports: [
+      airports['TPE'],
+      airports['TSA']
+    ]
+  },
+  {
+    id: 'hongkong-macau',
+    name: '港澳',
+    airports: [
+      airports['HKG'],
+      airports['MFM']
+    ]
+  },
+  {
+    id: 'northeast-asia',
+    name: '東北亞',
+    airports: [
+      airports['NRT'],
+      airports['HND'],
+      airports['KIX'],
+      airports['FUK'],
+      airports['NGO'],
+      airports['ICN']
+    ]
+  },
+  {
+    id: 'southeast-asia',
+    name: '東南亞',
+    airports: [
+      airports['BKK'],
+      airports['SIN'],
+      airports['KUL'],
+      airports['DPS'],
+      airports['CGK'],
+      airports['SGN'],
+      airports['HAN'],
+      airports['MNL'],
+      airports['CEB'],
+      airports['PNH'],
+      airports['RGN']
+    ]
+  },
+  {
+    id: 'south-asia',
+    name: '南亞',
+    airports: [
+      airports['DEL'],
+      airports['BOM'],
+      airports['BLR'],
+      airports['MAA'],
+      airports['CCU'],
+      airports['HYD'],
+      airports['COK'],
+      airports['JAI'],
+      airports['LKO'],
+      airports['AMD'],
+      airports['PNQ'],
+      airports['GOI'],
+      airports['CCJ'],
+      airports['TRV'],
+      airports['IXM']
+    ]
+  },
+  {
+    id: 'china',
+    name: '中國',
+    airports: [
+      airports['PVG'],
+      airports['PEK'],
+      airports['CAN'],
+      airports['SZX']
+    ]
+  },
+  {
+    id: 'north-america',
+    name: '北美洲',
+    airports: [
+      airports['LAX'],
+      airports['SFO'],
+      airports['SEA'],
+      airports['YVR'],
+      airports['JFK']
+    ]
+  },
+  {
+    id: 'europe',
+    name: '歐洲',
+    airports: [
+      airports['LHR'],
+      airports['CDG'],
+      airports['FRA'],
+      airports['AMS']
+    ]
+  },
+  {
+    id: 'oceania',
+    name: '大洋洲',
+    airports: [
+      airports['SYD'],
+      airports['MEL'],
+      airports['BNE'],
+      airports['AKL']
+    ]
+  }
+]
+
 export const getAirportCode = (cityString: string): string => {
   // 从 "城市 CODE" 格式提取机场代码
   const parts = cityString.split(' ')
@@ -383,4 +500,14 @@ export const getAirportCode = (cityString: string): string => {
 export const getAirportInfo = (cityString: string): Airport | undefined => {
   const code = getAirportCode(cityString)
   return airports[code]
+}
+
+export const formatAirportDisplay = (airport: Airport): string => {
+  return `${airport.city} ${airport.code}`
+}
+
+// 從格式化的機場字符串中提取機場代碼
+export const extractAirportCode = (airportString: string): string => {
+  const parts = airportString.split(' ')
+  return parts[parts.length - 1] || airportString
 }
