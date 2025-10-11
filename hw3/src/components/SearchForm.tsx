@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { SearchParams, CabinClass, TripType, MultiCityLeg } from '../types/Flight'
 import '../styles/SearchForm.css'
+import '../styles/FullCalendar.css'
 
 interface SearchFormProps {
   onSearch: (params: SearchParams) => void

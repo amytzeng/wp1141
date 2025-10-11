@@ -7,6 +7,7 @@ interface FullCalendarProps {
   cabin: CabinClass
   selectedDate: string | null
   onDateSelect: (date: string) => void
+  onConfirm: () => void
   tripType: 'roundtrip' | 'oneway' | 'multicity'
   departureDate?: string
   onDepartureDateSelect?: (date: string) => void
@@ -17,6 +18,7 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
   cabin,
   selectedDate,
   onDateSelect,
+  onConfirm,
   tripType,
   departureDate,
   onDepartureDateSelect
@@ -236,6 +238,17 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
           請選擇回程日期（必須晚於出發日期）
         </div>
       )}
+      
+      {/* 確定按鈕 */}
+      <div className="calendar-actions">
+        <button 
+          className="confirm-button"
+          onClick={onConfirm}
+          disabled={tripType === 'roundtrip' ? (!rangeStart || !rangeEnd) : !selectedDate}
+        >
+          確定
+        </button>
+      </div>
     </div>
   )
 }

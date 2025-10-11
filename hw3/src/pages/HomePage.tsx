@@ -222,6 +222,7 @@ function HomePage({ onSelectFlight }: HomePageProps) {
               cabin={searchParams.cabin}
               selectedDate={selectedDateRange.end || displayDate}
               onDateSelect={handleDateSelect}
+              onConfirm={() => setShowFullCalendar(false)}
               tripType={searchParams.tripType}
               departureDate={selectedDateRange.start || departureDate || undefined}
               onDepartureDateSelect={handleDepartureDateSelect}

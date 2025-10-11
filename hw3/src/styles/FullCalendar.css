@@ -212,6 +212,41 @@
   font-size: 0.9rem;
 }
 
+.calendar-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.confirm-button {
+  background: linear-gradient(135deg, #1a4d66, #0f3a4a);
+  color: #ffd700;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(26, 77, 102, 0.3);
+  min-width: 120px;
+}
+
+.confirm-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(26, 77, 102, 0.4);
+}
+
+.confirm-button:disabled {
+  background: #6c757d;
+  color: #adb5bd;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .full-calendar {
