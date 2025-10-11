@@ -22,6 +22,7 @@ function HomePage({ onSelectFlight }: HomePageProps) {
   const [displayDate, setDisplayDate] = useState<string>('')
   const [departureDate, setDepartureDate] = useState<string | null>(null)
   const [showFullCalendar, setShowFullCalendar] = useState(false)
+  const [selectedDateRange, setSelectedDateRange] = useState<{start: string | null, end: string | null}>({start: null, end: null})
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -71,47 +72,43 @@ function HomePage({ onSelectFlight }: HomePageProps) {
     }
   }
 
-  const handleDateChange = (direction: 'prev' | 'next') => {
-    if (!displayDate || !searchParams) return
-    const currentDate = new Date(displayDate)
-    // 前后7天移动
-    currentDate.setDate(currentDate.getDate() + (direction === 'next' ? 7 : -7))
-    const newDate = currentDate.toISOString().split('T')[0]
-    setDisplayDate(newDate)
-    
-    // 重新搜索该日期的航班
-    const filtered = flights.filter(flight => {
-      const departureMatch = flight.departure.includes(searchParams.departure)
-      const destinationMatch = flight.destination.includes(searchParams.destination)
-      return departureMatch && destinationMatch
-    })
-    setFilteredFlights(filtered)
-  }
+  // handleDateChange 函數已移除，現在直接在 PriceCalendar 中處理
 
   const handleDateSelect = (date: string) => {
     if (!searchParams) return
     
-    if (searchParams.tripType === 'roundtrip' && !departureDate) {
-      // 第一步：选择出发日
-      setDepartureDate(date)
-      setDisplayDate(date)
-    } else if (searchParams.tripType === 'roundtrip' && departureDate) {
-      // 第二步：选择回程日
-      setDisplayDate(date)
-      setShowFullCalendar(false)
+    if (searchParams.tripType === 'roundtrip') {
+      if (!selectedDateRange.start) {
+        // 第一步：选择出发日
+        setSelectedDateRange({start: date, end: null})
+        setDepartureDate(date)
+      } else if (!selectedDateRange.end && date > selectedDateRange.start) {
+        // 第二步：选择回程日（必须晚于出发日）
+        setSelectedDateRange({start: selectedDateRange.start, end: date})
+        setDisplayDate(date)
+        setShowFullCalendar(false)
+        
+        // 重新搜索该日期的航班
+        const filtered = flights.filter(flight => {
+          const departureMatch = flight.departure.includes(searchParams.departure)
+          const destinationMatch = flight.destination.includes(searchParams.destination)
+          return departureMatch && destinationMatch
+        })
+        setFilteredFlights(filtered)
+      }
     } else {
       // 单程票或多程票
       setDisplayDate(date)
       setShowFullCalendar(false)
+      
+      // 重新搜索该日期的航班
+      const filtered = flights.filter(flight => {
+        const departureMatch = flight.departure.includes(searchParams.departure)
+        const destinationMatch = flight.destination.includes(searchParams.destination)
+        return departureMatch && destinationMatch
+      })
+      setFilteredFlights(filtered)
     }
-    
-    // 重新搜索该日期的航班
-    const filtered = flights.filter(flight => {
-      const departureMatch = flight.departure.includes(searchParams.departure)
-      const destinationMatch = flight.destination.includes(searchParams.destination)
-      return departureMatch && destinationMatch
-    })
-    setFilteredFlights(filtered)
   }
 
   const handleDepartureDateSelect = (date: string) => {
@@ -223,10 +220,10 @@ function HomePage({ onSelectFlight }: HomePageProps) {
             <FullCalendar
               flights={filteredFlights}
               cabin={searchParams.cabin}
-              selectedDate={displayDate}
+              selectedDate={selectedDateRange.end || displayDate}
               onDateSelect={handleDateSelect}
               tripType={searchParams.tripType}
-              departureDate={departureDate || undefined}
+              departureDate={selectedDateRange.start || departureDate || undefined}
               onDepartureDateSelect={handleDepartureDateSelect}
             />
           </div>
@@ -283,23 +280,39 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         <div className="loading">載入航班資訊中...</div>
       ) : searchParams && (
         <>
-          {searchParams.tripType !== 'multicity' && displayDate && (
-            <div className="price-calendar-section">
-              <button 
-                className="calendar-toggle-button"
-                onClick={() => setShowFullCalendar(true)}
-              >
-                📅 選擇其他日期
-              </button>
-              <PriceCalendar
-                flights={filteredFlights}
-                selectedDate={displayDate}
-                cabin={searchParams.cabin}
-                onDateSelect={handleDateSelect}
-                onDateChange={handleDateChange}
-              />
-            </div>
-          )}
+          {/* 價格日曆 - 顯示前後幾天的票價 */}
+          <div className="price-calendar-section">
+            <button 
+              className="calendar-toggle-button"
+              onClick={() => setShowFullCalendar(true)}
+            >
+              📅 選擇其他日期
+            </button>
+            <PriceCalendar
+              flights={flights}
+              selectedDate={displayDate}
+              cabin={searchParams.cabin}
+              onDateSelect={handleDateSelect}
+              onDateChange={(direction) => {
+                const currentDate = new Date(displayDate)
+                if (direction === 'prev') {
+                  currentDate.setDate(currentDate.getDate() - 7)
+                } else {
+                  currentDate.setDate(currentDate.getDate() + 7)
+                }
+                setDisplayDate(currentDate.toISOString().split('T')[0])
+                
+                // 重新搜尋該日期的航班
+                const filtered = flights.filter(flight => {
+                  const departureMatch = flight.departure.includes(searchParams.departure)
+                  const destinationMatch = flight.destination.includes(searchParams.destination)
+                  return departureMatch && destinationMatch
+                })
+                setFilteredFlights(filtered)
+              }}
+            />
+          </div>
+          
           <FlightList 
             flights={filteredFlights} 
             cabin={searchParams.cabin}

@@ -104,7 +104,7 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
 
   const isDateInRange = (date: string) => {
     if (!rangeStart || !rangeEnd) return false
-    return date >= rangeStart && date <= rangeEnd
+    return date > rangeStart && date < rangeEnd
   }
 
   const isDateSelected = (date: string) => {
@@ -112,23 +112,28 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
   }
 
   const isDateRangeStart = (date: string) => {
-    return date === rangeStart || date === departureDate
+    return date === rangeStart
   }
 
   const isDateRangeEnd = (date: string) => {
-    return date === rangeEnd || date === selectedDate
+    return date === rangeEnd
   }
 
   const handleDateClick = (date: string) => {
-    if (tripType === 'roundtrip' && !departureDate) {
-      // 第一步：选择出发日
-      setRangeStart(date)
-      onDepartureDateSelect?.(date)
-    } else if (tripType === 'roundtrip' && departureDate && !selectedDate) {
-      // 第二步：选择回程日
-      if (date > departureDate) {
+    if (tripType === 'roundtrip') {
+      if (!rangeStart) {
+        // 第一步：选择出发日
+        setRangeStart(date)
+        onDepartureDateSelect?.(date)
+      } else if (!rangeEnd && date > rangeStart) {
+        // 第二步：选择回程日（必须晚于出发日）
         setRangeEnd(date)
         onDateSelect(date)
+      } else if (date <= rangeStart) {
+        // 重新选择出发日
+        setRangeStart(date)
+        setRangeEnd(null)
+        onDepartureDateSelect?.(date)
       }
     } else {
       // 单程票或多程票
@@ -156,14 +161,15 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
       <div className="calendar-header">
         <div className="calendar-title">
           {tripType === 'roundtrip' ? (
-            departureDate ? '選擇回程日期' : '選擇出發日期'
+            rangeStart ? '選擇回程日期' : '選擇出發日期'
           ) : (
             '選擇出發日期'
           )}
         </div>
-        {tripType === 'roundtrip' && departureDate && (
+        {tripType === 'roundtrip' && rangeStart && (
           <div className="selected-dates">
-            出發日期 {new Date(departureDate).toLocaleDateString('zh-TW')}
+            出發日期 {new Date(rangeStart).toLocaleDateString('zh-TW')} 
+            {rangeEnd && ` - 回程日期 ${new Date(rangeEnd).toLocaleDateString('zh-TW')}`}
           </div>
         )}
       </div>
@@ -220,9 +226,14 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
         </div>
       </div>
 
-      {tripType === 'roundtrip' && !departureDate && (
+      {tripType === 'roundtrip' && !rangeStart && (
         <div className="calendar-hint">
           請先選擇出發日期，再選擇回程日期
+        </div>
+      )}
+      {tripType === 'roundtrip' && rangeStart && !rangeEnd && (
+        <div className="calendar-hint">
+          請選擇回程日期（必須晚於出發日期）
         </div>
       )}
     </div>
