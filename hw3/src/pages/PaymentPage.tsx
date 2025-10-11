@@ -211,7 +211,7 @@ function PaymentPage({ selectedFlights, onCompleteOrder }: PaymentPageProps) {
                 
                 <div className="form-group">
                   <label>轉帳日期</label>
-                  <input type="date" className="form-input" max={new Date().toISOString().split('T')[0]} />
+                  <input type="text" className="form-input" placeholder="MM/YY" maxLength={5} />
                 </div>
                 
                 <div className="notice-box">
