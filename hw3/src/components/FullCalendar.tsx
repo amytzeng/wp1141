@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Flight, CabinClass } from '../types/Flight'
 import '../styles/FullCalendar.css'
 
@@ -11,6 +11,8 @@ interface FullCalendarProps {
   tripType: 'roundtrip' | 'oneway' | 'multicity'
   departureDate?: string
   onDepartureDateSelect?: (date: string) => void
+  departure?: string
+  destination?: string
 }
 
 const FullCalendar: React.FC<FullCalendarProps> = ({
@@ -21,16 +23,56 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
   onConfirm,
   tripType,
   departureDate,
-  onDepartureDateSelect
+  onDepartureDateSelect,
+  departure,
+  destination
 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [rangeStart, setRangeStart] = useState<string | null>(null)
-  const [rangeEnd, setRangeEnd] = useState<string | null>(null)
+  const [rangeStart, setRangeStart] = useState<string | null>(departureDate || null)
+  const [rangeEnd, setRangeEnd] = useState<string | null>(() => {
+    if (tripType === 'roundtrip' && selectedDate && selectedDate !== departureDate) {
+      return selectedDate
+    }
+    return null
+  })
+
+  // 只在組件掛載時打印初始狀態
+  useEffect(() => {
+    console.log('🔵 FullCalendar 組件掛載')
+    console.log('初始 departureDate prop:', departureDate)
+    console.log('初始 selectedDate prop:', selectedDate)
+    console.log('初始 rangeStart:', rangeStart)
+    console.log('初始 rangeEnd:', rangeEnd)
+  }, [])
 
   const getPriceForDate = (date: string) => {
     if (flights.length === 0) return 0
     
-    const prices = flights.map(flight => {
+    // 找出該日期且符合路線的航班
+    const dayFlights = flights.filter(flight => {
+      let departureMatch = true
+      let destinationMatch = true
+      
+      if (departure) {
+        // 從 "台北 TPE" 中提取 "TPE"
+        const departureCode = departure.split(' ')[1] || departure
+        departureMatch = flight.departure.includes(departureCode)
+      }
+      
+      if (destination) {
+        // 從 "東京 NRT" 中提取 "NRT"
+        const destinationCode = destination.split(' ')[1] || destination
+        destinationMatch = flight.destination.includes(destinationCode)
+      }
+      
+      const dateMatch = flight.departureDate === date
+      return departureMatch && destinationMatch && dateMatch
+    })
+    
+    if (dayFlights.length === 0) return 0
+    
+    // 取得該艙等的所有價格
+    const prices = dayFlights.map(flight => {
       switch (cabin) {
         case 'economy':
           return flight.price_economy
@@ -38,17 +80,13 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
           return flight.price_business
         case 'first':
           return flight.price_first
+        default:
+          return 0
       }
     })
     
-    const basePrice = Math.min(...prices)
-    const dateObj = new Date(date)
-    const dayOfWeek = dateObj.getDay()
-    
-    const weekendMultiplier = (dayOfWeek === 0 || dayOfWeek === 6) ? 1.15 : 1
-    const dayVariation = (dateObj.getDate() % 10) * 0.02
-    
-    return Math.round(basePrice * weekendMultiplier * (1 + dayVariation))
+    // 回傳最低價格
+    return Math.min(...prices)
   }
 
   const formatPrice = (price: number) => {
@@ -128,17 +166,32 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
   }
 
   const handleDateClick = (date: string) => {
+    console.log('========== FullCalendar handleDateClick ==========')
+    console.log('點擊的日期:', date)
+    console.log('tripType:', tripType)
+    console.log('當前 rangeStart:', rangeStart)
+    console.log('當前 rangeEnd:', rangeEnd)
+    console.log('傳入的 departureDate prop:', departureDate)
+    
     if (tripType === 'roundtrip') {
       if (!rangeStart) {
         // 第一步：选择出发日
+        console.log('✓ 執行：第一步選擇出發日')
         setRangeStart(date)
         onDepartureDateSelect?.(date)
-      } else if (!rangeEnd && date > rangeStart) {
-        // 第二步：选择回程日（必须晚于出发日）
+      } else if (!rangeEnd && date >= rangeStart) {
+        // 第二步：选择回程日（可以等於或晚於出發日）
+        console.log('✓ 執行：第二步選擇回程日')
         setRangeEnd(date)
         onDateSelect(date)
-      } else if (date <= rangeStart) {
-        // 重新选择出发日
+      } else if (rangeEnd && date >= rangeStart) {
+        // 重新選擇回程日（已經有回程日期，且新日期不早於出發日）
+        console.log('✓ 執行：重新選擇回程日')
+        setRangeEnd(date)
+        onDateSelect(date)
+      } else if (date < rangeStart) {
+        // 重新選擇出發日（選擇的日期早於當前出發日）
+        console.log('✓ 執行：重新選擇出發日')
         setRangeStart(date)
         setRangeEnd(null)
         onDepartureDateSelect?.(date)
@@ -147,6 +200,7 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
       // 单程票或多程票
       onDateSelect(date)
     }
+    console.log('==================================================')
   }
 
   const handlePrevMonth = () => {

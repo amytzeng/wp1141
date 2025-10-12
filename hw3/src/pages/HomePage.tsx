@@ -114,13 +114,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         // 第一步：选择出发日
         setSelectedDateRange({start: date, end: null})
         setDepartureDate(date)
-      } else if (!selectedDateRange.end && date > selectedDateRange.start) {
-        // 第二步：选择回程日（必须晚于出发日）
-        setSelectedDateRange({start: selectedDateRange.start, end: date})
-        setDisplayDate(date)
-        setShowFullCalendar(false)
         
-        // 重新搜索该日期的航班
+        // 搜尋該出發日期的航班
         const filtered = flights.filter(flight => {
           const departureCode = extractAirportCode(searchParams.departure)
           const destinationCode = extractAirportCode(searchParams.destination)
@@ -130,6 +125,83 @@ function HomePage({ onSelectFlight }: HomePageProps) {
           return departureMatch && destinationMatch && dateMatch
         })
         setFilteredFlights(filtered)
+      } else if (date !== selectedDateRange.start) {
+        // 如果選擇的日期與當前出發日不同，重新選擇出發日
+        setSelectedDateRange({start: date, end: null})
+        setDepartureDate(date)
+        
+        // 搜尋新的出發日期的航班
+        const filtered = flights.filter(flight => {
+          const departureCode = extractAirportCode(searchParams.departure)
+          const destinationCode = extractAirportCode(searchParams.destination)
+          const departureMatch = flight.departure.includes(departureCode)
+          const destinationMatch = flight.destination.includes(destinationCode)
+          const dateMatch = flight.departureDate === date
+          return departureMatch && destinationMatch && dateMatch
+        })
+        setFilteredFlights(filtered)
+      } else if (!selectedDateRange.end || date !== selectedDateRange.end) {
+        // 第二步：选择回程日（必须晚于出发日）或重新選擇回程日
+        console.log('============ 選擇回程日期 ============')
+        console.log('選擇的日期:', date)
+        console.log('當前出發日期:', selectedDateRange.start)
+        console.log('當前回程日期:', selectedDateRange.end)
+        console.log('currentLegIndex:', currentLegIndex)
+        console.log('selectedFlights.length:', selectedFlights.length)
+        console.log('====================================')
+        
+        setSelectedDateRange({start: selectedDateRange.start, end: date})
+        setShowFullCalendar(false)
+        
+        // 檢查是否已經選擇了去程航班
+        if (currentLegIndex === 0 && selectedFlights.length === 0) {
+          // 還沒有選擇去程航班，繼續顯示出發日期的航班
+          console.log('✓ 還沒有選擇去程航班，顯示出發日期航班')
+          setDisplayDate(date) // 更新 displayDate 為回程日期
+          const filtered = flights.filter(flight => {
+            const departureCode = extractAirportCode(searchParams.departure)
+            const destinationCode = extractAirportCode(searchParams.destination)
+            const departureMatch = flight.departure.includes(departureCode)
+            const destinationMatch = flight.destination.includes(destinationCode)
+            const dateMatch = flight.departureDate === selectedDateRange.start
+            console.log(`回程日期搜尋: 航班=${flight.flightNumber}, 日期=${flight.departureDate}, 匹配=${dateMatch}`)
+            return departureMatch && destinationMatch && dateMatch
+          })
+          console.log('回程日期搜尋結果:', filtered.length, '個航班')
+          setFilteredFlights(filtered)
+        } else {
+          // 已經選擇了去程航班，需要重新搜尋回程航班
+          console.log('✓ 已經選擇了去程航班，重新搜尋回程航班')
+          // 不要更新 displayDate，保持出發日期顯示
+          console.log('保持 departureDate 不變:', departureDate)
+          console.log('保持 displayDate 不變:', displayDate)
+          const returnDateToUse = date // 使用新選擇的回程日期
+          const departureCode = extractAirportCode(searchParams.destination)
+          const destinationCode = extractAirportCode(searchParams.departure)
+          
+          console.log('回程搜尋參數:')
+          console.log('- 回程日期:', returnDateToUse)
+          console.log('- 出發地:', searchParams.destination, '→ 代碼:', departureCode)
+          console.log('- 目的地:', searchParams.departure, '→ 代碼:', destinationCode)
+          
+          const filtered = flights.filter(f => {
+            const departureMatch = f.departure.includes(departureCode)
+            const destinationMatch = f.destination.includes(destinationCode)
+            const dateMatch = f.departureDate === returnDateToUse
+            
+            if (departureMatch && destinationMatch) {
+              console.log(`✓ 找到候選回程航班: ${f.flightNumber}, 日期=${f.departureDate}, 出發=${f.departure}, 目的=${f.destination}`)
+              console.log(`  匹配結果: 出發=${departureMatch}, 目的=${destinationMatch}, 日期=${dateMatch}`)
+            }
+            
+            return departureMatch && destinationMatch && dateMatch
+          })
+          
+          console.log(`✓ 找到 ${filtered.length} 個回程航班`)
+          console.log('回程航班列表:', filtered.map(f => f.flightNumber).join(', '))
+          setFilteredFlights(filtered)
+        }
+        console.log('====================================')
       }
     } else {
       // 单程票或多程票
@@ -153,6 +225,10 @@ function HomePage({ onSelectFlight }: HomePageProps) {
   }
 
   const handleDepartureDateSelect = (date: string) => {
+    console.log('🔴 handleDepartureDateSelect 被調用，日期:', date)
+    console.log('🔴 currentLegIndex:', currentLegIndex)
+    console.log('🔴 selectedFlights.length:', selectedFlights.length)
+    console.log('🔴 selectedDateRange:', selectedDateRange)
     setDepartureDate(date)
   }
 
@@ -180,8 +256,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         // 选择了去程，保存并显示回程
         setSelectedFlights([flight])
         
-        // 使用正確的回程日期來源
-        const returnDateToUse = selectedDateRange.end || searchParams.returnDate || displayDate
+        // 使用正確的回程日期來源 - 優先使用 selectedDateRange.end
+        const returnDateToUse = selectedDateRange.end || searchParams.returnDate
         const departureCode = extractAirportCode(searchParams.destination)
         const destinationCode = extractAirportCode(searchParams.departure)
         
@@ -292,7 +368,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
           <div className="calendar-overlay" onClick={() => setShowFullCalendar(false)}></div>
           <div className="calendar-container">
             <FullCalendar
-              flights={filteredFlights}
+              key={`${selectedDateRange.start}-${selectedDateRange.end}`}
+              flights={flights}
               cabin={searchParams.cabin}
               selectedDate={selectedDateRange.end || displayDate}
               onDateSelect={handleDateSelect}
@@ -300,6 +377,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
               tripType={searchParams.tripType}
               departureDate={selectedDateRange.start || departureDate || undefined}
               onDepartureDateSelect={handleDepartureDateSelect}
+              departure={searchParams.departure}
+              destination={searchParams.destination}
             />
           </div>
         </div>
@@ -310,18 +389,27 @@ function HomePage({ onSelectFlight }: HomePageProps) {
           <div className="selection-info">
             <h2 className="selection-title">{getStepTitle()}</h2>
             <p className="selection-hint">{getRouteHint()}</p>
-            {searchParams.tripType !== 'multicity' && displayDate && (
+            {searchParams.tripType === 'roundtrip' && departureDate && (
               <p className="selected-date-info">
-                搜尋日期: {new Date(displayDate).toLocaleDateString('zh-TW', { 
+                出發日期: {new Date(departureDate).toLocaleDateString('zh-TW', { 
                   month: 'long', 
                   day: 'numeric', 
                   weekday: 'long' 
                 })}
               </p>
             )}
-            {searchParams.tripType === 'roundtrip' && departureDate && (
+            {searchParams.tripType === 'roundtrip' && selectedDateRange.end && (
               <p className="selected-date-info">
-                出發日期: {new Date(departureDate).toLocaleDateString('zh-TW', { 
+                回程日期: {new Date(selectedDateRange.end).toLocaleDateString('zh-TW', { 
+                  month: 'long', 
+                  day: 'numeric', 
+                  weekday: 'long' 
+                })}
+              </p>
+            )}
+            {searchParams.tripType !== 'roundtrip' && displayDate && (
+              <p className="selected-date-info">
+                搜尋日期: {new Date(displayDate).toLocaleDateString('zh-TW', { 
                   month: 'long', 
                   day: 'numeric', 
                   weekday: 'long' 

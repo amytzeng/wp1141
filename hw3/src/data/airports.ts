@@ -9,15 +9,15 @@ export interface AirportRegion {
 export const airports: Record<string, Airport> = {
   'TPE': {
     code: 'TPE',
-    city: '台北',
-    country: '台灣',
+    city: '臺北',
+    country: '臺灣',
     continent: '亞洲',
     coordinates: { lat: 25.0777, lng: 121.2328 }
   },
   'TSA': {
     code: 'TSA',
-    city: '台北',
-    country: '台灣',
+    city: '臺北',
+    country: '臺灣',
     continent: '亞洲',
     coordinates: { lat: 25.0697, lng: 121.5519 }
   },
