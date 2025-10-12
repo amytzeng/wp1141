@@ -232,6 +232,9 @@ function PaymentPage({ selectedFlights, onCompleteOrder }: PaymentPageProps) {
                     <div className="item-route">
                       {item.flight.departure} → {item.flight.destination}
                     </div>
+                    <div className="item-date">
+                      日期: {new Date(item.flight.departureDate).toLocaleDateString('zh-TW')}
+                    </div>
                   </div>
                   <div className="item-price">
                     NT$ {getPrice(item.flight, item.cabin).toLocaleString()}
