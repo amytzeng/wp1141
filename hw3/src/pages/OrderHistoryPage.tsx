@@ -88,6 +88,8 @@ function OrderHistoryPage({ orders, onDeleteOrder }: OrderHistoryPageProps) {
                       <span>•</span>
                       <span>{getCabinName(item.cabin)}</span>
                       <span>•</span>
+                      <span>日期: {new Date(item.flight.departureDate).toLocaleDateString('zh-TW')}</span>
+                      <span>•</span>
                       <span>NT$ {getPrice(item.flight, item.cabin).toLocaleString()}</span>
                     </div>
                   </div>

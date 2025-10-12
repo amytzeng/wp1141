@@ -1,6 +1,15 @@
 import { Flight, CabinClass } from '../types/Flight'
 import '../styles/FlightCard.css'
 
+// 格式化日期為易讀格式，避免時區問題
+const formatFlightDate = (dateString: string): string => {
+  // 直接解析 YYYY-MM-DD 格式
+  const [year, month, day] = dateString.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  const weekday = ['日', '一', '二', '三', '四', '五', '六'][date.getDay()]
+  return `${month}月${day}日 (週${weekday})`
+}
+
 interface FlightCardProps {
   flight: Flight
   cabin: CabinClass
@@ -31,6 +40,11 @@ const FlightCard = ({ flight, cabin, price, onSelect }: FlightCardProps) => {
           <span className="label">機型</span>
           <span className="value">{flight.aircraft}</span>
         </div>
+      </div>
+      
+      <div className="flight-date">
+        <span className="date-label">航班日期</span>
+        <span className="date-value">{formatFlightDate(flight.departureDate)}</span>
       </div>
 
       <div className="flight-route">

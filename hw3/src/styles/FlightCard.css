@@ -17,9 +17,33 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
+}
+
+.flight-date {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.8rem 1.5rem;
+  background: rgba(255, 193, 7, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.date-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.date-value {
+  font-size: 1rem;
+  color: var(--gold-color);
+  font-weight: 600;
 }
 
 .flight-number,

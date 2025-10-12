@@ -89,6 +89,7 @@ function CartPage({ selectedFlights, onRemoveFlight }: CartPageProps) {
                     <div className="flight-details">
                       <span>飛行時間: {item.flight.duration}</span>
                       <span>機型: {item.flight.aircraft}</span>
+                      <span>日期: {new Date(item.flight.departureDate).toLocaleDateString('zh-TW')}</span>
                     </div>
                   </div>
                   

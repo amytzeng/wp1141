@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { SearchParams, CabinClass, TripType, MultiCityLeg } from '../types/Flight'
 import AirportSelector from './AirportSelector'
-import { formatAirportDisplay, airports } from '../data/airports'
 import '../styles/SearchForm.css'
 import '../styles/FullCalendar.css'
 
@@ -13,13 +12,14 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
   const [tripType, setTripType] = useState<TripType>('roundtrip')
   const [departure, setDeparture] = useState('')
   const [destination, setDestination] = useState('')
-  const [departureDate, setDepartureDate] = useState('2024-10-17')
+  const [departureDate, setDepartureDate] = useState(new Date().toISOString().split('T')[0])
   const [returnDate, setReturnDate] = useState('')
   const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
   const [showReturnCalendar, setShowReturnCalendar] = useState(false)
   const [showMultiCityCalendars, setShowMultiCityCalendars] = useState<boolean[]>([])
   const [showDepartureSelector, setShowDepartureSelector] = useState(false)
   const [showDestinationSelector, setShowDestinationSelector] = useState(false)
+  const [currentLegIndex, setCurrentLegIndex] = useState(0)
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [returnCurrentMonth, setReturnCurrentMonth] = useState(new Date())
   const [multiCityMonths, setMultiCityMonths] = useState<Date[]>([])
@@ -30,8 +30,6 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
   ])
 
 
-  // 生成所有機場的城市字符串列表
-  const allAirports = Object.values(airports).map(formatAirportDisplay)
 
   // 格式化日期字符串，避免時區問題
   const formatDateString = (year: number, month: number, day: number): string => {
@@ -55,10 +53,29 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     }
   }
 
-  const handleLegChange = (index: number, field: keyof MultiCityLeg, value: string) => {
-    const newLegs = [...multiCityLegs]
-    newLegs[index][field] = value
-    setMultiCityLegs(newLegs)
+
+  const handleAirportSelect = (airport: string, type: 'departure' | 'destination') => {
+    if (tripType === 'multicity') {
+      // 多程票處理
+      const newLegs = [...multiCityLegs]
+      if (type === 'departure') {
+        newLegs[currentLegIndex].departure = airport
+      } else {
+        newLegs[currentLegIndex].destination = airport
+      }
+      setMultiCityLegs(newLegs)
+      setShowDepartureSelector(false)
+      setShowDestinationSelector(false)
+    } else {
+      // 單程、來回票處理
+      if (type === 'departure') {
+        setDeparture(airport)
+        setShowDepartureSelector(false)
+      } else {
+        setDestination(airport)
+        setShowDestinationSelector(false)
+      }
+    }
   }
 
   // 日曆相關函數
@@ -74,11 +91,13 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     const days = []
     
     // 上个月的结尾日期
-    const prevMonth = new Date(year, monthIndex - 1, 0)
+    const prevMonthDate = new Date(year, monthIndex - 1, 0)
+    const prevMonthYear = prevMonthDate.getFullYear()
+    const prevMonth = prevMonthDate.getMonth() + 1
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-      const day = prevMonth.getDate() - i
+      const day = prevMonthDate.getDate() - i
       days.push({
-        date: formatDateString(year, monthIndex, day),
+        date: formatDateString(prevMonthYear, prevMonth, day),
         day,
         isCurrentMonth: false,
         isToday: false
@@ -99,10 +118,13 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     }
     
     // 下个月的开始日期
+    const nextMonthDate = new Date(year, monthIndex + 1, 1)
+    const nextMonthYear = nextMonthDate.getFullYear()
+    const nextMonth = nextMonthDate.getMonth() + 1
     const remainingDays = 42 - days.length
     for (let day = 1; day <= remainingDays; day++) {
       days.push({
-        date: formatDateString(year, monthIndex + 2, day),
+        date: formatDateString(nextMonthYear, nextMonth, day),
         day,
         isCurrentMonth: false,
         isToday: false
@@ -199,14 +221,29 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
         alert('出發地和目的地不能相同')
         return
       }
-      onSearch({ 
+      console.log('========== SearchForm - 提交搜尋 ==========')
+      console.log('票種:', tripType)
+      console.log('出發地:', departure)
+      console.log('目的地:', destination)
+      console.log('出發日期 (state):', departureDate)
+      console.log('回程日期 (state):', returnDate)
+      console.log('艙等:', cabin)
+      console.log('==========================================')
+      
+      const searchData = { 
         tripType,
         departure, 
         destination, 
         date: departureDate, 
         cabin,
-        returnDate: tripType === 'roundtrip' ? (returnDate || undefined) : undefined
-      })
+        returnDate: tripType === 'roundtrip' ? returnDate : undefined
+      }
+      
+      console.log('✓ 實際傳送的資料:', searchData)
+      console.log('✓ returnDate 會傳送嗎?', tripType === 'roundtrip' ? '是 (' + returnDate + ')' : '否 (單程)')
+      console.log('==========================================')
+      
+      onSearch(searchData)
     }
   }
 
@@ -271,29 +308,29 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
                 <div className="leg-fields">
                   <div className="form-group">
                     <label>出發地</label>
-                    <select
-                      value={leg.departure}
-                      onChange={(e) => handleLegChange(index, 'departure', e.target.value)}
-                      className="form-select city-select-small"
+                    <button
+                      type="button"
+                      className="city-select-button"
+                      onClick={() => {
+                        setShowDepartureSelector(true)
+                        setCurrentLegIndex(index)
+                      }}
                     >
-                      <option value="">請選擇</option>
-                      {allAirports.filter(airport => airport !== leg.destination).map((airport: string) => (
-                        <option key={airport} value={airport}>{airport}</option>
-                      ))}
-                    </select>
+                      {leg.departure || '選擇出發地'}
+                    </button>
                   </div>
                   <div className="form-group">
                     <label>目的地</label>
-                    <select
-                      value={leg.destination}
-                      onChange={(e) => handleLegChange(index, 'destination', e.target.value)}
-                      className="form-select city-select-small"
+                    <button
+                      type="button"
+                      className="city-select-button"
+                      onClick={() => {
+                        setShowDestinationSelector(true)
+                        setCurrentLegIndex(index)
+                      }}
                     >
-                      <option value="">請選擇</option>
-                      {allAirports.filter(airport => airport !== leg.departure).map((airport: string) => (
-                        <option key={airport} value={airport}>{airport}</option>
-                      ))}
-                    </select>
+                      {leg.destination || '選擇目的地'}
+                    </button>
                   </div>
                   <div className="form-group">
                     <label>日期</label>
@@ -538,7 +575,7 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
                   {getCalendarDays(returnCurrentMonth).map((dayData, index) => {
                     const isSelected = dayData.date === returnDate
                     const isWeekend = new Date(dayData.date).getDay() === 0 || new Date(dayData.date).getDay() === 6
-                    const isPast = dayData.date <= departureDate
+                    const isPast = dayData.date < departureDate
 
                     return (
                       <div
@@ -626,20 +663,20 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
       {showDepartureSelector && (
         <AirportSelector
           title="請選擇出發地"
-          selectedAirport={departure}
-          onSelect={setDeparture}
+          selectedAirport={tripType === 'multicity' ? multiCityLegs[currentLegIndex]?.departure || '' : departure}
+          onSelect={(airport) => handleAirportSelect(airport, 'departure')}
           onClose={() => setShowDepartureSelector(false)}
-          excludeAirport={destination}
+          excludeAirport={tripType === 'multicity' ? multiCityLegs[currentLegIndex]?.destination || '' : destination}
         />
       )}
       
       {showDestinationSelector && (
         <AirportSelector
           title="請選擇目的地"
-          selectedAirport={destination}
-          onSelect={setDestination}
+          selectedAirport={tripType === 'multicity' ? multiCityLegs[currentLegIndex]?.destination || '' : destination}
+          onSelect={(airport) => handleAirportSelect(airport, 'destination')}
           onClose={() => setShowDestinationSelector(false)}
-          excludeAirport={departure}
+          excludeAirport={tripType === 'multicity' ? multiCityLegs[currentLegIndex]?.departure || '' : departure}
         />
       )}
     </div>

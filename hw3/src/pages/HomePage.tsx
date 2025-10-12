@@ -49,10 +49,28 @@ function HomePage({ onSelectFlight }: HomePageProps) {
   }, [])
 
   const handleSearch = (params: SearchParams) => {
+    console.log('============ 開始搜尋航班 ============')
+    console.log('搜尋類型:', params.tripType)
+    console.log('出發地:', params.departure)
+    console.log('目的地:', params.destination)
+    console.log('出發日期:', params.date)
+    console.log('回程日期:', params.returnDate)
+    console.log('艙等:', params.cabin)
+    console.log('====================================')
+    
     setSearchParams(params)
     setCurrentLegIndex(0)
     setSelectedFlights([])
     setDisplayDate(params.date)
+    setDepartureDate(params.date)
+    
+    // 如果是來回票，保存回程日期
+    if (params.tripType === 'roundtrip' && params.returnDate) {
+      console.log('✓ 設置回程日期範圍:', params.date, '→', params.returnDate)
+      setSelectedDateRange({start: params.date, end: params.returnDate})
+    } else {
+      setSelectedDateRange({start: null, end: null})
+    }
 
     if (params.tripType === 'multicity' && params.multiCityLegs) {
       // 多程：显示第一程
@@ -161,11 +179,40 @@ function HomePage({ onSelectFlight }: HomePageProps) {
       if (currentLegIndex === 0) {
         // 选择了去程，保存并显示回程
         setSelectedFlights([flight])
+        
+        // 使用正確的回程日期來源
+        const returnDateToUse = selectedDateRange.end || searchParams.returnDate || displayDate
+        const departureCode = extractAirportCode(searchParams.destination)
+        const destinationCode = extractAirportCode(searchParams.departure)
+        
+        console.log('============ 選擇去程航班，準備顯示回程航班 ============')
+        console.log('searchParams.returnDate:', searchParams.returnDate)
+        console.log('selectedDateRange:', selectedDateRange)
+        console.log('displayDate:', displayDate)
+        console.log('最終使用的回程日期:', returnDateToUse)
+        console.log('回程出發地:', searchParams.destination, '→ 代碼:', departureCode)
+        console.log('回程目的地:', searchParams.departure, '→ 代碼:', destinationCode)
+        console.log('總航班數量:', flights.length)
+        console.log('==================================================')
+        
         const filtered = flights.filter(f => {
-          const departureMatch = f.departure.includes(searchParams.destination)
-          const destinationMatch = f.destination.includes(searchParams.departure)
-          return departureMatch && destinationMatch
+          const departureMatch = f.departure.includes(departureCode)
+          const destinationMatch = f.destination.includes(destinationCode)
+          const dateMatch = f.departureDate === returnDateToUse
+          
+          // 只顯示匹配的航班以減少日誌
+          if (departureMatch && destinationMatch) {
+            console.log(`✓ 找到候選航班: ${f.flightNumber}, 日期=${f.departureDate}, 出發=${f.departure}, 目的=${f.destination}`)
+            console.log(`  匹配結果: 出發=${departureMatch}, 目的=${destinationMatch}, 日期=${dateMatch}`)
+          }
+          
+          return departureMatch && destinationMatch && dateMatch
         })
+        
+        console.log('==================================================')
+        console.log(`✓ 找到 ${filtered.length} 個回程航班`)
+        console.log('回程航班列表:', filtered.map(f => f.flightNumber).join(', '))
+        console.log('==================================================')
         setFilteredFlights(filtered)
         setCurrentLegIndex(1)
       } else {
@@ -184,10 +231,14 @@ function HomePage({ onSelectFlight }: HomePageProps) {
       if (nextIndex < searchParams.multiCityLegs.length) {
         // 还有下一程
         const nextLeg = searchParams.multiCityLegs[nextIndex]
+        const departureCode = extractAirportCode(nextLeg.departure)
+        const destinationCode = extractAirportCode(nextLeg.destination)
+        
         const filtered = flights.filter(f => {
-          const departureMatch = f.departure.includes(nextLeg.departure)
-          const destinationMatch = f.destination.includes(nextLeg.destination)
-          return departureMatch && destinationMatch
+          const departureMatch = f.departure.includes(departureCode)
+          const destinationMatch = f.destination.includes(destinationCode)
+          const dateMatch = f.departureDate === nextLeg.date
+          return departureMatch && destinationMatch && dateMatch
         })
         setFilteredFlights(filtered)
         setCurrentLegIndex(nextIndex)
