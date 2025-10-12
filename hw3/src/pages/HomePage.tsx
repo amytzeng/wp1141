@@ -3,7 +3,6 @@ import Papa from 'papaparse'
 import { useNavigate } from 'react-router-dom'
 import SearchForm from '../components/SearchForm'
 import FlightList from '../components/FlightList'
-import PriceCalendar from '../components/PriceCalendar'
 import FullCalendar from '../components/FullCalendar'
 import { Flight, SearchParams, CabinClass } from '../types/Flight'
 import { extractAirportCode } from '../data/airports'
@@ -35,6 +34,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
           dynamicTyping: true,
           skipEmptyLines: true,
           complete: (results) => {
+            console.log('航班資料載入完成:', results.data.length, '個航班')
+            console.log('前5個航班:', results.data.slice(0, 5))
             setFlights(results.data)
             setFilteredFlights(results.data)
             setIsLoading(false)
@@ -304,46 +305,13 @@ function HomePage({ onSelectFlight }: HomePageProps) {
       ) : searchParams && (
         <>
           {/* 價格日曆 - 顯示前後幾天的票價 */}
-          <div className="price-calendar-section">
+          <div className="calendar-section">
             <button 
               className="calendar-toggle-button"
               onClick={() => setShowFullCalendar(true)}
             >
               📅 選擇其他日期
             </button>
-            <PriceCalendar
-              flights={filteredFlights}
-              selectedDate={displayDate}
-              cabin={searchParams.cabin}
-              departure={searchParams.departure}
-              destination={searchParams.destination}
-              onDateSelect={handleDateSelect}
-              onDateChange={(direction) => {
-                const currentDate = new Date(displayDate)
-                if (direction === 'prev') {
-                  currentDate.setDate(currentDate.getDate() - 7)
-                } else {
-                  currentDate.setDate(currentDate.getDate() + 7)
-                }
-                const newDate = currentDate.toISOString().split('T')[0]
-                console.log(`前七日/後七日導航: 從 ${displayDate} 到 ${newDate}`)
-                setDisplayDate(newDate)
-                
-                // 重新搜尋該日期的航班
-                const filtered = flights.filter(flight => {
-                  const departureCode = extractAirportCode(searchParams.departure)
-                  const destinationCode = extractAirportCode(searchParams.destination)
-                  const departureMatch = flight.departure.includes(departureCode)
-                  const destinationMatch = flight.destination.includes(destinationCode)
-                  const dateMatch = flight.departureDate === newDate
-                  console.log(`前七日/後七日搜尋: 出發地=${flight.departure}, 目的地=${flight.destination}, 日期=${flight.departureDate}`)
-                  console.log(`條件: 出發地匹配=${departureMatch}, 目的地匹配=${destinationMatch}, 日期匹配=${dateMatch}`)
-                  return departureMatch && destinationMatch && dateMatch
-                })
-                console.log(`前七日/後七日找到 ${filtered.length} 個航班`)
-                setFilteredFlights(filtered)
-              }}
-            />
           </div>
           
           <FlightList 

@@ -30,10 +30,33 @@ function PriceCalendar({ flights, selectedDate, cabin, departure, destination, o
   }, [selectedDate])
 
   const getPriceForDate = (date: string): number | null => {
-    // 找出該日期的航班
-    const dayFlights = flights.filter(flight => flight.departureDate === date)
+    // 找出該日期且符合路線的航班
+    const dayFlights = flights.filter(flight => {
+      let departureMatch = true
+      let destinationMatch = true
+      
+      if (departure) {
+        // 從 "台北 TPE" 中提取 "TPE"
+        const departureCode = departure.split(' ')[1] || departure
+        departureMatch = flight.departure.includes(departureCode)
+      }
+      
+      if (destination) {
+        // 從 "東京 NRT" 中提取 "NRT"
+        const destinationCode = destination.split(' ')[1] || destination
+        destinationMatch = flight.destination.includes(destinationCode)
+      }
+      
+      const dateMatch = flight.departureDate === date
+      
+      console.log(`航班檢查: ${flight.flightNumber}, 出發地=${flight.departure}, 目的地=${flight.destination}, 日期=${flight.departureDate}`)
+      console.log(`匹配結果: 出發地=${departureMatch}, 目的地=${destinationMatch}, 日期=${dateMatch}`)
+      
+      return departureMatch && destinationMatch && dateMatch
+    })
     
     console.log(`檢查日期 ${date} 的航班:`, dayFlights.length, '個航班')
+    console.log(`路線條件: 出發地=${departure}, 目的地=${destination}`)
     
     if (dayFlights.length === 0) return null // 沒航班
     
@@ -58,7 +81,23 @@ function PriceCalendar({ flights, selectedDate, cabin, departure, destination, o
   }
 
   const hasFlightsForDate = (date: string): boolean => {
-    return flights.some(flight => flight.departureDate === date)
+    return flights.some(flight => {
+      let departureMatch = true
+      let destinationMatch = true
+      
+      if (departure) {
+        const departureCode = departure.split(' ')[1] || departure
+        departureMatch = flight.departure.includes(departureCode)
+      }
+      
+      if (destination) {
+        const destinationCode = destination.split(' ')[1] || destination
+        destinationMatch = flight.destination.includes(destinationCode)
+      }
+      
+      const dateMatch = flight.departureDate === date
+      return departureMatch && destinationMatch && dateMatch
+    })
   }
 
   const formatPrice = (price: number) => {
@@ -74,7 +113,8 @@ function PriceCalendar({ flights, selectedDate, cabin, departure, destination, o
     return { month, day, weekday }
   }
 
-  console.log('PriceCalendar 檢查:', { selectedDate, flightsCount: flights.length, cabin })
+  console.log('PriceCalendar 檢查:', { selectedDate, flightsCount: flights.length, cabin, departure, destination })
+  console.log('PriceCalendar 航班資料:', flights.slice(0, 3))
   
   if (!selectedDate) {
     console.log('PriceCalendar: selectedDate 為空，不渲染')
@@ -93,8 +133,12 @@ function PriceCalendar({ flights, selectedDate, cabin, departure, destination, o
       <div className="calendar-controls">
         <button 
           className="calendar-nav-button prev"
-          onClick={() => onDateChange('prev')}
+          onClick={() => {
+            console.log('點擊前七日按鈕')
+            onDateChange('prev')
+          }}
           title="前七日"
+          style={{ cursor: 'pointer' }}
         >
           &lt; 前七日
         </button>
@@ -111,8 +155,17 @@ function PriceCalendar({ flights, selectedDate, cabin, departure, destination, o
               <div
                 key={date}
                 className={`calendar-date ${isSelected ? 'selected' : ''} ${isWeekend ? 'weekend' : ''} ${!hasFlights ? 'no-flights' : ''}`}
-                onClick={() => hasFlights ? onDateSelect(date) : null}
-                style={{ cursor: hasFlights ? 'pointer' : 'not-allowed', opacity: hasFlights ? 1 : 0.5 }}
+                onClick={() => {
+                  console.log(`點擊日期按鈕: ${date}, 有航班: ${hasFlights}`)
+                  if (hasFlights) {
+                    onDateSelect(date)
+                  }
+                }}
+                style={{ 
+                  cursor: hasFlights ? 'pointer' : 'not-allowed', 
+                  opacity: hasFlights ? 1 : 0.5,
+                  pointerEvents: hasFlights ? 'auto' : 'none'
+                }}
               >
                 <div className="date-info">
                   <span className="date-month">{month}月{day}日</span>
@@ -129,8 +182,12 @@ function PriceCalendar({ flights, selectedDate, cabin, departure, destination, o
         
         <button 
           className="calendar-nav-button next"
-          onClick={() => onDateChange('next')}
+          onClick={() => {
+            console.log('點擊後七日按鈕')
+            onDateChange('next')
+          }}
           title="後七日"
+          style={{ cursor: 'pointer' }}
         >
           後七日 &gt;
         </button>
