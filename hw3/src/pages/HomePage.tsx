@@ -108,8 +108,6 @@ function HomePage({ onSelectFlight }: HomePageProps) {
     }
   }
 
-  // handleDateChange 函數已移除，現在直接在 PriceCalendar 中處理
-
   const handleDateSelect = (date: string) => {
     if (!searchParams) return
     

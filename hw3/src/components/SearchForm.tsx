@@ -22,7 +22,6 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
   const [showDepartureSelector, setShowDepartureSelector] = useState(false)
   const [showDestinationSelector, setShowDestinationSelector] = useState(false)
   const [currentLegIndex, setCurrentLegIndex] = useState(0)
-  const [multiCityMonths, setMultiCityMonths] = useState<Date[]>([])
   const [cabin, setCabin] = useState<CabinClass>('economy')
   const [multiCityLegs, setMultiCityLegs] = useState<MultiCityLeg[]>([
     { departure: '', destination: '', date: '', cabin: 'economy' },
@@ -89,7 +88,6 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
     if (multiCityLegs.length < 4) {
       setMultiCityLegs([...multiCityLegs, { departure: '', destination: '', date: '', cabin: 'economy' }])
       setShowMultiCityCalendars([...showMultiCityCalendars, false])
-      setMultiCityMonths([...multiCityMonths, new Date()])
     }
   }
 
@@ -97,7 +95,6 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
     if (multiCityLegs.length > 2) {
       setMultiCityLegs(multiCityLegs.filter((_, i) => i !== index))
       setShowMultiCityCalendars(showMultiCityCalendars.filter((_, i) => i !== index))
-      setMultiCityMonths(multiCityMonths.filter((_, i) => i !== index))
     }
   }
 
@@ -143,7 +140,6 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
   // 初始化多個航段日曆狀態
   useEffect(() => {
     setShowMultiCityCalendars(new Array(multiCityLegs.length).fill(false))
-    setMultiCityMonths(new Array(multiCityLegs.length).fill(new Date()))
   }, [multiCityLegs.length])
 
   const handleSubmit = (e: React.FormEvent | Event) => {
