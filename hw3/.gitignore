@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
+# Backup files
+cursor_backup.md
+
