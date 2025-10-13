@@ -182,56 +182,74 @@ function TravelMapPage({ orders }: TravelMapPageProps) {
         
         <div className="map-section">
           <div className="world-map">
-            <svg viewBox="0 0 1000 500" className="map-svg">
-              {/* 海洋背景 */}
-              <rect width="1000" height="500" fill="#0a1628" />
-              
-              {/* 大陸輪廓 - 更清楚明顯 */}
-              <g className="continents">
-                {/* 亞洲 */}
-                <path d="M 580 140 L 620 110 L 680 100 L 750 120 L 820 140 L 860 180 L 870 220 L 850 260 L 820 290 L 770 310 L 720 315 L 670 305 L 630 280 L 600 240 L 585 200 L 580 160 Z" 
-                      fill="#2a4a3a" stroke="#3d6e59" strokeWidth="3"/>
-                
-                {/* 歐洲 */}
-                <path d="M 420 110 L 460 95 L 500 100 L 530 130 L 540 165 L 530 190 L 500 205 L 460 195 L 430 170 L 410 140 Z" 
-                      fill="#2a4a3a" stroke="#3d6e59" strokeWidth="3"/>
-                
-                {/* 北美洲 */}
-                <path d="M 120 90 L 180 75 L 240 85 L 290 110 L 310 150 L 300 190 L 280 220 L 240 240 L 190 245 L 150 220 L 120 180 L 110 140 Z" 
-                      fill="#2a4a3a" stroke="#3d6e59" strokeWidth="3"/>
-                
-                {/* 南美洲 */}
-                <path d="M 210 270 L 250 255 L 285 265 L 305 290 L 310 330 L 300 370 L 280 405 L 250 425 L 220 430 L 190 410 L 175 380 L 180 340 L 195 300 Z" 
-                      fill="#2a4a3a" stroke="#3d6e59" strokeWidth="3"/>
-                
-                {/* 非洲 */}
-                <path d="M 460 210 L 500 195 L 540 205 L 565 235 L 570 275 L 560 320 L 540 360 L 510 385 L 475 390 L 445 370 L 430 330 L 435 280 L 450 240 Z" 
-                      fill="#2a4a3a" stroke="#3d6e59" strokeWidth="3"/>
-                
-                {/* 大洋洲 */}
-                <path d="M 760 330 L 810 315 L 860 330 L 890 360 L 885 385 L 860 405 L 820 410 L 780 395 L 760 370 L 755 350 Z" 
-                      fill="#2a4a3a" stroke="#3d6e59" strokeWidth="3"/>
-              </g>
+            <div className="map-image-container">
+              <img 
+                src="/vec_worldmap.jpg" 
+                alt="世界地圖" 
+                className="world-map-image"
+              />
               
               {/* 標記訪問過的機場 */}
               {visitedAirports.map((airport) => {
-                // 簡化的座標映射（實際應該用投影算法）
-                const x = ((airport.coordinates.lng + 180) / 360) * 1000
-                const y = ((90 - airport.coordinates.lat) / 180) * 500
+                // 改進的座標映射，考慮地圖投影
+                const lng = airport.coordinates.lng
+                const lat = airport.coordinates.lat
+                
+                // 使用墨卡托投影的簡化版本
+                const x = ((lng + 180) / 360) * 100
+                const y = ((90 - lat) / 180) * 100
+                
+                // 基礎調整 - 所有地方都再垂直往下移兩倍
+                let adjustedX = Math.max(0, Math.min(100, x - 3))
+                let adjustedY = Math.max(0, Math.min(100, y + 8))
+                
+                // 特定地區的個別調整
+                switch (airport.code) {
+                  case 'SEA': // 西雅圖 - 往左下移動
+                    adjustedX = Math.max(0, Math.min(100, x - 6))
+                    adjustedY = Math.max(0, Math.min(100, y + 12))
+                    break
+                  case 'NRT': // 東京成田 - 往右下移動
+                  case 'HND': // 東京羽田 - 往右下移動
+                  case 'KIX': // 大阪 - 往右下移動
+                  case 'FUK': // 福岡 - 往右下移動
+                    adjustedX = Math.max(0, Math.min(100, x + 1))
+                    adjustedY = Math.max(0, Math.min(100, y + 14))
+                    break
+                  case 'TPE': // 台北 - 往右移動
+                  case 'TSA': // 台北松山 - 往右移動
+                    adjustedX = Math.max(0, Math.min(100, x + 1))
+                    adjustedY = Math.max(0, Math.min(100, y + 14))
+                    break
+                  case 'SIN': // 新加坡 - 往上移動
+                    adjustedX = Math.max(0, Math.min(100, x - 1))
+                    adjustedY = Math.max(0, Math.min(100, y + 8))
+                    break
+                  case 'SYD': // 雪梨 - 往右下移動
+                  case 'MEL': // 墨爾本 - 往右下移動
+                  case 'BNE': // 布里斯本 - 往右下移動
+                    adjustedX = Math.max(0, Math.min(100, x - 1))
+                    adjustedY = Math.max(0, Math.min(100, y + 8))
+                    break
+                }
                 
                 return (
-                  <g key={airport.code} className="airport-marker">
-                    <circle cx={x} cy={y} r="8" fill="var(--accent-color)" />
-                    <text x={x} y={y - 15} className="flag-icon" textAnchor="middle">
-                      🚩
-                    </text>
-                    <text x={x} y={y + 25} className="airport-label" textAnchor="middle">
-                      {airport.city}
-                    </text>
-                  </g>
+                  <div 
+                    key={airport.code} 
+                    className="airport-marker"
+                    style={{
+                      position: 'absolute',
+                      left: `${adjustedX}%`,
+                      top: `${adjustedY}%`,
+                      transform: 'translate(-50%, -50%)'
+                    }}
+                  >
+                    <div className="marker-circle"></div>
+                    <div className="airport-label">{airport.city}</div>
+                  </div>
                 )
               })}
-            </svg>
+            </div>
           </div>
         </div>
 
