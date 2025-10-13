@@ -346,3 +346,37 @@
   }
 }
 
+/* 免費價格樣式 */
+.free-price-payment {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  color: #059669;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.original-price-payment {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
+.free-total-payment {
+  color: #059669 !important;
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+  animation: paymentPulse 2s ease-in-out infinite;
+}
+
+@keyframes paymentPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+

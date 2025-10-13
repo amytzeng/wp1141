@@ -7,6 +7,7 @@ interface FlightPlanSelectorProps {
   cabin: CabinClass
   onSelect: (plan: 'value' | 'basic' | 'full') => void
   onClose: () => void
+  isFree?: boolean
 }
 
 interface PlanDetails {
@@ -23,7 +24,8 @@ const FlightPlanSelector: React.FC<FlightPlanSelectorProps> = ({
   flight,
   cabin,
   onSelect,
-  onClose
+  onClose,
+  isFree = false
 }) => {
   const getBasePrice = (cabin: CabinClass): number => {
     switch (cabin) {
@@ -122,12 +124,21 @@ const FlightPlanSelector: React.FC<FlightPlanSelectorProps> = ({
                 <h4 className="plan-name">{plan.name}</h4>
                 <div className="plan-price">
                   <span className="price-label">價格</span>
-                  <span className="price-value">
-                    NT$ {(basePrice + plan.priceModifier).toLocaleString()}
-                    {plan.priceModifier > 0 && (
-                      <span className="price-modifier"> (+{plan.priceModifier})</span>
-                    )}
-                  </span>
+                  {isFree ? (
+                    <span className="price-value free-plan-price">
+                      🎉 免費
+                      <span className="original-plan-price">
+                        NT$ {(basePrice + plan.priceModifier).toLocaleString()}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="price-value">
+                      NT$ {(basePrice + plan.priceModifier).toLocaleString()}
+                      {plan.priceModifier > 0 && (
+                        <span className="price-modifier"> (+{plan.priceModifier})</span>
+                      )}
+                    </span>
+                  )}
                 </div>
               </div>
 

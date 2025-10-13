@@ -3,6 +3,7 @@ import { Flight, CabinClass } from './Flight'
 export interface OrderItem {
   flight: Flight
   cabin: CabinClass
+  actualPrice?: number // 設為可選，以兼容舊數據
 }
 
 export interface Order {

@@ -369,3 +369,31 @@
     font-size: 1.25rem;
   }
 }
+
+/* 免費方案價格樣式 */
+.free-plan-price {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #059669 !important;
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+  animation: freePulse 2s ease-in-out infinite;
+}
+
+.original-plan-price {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
+@keyframes freePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}

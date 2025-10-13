@@ -12,6 +12,7 @@ import { Order } from './types/Order'
 interface SelectedFlight {
   flight: Flight
   cabin: CabinClass
+  actualPrice: number // 實際支付價格（考慮通關密語等優惠）
 }
 
 // LocalStorage keys
@@ -39,10 +40,10 @@ function App() {
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders))
   }, [orders])
 
-  const handleSelectFlight = (flight: Flight, cabin: CabinClass) => {
-    const newFlight = { flight, cabin }
+  const handleSelectFlight = (flight: Flight, cabin: CabinClass, actualPrice: number) => {
+    const newFlight = { flight, cabin, actualPrice }
     setSelectedFlights(prev => {
-      console.log('Adding flight to cart:', flight.flightNumber)
+      console.log('Adding flight to cart:', flight.flightNumber, 'Price:', actualPrice)
       return [...prev, newFlight]
     })
   }
@@ -52,19 +53,8 @@ function App() {
   }
 
   const handleCompleteOrder = (paymentMethod: string) => {
-    const getPrice = (flight: Flight, cabin: CabinClass): number => {
-      switch (cabin) {
-        case 'economy':
-          return flight.price_economy
-        case 'business':
-          return flight.price_business
-        case 'first':
-          return flight.price_first
-      }
-    }
-
     const totalAmount = selectedFlights.reduce((sum, item) => {
-      return sum + getPrice(item.flight, item.cabin)
+      return sum + item.actualPrice
     }, 0)
 
     const newOrder: Order = {

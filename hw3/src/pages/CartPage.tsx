@@ -5,6 +5,7 @@ import '../styles/CartPage.css'
 interface SelectedFlight {
   flight: Flight
   cabin: CabinClass
+  actualPrice: number
 }
 
 interface CartPageProps {
@@ -26,7 +27,7 @@ function CartPage({ selectedFlights, onRemoveFlight }: CartPageProps) {
     }
   }
 
-  const getPrice = (flight: Flight, cabin: CabinClass): number => {
+  const getOriginalPrice = (flight: Flight, cabin: CabinClass): number => {
     switch (cabin) {
       case 'economy':
         return flight.price_economy
@@ -38,7 +39,7 @@ function CartPage({ selectedFlights, onRemoveFlight }: CartPageProps) {
   }
 
   const totalAmount = selectedFlights.reduce((sum, item) => {
-    return sum + getPrice(item.flight, item.cabin)
+    return sum + item.actualPrice
   }, 0)
 
   const handleCheckout = () => {
@@ -95,7 +96,16 @@ function CartPage({ selectedFlights, onRemoveFlight }: CartPageProps) {
                   
                   <div className="flight-actions">
                     <div className="price">
-                      NT$ {getPrice(item.flight, item.cabin).toLocaleString()}
+                      {item.actualPrice === 0 ? (
+                        <div className="free-price-cart">
+                          🎉 免費
+                          <span className="original-price-cart">
+                            NT$ {getOriginalPrice(item.flight, item.cabin).toLocaleString()}
+                          </span>
+                        </div>
+                      ) : (
+                        `NT$ ${item.actualPrice.toLocaleString()}`
+                      )}
                     </div>
                     <button 
                       className="remove-button"
@@ -115,7 +125,9 @@ function CartPage({ selectedFlights, onRemoveFlight }: CartPageProps) {
               </div>
               <div className="summary-row total">
                 <span>總金額</span>
-                <span>NT$ {totalAmount.toLocaleString()}</span>
+                <span className={totalAmount === 0 ? 'free-total' : ''}>
+                  {totalAmount === 0 ? '🎉 免費' : `NT$ ${totalAmount.toLocaleString()}`}
+                </span>
               </div>
               
               <div className="cart-actions">

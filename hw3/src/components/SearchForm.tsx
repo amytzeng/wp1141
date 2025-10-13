@@ -70,8 +70,18 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
       // 延遲執行搜尋，讓用戶看到成功訊息
       setTimeout(() => {
         setShowSecretModal(false)
-        // 直接觸發搜尋
-        handleSubmit(new Event('submit') as any)
+        // 直接觸發搜尋，並強制傳遞 hasSecretCode: true
+        const searchData = { 
+          tripType,
+          departure, 
+          destination, 
+          date: departureDate, 
+          cabin,
+          returnDate: tripType === 'roundtrip' ? returnDate : undefined,
+          hasSecretCode: true // 強制設為 true，不依賴狀態
+        }
+        console.log('🎉 通關密語成功！直接傳送搜尋資料:', searchData)
+        onSearch(searchData)
       }, 2000)
     } else if (!isCorrectDate) {
       setSecretModalMessage('欸米不開心，該日期無法使用')
@@ -165,7 +175,8 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
         destination: '',
         date: '',
         cabin,
-        multiCityLegs
+        multiCityLegs,
+        hasSecretCode: hasValidSecretCode && hasDate1017()
       })
     } else {
       if (departure === destination) {
@@ -192,6 +203,10 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
       }
       
       console.log('✓ 實際傳送的資料:', searchData)
+      console.log('🔑 通關密語狀態:')
+      console.log('  hasValidSecretCode:', hasValidSecretCode)
+      console.log('  hasDate1017():', hasDate1017())
+      console.log('  最終 hasSecretCode:', searchData.hasSecretCode)
       console.log('✓ returnDate 會傳送嗎?', tripType === 'roundtrip' ? '是 (' + returnDate + ')' : '否 (單程)')
       console.log('==========================================')
       

@@ -19,7 +19,7 @@ function OrderHistoryPage({ orders, onDeleteOrder }: OrderHistoryPageProps) {
     }
   }
 
-  const getPrice = (flight: Flight, cabin: CabinClass): number => {
+  const getOriginalPrice = (flight: Flight, cabin: CabinClass): number => {
     switch (cabin) {
       case 'economy':
         return flight.price_economy
@@ -84,7 +84,18 @@ function OrderHistoryPage({ orders, onDeleteOrder }: OrderHistoryPageProps) {
                       <span>{item.flight.destination}</span>
                     </div>
                     <div className="flight-details">
-                      {item.flight.departureTime} - {item.flight.arrivalTime} | {getCabinName(item.cabin)} | 日期: {new Date(item.flight.departureDate).toLocaleDateString('zh-TW')} | NT$ {getPrice(item.flight, item.cabin).toLocaleString()}
+                      {item.flight.departureTime} - {item.flight.arrivalTime} | {getCabinName(item.cabin)} | 日期: {new Date(item.flight.departureDate).toLocaleDateString('zh-TW')} | {
+                        (item.actualPrice !== undefined && item.actualPrice === 0) ? (
+                          <span className="free-price-order">
+                            🎉 免費
+                            <span className="original-price-order">
+                              NT$ {getOriginalPrice(item.flight, item.cabin).toLocaleString()}
+                            </span>
+                          </span>
+                        ) : (
+                          `NT$ ${(item.actualPrice !== undefined ? item.actualPrice : getOriginalPrice(item.flight, item.cabin)).toLocaleString()}`
+                        )
+                      }
                     </div>
                   </div>
                 ))}
@@ -96,7 +107,9 @@ function OrderHistoryPage({ orders, onDeleteOrder }: OrderHistoryPageProps) {
                 </div>
                 <div className="order-actions">
                   <div className="order-total">
-                    總金額: <span className="amount">NT$ {order.totalAmount.toLocaleString()}</span>
+                    總金額: <span className={`amount ${order.totalAmount === 0 ? 'free-total-order' : ''}`}>
+                      {order.totalAmount === 0 ? '🎉 免費' : `NT$ ${order.totalAmount.toLocaleString()}`}
+                    </span>
                   </div>
                   <button 
                     className="delete-order-button"

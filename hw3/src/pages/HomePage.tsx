@@ -11,7 +11,7 @@ import { extractAirportCode } from '../data/airports'
 import '../styles/HomePage.css'
 
 interface HomePageProps {
-  onSelectFlight: (flight: Flight, cabin: CabinClass) => void
+  onSelectFlight: (flight: Flight, cabin: CabinClass, actualPrice: number) => void
 }
 
 function HomePage({ onSelectFlight }: HomePageProps) {
@@ -246,7 +246,18 @@ function HomePage({ onSelectFlight }: HomePageProps) {
       return month === 10 && day === 17
     }
 
-    const hasSecretCode = searchParams?.hasSecretCode && isDate1017(flight.departureDate)
+    const is1017Flight = isDate1017(flight.departureDate)
+    const hasSecretCode = searchParams?.hasSecretCode && is1017Flight
+    
+    // 調試信息
+    if (is1017Flight) {
+      console.log('🔍 10/17 航班價格計算:')
+      console.log('  航班:', flight.flightNumber, flight.departureDate)
+      console.log('  searchParams.hasSecretCode:', searchParams?.hasSecretCode)
+      console.log('  is1017Flight:', is1017Flight)
+      console.log('  hasSecretCode:', hasSecretCode)
+      console.log('  返回價格:', hasSecretCode ? 0 : flight[`price_${cabin}`])
+    }
     
     if (hasSecretCode) {
       return 0 // 通關密語有效時免費
@@ -292,7 +303,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
     // 繼續原本的選擇邏輯
     if (searchParams.tripType === 'oneway') {
       // 单程：直接加入购物车
-      onSelectFlight(adjustedFlight, searchParams.cabin)
+      const actualPrice = getPrice(adjustedFlight, searchParams.cabin)
+      onSelectFlight(adjustedFlight, searchParams.cabin, actualPrice)
       navigate('/cart')
     } else if (searchParams.tripType === 'roundtrip') {
       // 来回
@@ -329,8 +341,10 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         setDisplayDate(returnDateToUse || '')
       } else {
         // 选择了回程，全部加入购物车
-        onSelectFlight(selectedFlights[0], searchParams.cabin)
-        onSelectFlight(adjustedFlight, searchParams.cabin)
+        const outboundPrice = getPrice(selectedFlights[0], searchParams.cabin)
+        const returnPrice = getPrice(adjustedFlight, searchParams.cabin)
+        onSelectFlight(selectedFlights[0], searchParams.cabin, outboundPrice)
+        onSelectFlight(adjustedFlight, searchParams.cabin, returnPrice)
         navigate('/cart')
       }
     } else if (searchParams.tripType === 'multicity') {
@@ -359,7 +373,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         newSelectedFlights.forEach(flight => {
           const legIndex = newSelectedFlights.indexOf(flight)
           const legCabin = searchParams.multiCityLegs![legIndex].cabin
-          onSelectFlight(flight, legCabin)
+          const actualPrice = getPrice(flight, legCabin)
+          onSelectFlight(flight, legCabin, actualPrice)
         })
         navigate('/cart')
       }
@@ -400,7 +415,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
 
     if (searchParams.tripType === 'oneway') {
       // 单程：直接加入购物车
-      onSelectFlight(adjustedFlight, searchParams.cabin)
+      const actualPrice = getPrice(adjustedFlight, searchParams.cabin)
+      onSelectFlight(adjustedFlight, searchParams.cabin, actualPrice)
       navigate('/cart')
     } else if (searchParams.tripType === 'roundtrip') {
       // 来回
@@ -445,8 +461,12 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         setCurrentLegIndex(1)
       } else {
         // 选择了回程，将去程和回程都加入购物车
-        selectedFlights.forEach(f => onSelectFlight(f, searchParams.cabin))
-        onSelectFlight(adjustedFlight, searchParams.cabin)
+        selectedFlights.forEach(f => {
+          const price = getPrice(f, searchParams.cabin)
+          onSelectFlight(f, searchParams.cabin, price)
+        })
+        const returnPrice = getPrice(adjustedFlight, searchParams.cabin)
+        onSelectFlight(adjustedFlight, searchParams.cabin, returnPrice)
         navigate('/cart')
       }
     } else if (searchParams.tripType === 'multicity' && searchParams.multiCityLegs) {
@@ -472,7 +492,10 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         setCurrentLegIndex(nextIndex)
       } else {
         // 所有程都选完了，加入购物车
-        newSelectedFlights.forEach(f => onSelectFlight(f, searchParams.cabin))
+        newSelectedFlights.forEach(f => {
+          const price = getPrice(f, searchParams.cabin)
+          onSelectFlight(f, searchParams.cabin, price)
+        })
         navigate('/cart')
       }
     }
@@ -625,6 +648,7 @@ function HomePage({ onSelectFlight }: HomePageProps) {
             setSelectedFlight(null)
             setSelectedPlan(null)
           }}
+          isFree={getPrice(selectedFlight, searchParams?.cabin || 'economy') === 0}
         />
       )}
 

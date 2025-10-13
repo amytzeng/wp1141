@@ -6,6 +6,7 @@ import '../styles/PaymentPage.css'
 interface SelectedFlight {
   flight: Flight
   cabin: CabinClass
+  actualPrice: number
 }
 
 interface PaymentPageProps {
@@ -18,7 +19,7 @@ function PaymentPage({ selectedFlights, onCompleteOrder }: PaymentPageProps) {
   const [paymentMethod, setPaymentMethod] = useState<'credit' | 'debit' | 'transfer'>('credit')
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const getPrice = (flight: Flight, cabin: CabinClass): number => {
+  const getOriginalPrice = (flight: Flight, cabin: CabinClass): number => {
     switch (cabin) {
       case 'economy':
         return flight.price_economy
@@ -30,7 +31,7 @@ function PaymentPage({ selectedFlights, onCompleteOrder }: PaymentPageProps) {
   }
 
   const totalAmount = selectedFlights.reduce((sum, item) => {
-    return sum + getPrice(item.flight, item.cabin)
+    return sum + item.actualPrice
   }, 0)
 
   const handlePayment = () => {
@@ -200,7 +201,9 @@ function PaymentPage({ selectedFlights, onCompleteOrder }: PaymentPageProps) {
                   </div>
                   <div className="info-item">
                     <span className="info-label">轉帳金額</span>
-                    <span className="info-value highlight">NT$ {totalAmount.toLocaleString()}</span>
+                    <span className="info-value highlight">
+                      {totalAmount === 0 ? '🎉 免費' : `NT$ ${totalAmount.toLocaleString()}`}
+                    </span>
                   </div>
                 </div>
                 
@@ -237,7 +240,16 @@ function PaymentPage({ selectedFlights, onCompleteOrder }: PaymentPageProps) {
                     </div>
                   </div>
                   <div className="item-price">
-                    NT$ {getPrice(item.flight, item.cabin).toLocaleString()}
+                    {item.actualPrice === 0 ? (
+                      <div className="free-price-payment">
+                        🎉 免費
+                        <span className="original-price-payment">
+                          NT$ {getOriginalPrice(item.flight, item.cabin).toLocaleString()}
+                        </span>
+                      </div>
+                    ) : (
+                      `NT$ ${item.actualPrice.toLocaleString()}`
+                    )}
                   </div>
                 </div>
               ))}
@@ -245,7 +257,9 @@ function PaymentPage({ selectedFlights, onCompleteOrder }: PaymentPageProps) {
             
             <div className="summary-total">
               <span>總金額</span>
-              <span className="total-amount">NT$ {totalAmount.toLocaleString()}</span>
+              <span className={`total-amount ${totalAmount === 0 ? 'free-total-payment' : ''}`}>
+                {totalAmount === 0 ? '🎉 免費' : `NT$ ${totalAmount.toLocaleString()}`}
+              </span>
             </div>
             
             <button 
@@ -253,7 +267,7 @@ function PaymentPage({ selectedFlights, onCompleteOrder }: PaymentPageProps) {
               onClick={handlePayment}
               disabled={isProcessing}
             >
-              {isProcessing ? '處理中...' : `確認付款 NT$ ${totalAmount.toLocaleString()}`}
+              {isProcessing ? '處理中...' : (totalAmount === 0 ? '確認付款 (免費)' : `確認付款 NT$ ${totalAmount.toLocaleString()}`)}
             </button>
             
             <button className="cancel-button" onClick={() => navigate('/cart')}>
