@@ -94,6 +94,8 @@ const SearchCalendar: React.FC<SearchCalendarProps> = ({
   // 檢查日期是否在範圍內
   const isDateInRange = (date: string) => {
     if (!rangeStart || !rangeEnd) return false
+    // 如果開始和結束日期相同（當天來回），不高亮中間範圍
+    if (rangeStart === rangeEnd) return false
     return date > rangeStart && date < rangeEnd
   }
 
@@ -140,19 +142,13 @@ const SearchCalendar: React.FC<SearchCalendarProps> = ({
 
     // 如果已有開始日期但沒有結束日期
     if (rangeStart && !rangeEnd) {
-      // 如果點擊的是開始日期，取消選擇
-      if (date === rangeStart) {
-        setRangeStart(null)
-        return
-      }
-      
       // 如果點擊的日期早於開始日期，重新設置開始日期
       if (date < rangeStart) {
         setRangeStart(date)
         return
       }
       
-      // 設置結束日期
+      // 設置結束日期（允許同一天來回）
       setRangeEnd(date)
       return
     }
