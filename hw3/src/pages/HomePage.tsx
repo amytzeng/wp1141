@@ -263,6 +263,20 @@ function HomePage({ onSelectFlight }: HomePageProps) {
       return 0 // 通關密語有效時免費
     }
 
+    // 臺北松山航班特殊價格
+    const isTSAFlight = flight.departure === '臺北松山 TSA' || flight.destination === '臺北松山 TSA'
+    if (isTSAFlight) {
+      console.log('🎉 臺北松山航班特殊價格:', flight.flightNumber, '艙等:', cabin)
+      switch (cabin) {
+        case 'economy':
+          return 0 // 經濟艙免費
+        case 'business':
+          return 30 // 商務艙 30 元
+        case 'first':
+          return 50 // 頭等艙 50 元
+      }
+    }
+
     switch (cabin) {
       case 'economy':
         return flight.price_economy
@@ -642,13 +656,13 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         <FlightPlanSelector
           flight={selectedFlight}
           cabin={searchParams?.cabin || 'economy'}
+          isFree={getPrice(selectedFlight, searchParams?.cabin || 'economy') === 0}
           onSelect={handlePlanSelect}
           onClose={() => {
             setShowPlanSelector(false)
             setSelectedFlight(null)
             setSelectedPlan(null)
           }}
-          isFree={getPrice(selectedFlight, searchParams?.cabin || 'economy') === 0}
         />
       )}
 
