@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import SearchForm from '../components/SearchForm'
 import FlightList from '../components/FlightList'
 import FullCalendar from '../components/FullCalendar'
+import FlightPlanSelector from '../components/FlightPlanSelector'
 import { Flight, SearchParams, CabinClass } from '../types/Flight'
 import { extractAirportCode } from '../data/airports'
 import '../styles/HomePage.css'
@@ -23,6 +24,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
   const [departureDate, setDepartureDate] = useState<string | null>(null)
   const [showFullCalendar, setShowFullCalendar] = useState(false)
   const [selectedDateRange, setSelectedDateRange] = useState<{start: string | null, end: string | null}>({start: null, end: null})
+  const [showPlanSelector, setShowPlanSelector] = useState(false)
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -244,17 +247,43 @@ function HomePage({ onSelectFlight }: HomePageProps) {
   }
 
   const handleSelectFlight = (flight: Flight) => {
+    console.log('選擇航班:', flight)
+    
+    // 顯示方案選擇器
+    setSelectedFlight(flight)
+    setShowPlanSelector(true)
+  }
+
+  const handlePlanSelect = (plan: 'value' | 'basic' | 'full') => {
+    if (!selectedFlight || !searchParams) return
+
+    console.log('選擇方案:', plan, selectedFlight)
+    
+    // 根據方案調整價格
+    const priceModifier = plan === 'value' ? 0 : plan === 'basic' ? 300 : 1000
+    const adjustedFlight = {
+      ...selectedFlight,
+      price_economy: selectedFlight.price_economy + priceModifier,
+      price_business: selectedFlight.price_business + priceModifier,
+      price_first: selectedFlight.price_first + priceModifier
+    }
+    
+    // 關閉方案選擇器
+    setShowPlanSelector(false)
+    setSelectedFlight(null)
+
+    // 繼續原本的選擇邏輯
     if (!searchParams) return
 
     if (searchParams.tripType === 'oneway') {
       // 单程：直接加入购物车
-      onSelectFlight(flight, searchParams.cabin)
+      onSelectFlight(adjustedFlight, searchParams.cabin)
       navigate('/cart')
     } else if (searchParams.tripType === 'roundtrip') {
       // 来回
       if (currentLegIndex === 0) {
         // 选择了去程，保存并显示回程
-        setSelectedFlights([flight])
+        setSelectedFlights([adjustedFlight])
         
         // 使用正確的回程日期來源 - 優先使用 selectedDateRange.end
         const returnDateToUse = selectedDateRange.end || searchParams.returnDate
@@ -294,12 +323,12 @@ function HomePage({ onSelectFlight }: HomePageProps) {
       } else {
         // 选择了回程，将去程和回程都加入购物车
         selectedFlights.forEach(f => onSelectFlight(f, searchParams.cabin))
-        onSelectFlight(flight, searchParams.cabin)
+        onSelectFlight(adjustedFlight, searchParams.cabin)
         navigate('/cart')
       }
     } else if (searchParams.tripType === 'multicity' && searchParams.multiCityLegs) {
       // 多個航段
-      const newSelectedFlights = [...selectedFlights, flight]
+      const newSelectedFlights = [...selectedFlights, adjustedFlight]
       setSelectedFlights(newSelectedFlights)
       
       const nextIndex = currentLegIndex + 1
@@ -325,6 +354,7 @@ function HomePage({ onSelectFlight }: HomePageProps) {
       }
     }
   }
+
 
   const handleCancelSelection = () => {
     setSearchParams(null)
@@ -460,6 +490,18 @@ function HomePage({ onSelectFlight }: HomePageProps) {
             onSelectFlight={handleSelectFlight}
           />
         </>
+      )}
+
+      {showPlanSelector && selectedFlight && (
+        <FlightPlanSelector
+          flight={selectedFlight}
+          cabin={searchParams?.cabin || 'economy'}
+          onSelect={handlePlanSelect}
+          onClose={() => {
+            setShowPlanSelector(false)
+            setSelectedFlight(null)
+          }}
+        />
       )}
     </main>
   )

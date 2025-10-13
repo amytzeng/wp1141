@@ -12,10 +12,12 @@
   border-left: 4px solid var(--gold-color);
 }
 
+.main-content .cart-container .empty-cart,
 .empty-cart {
   text-align: center;
   padding: 4rem 2rem;
-  background: var(--card-bg);
+  background: transparent !important;
+  background-color: transparent !important;
   border-radius: 16px;
   border: 1px solid var(--border-color);
 }
@@ -53,8 +55,10 @@
   margin-bottom: 2rem;
 }
 
+.main-content .cart-container .selected-flight-card,
 .selected-flight-card {
-  background: var(--card-bg);
+  background: transparent !important;
+  background-color: transparent !important;
   border-radius: 16px;
   padding: 1.5rem;
   border: 1px solid var(--border-color);
@@ -65,8 +69,9 @@
   transition: all 0.3s ease;
 }
 
+.main-content .cart-container .selected-flight-card:hover,
 .selected-flight-card:hover {
-  border-color: var(--gold-color);
+  border-color: var(--gold-color) !important;
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
@@ -85,7 +90,7 @@
 .flight-number {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #1a1a2e;
 }
 
 .cabin-badge {
@@ -113,7 +118,7 @@
 .route-point .city {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #1a1a2e;
 }
 
 .route-point .time {
@@ -164,8 +169,10 @@
   color: white;
 }
 
+.main-content .cart-container .cart-summary,
 .cart-summary {
-  background: var(--card-bg);
+  background: transparent !important;
+  background-color: transparent !important;
   border-radius: 16px;
   padding: 2rem;
   border: 1px solid var(--border-color);

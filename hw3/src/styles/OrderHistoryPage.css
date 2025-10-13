@@ -15,7 +15,7 @@
 .empty-orders {
   text-align: center;
   padding: 4rem 2rem;
-  background: var(--card-bg);
+  background: transparent !important;
   border-radius: 16px;
   border: 1px solid var(--border-color);
 }
@@ -38,7 +38,7 @@
 }
 
 .order-card {
-  background: var(--card-bg);
+  background: transparent !important;
   border-radius: 16px;
   padding: 2rem;
   border: 1px solid var(--border-color);
@@ -128,10 +128,11 @@
 
 .order-flight-item .flight-details {
   font-size: 0.9rem;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  color: var(--text-primary);
+  margin-top: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .order-footer {

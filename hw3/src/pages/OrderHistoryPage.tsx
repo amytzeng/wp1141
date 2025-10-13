@@ -84,13 +84,7 @@ function OrderHistoryPage({ orders, onDeleteOrder }: OrderHistoryPageProps) {
                       <span>{item.flight.destination}</span>
                     </div>
                     <div className="flight-details">
-                      <span>{item.flight.departureTime} - {item.flight.arrivalTime}</span>
-                      <span>•</span>
-                      <span>{getCabinName(item.cabin)}</span>
-                      <span>•</span>
-                      <span>日期: {new Date(item.flight.departureDate).toLocaleDateString('zh-TW')}</span>
-                      <span>•</span>
-                      <span>NT$ {getPrice(item.flight, item.cabin).toLocaleString()}</span>
+                      {item.flight.departureTime} - {item.flight.arrivalTime} | {getCabinName(item.cabin)} | 日期: {new Date(item.flight.departureDate).toLocaleDateString('zh-TW')} | NT$ {getPrice(item.flight, item.cabin).toLocaleString()}
                     </div>
                   </div>
                 ))}
