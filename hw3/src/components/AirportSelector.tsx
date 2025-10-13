@@ -21,6 +21,33 @@ const AirportSelector = ({
 
   // 過濾機場（排除指定的機場）
   const getFilteredAirports = () => {
+    // 如果有搜尋詞，搜尋所有地區的機場
+    if (searchTerm) {
+      let allAirports: any[] = []
+      
+      // 收集所有地區的機場
+      airportRegions.forEach(region => {
+        allAirports = allAirports.concat(region.airports)
+      })
+      
+      // 搜尋過濾
+      allAirports = allAirports.filter(airport => 
+        airport.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        airport.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        airport.country.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      
+      // 排除指定的機場
+      if (excludeAirport) {
+        allAirports = allAirports.filter(airport => 
+          formatAirportDisplay(airport) !== excludeAirport
+        )
+      }
+      
+      return allAirports
+    }
+    
+    // 沒有搜尋詞時，只顯示當前選中地區的機場
     const region = airportRegions.find(r => r.id === selectedRegion)
     if (!region) return []
     
@@ -30,15 +57,6 @@ const AirportSelector = ({
     if (excludeAirport) {
       airports = airports.filter(airport => 
         formatAirportDisplay(airport) !== excludeAirport
-      )
-    }
-    
-    // 搜尋過濾
-    if (searchTerm) {
-      airports = airports.filter(airport => 
-        airport.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        airport.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        airport.country.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
     
