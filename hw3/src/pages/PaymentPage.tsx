@@ -196,7 +196,7 @@ function PaymentPage({ selectedFlights, onCompleteOrder }: PaymentPageProps) {
                   </div>
                   <div className="info-item">
                     <span className="info-label">戶名</span>
-                    <span className="info-value">星程航空股份有限公司</span>
+                    <span className="info-value">欸米航空股份有限公司</span>
                   </div>
                   <div className="info-item">
                     <span className="info-label">轉帳金額</span>

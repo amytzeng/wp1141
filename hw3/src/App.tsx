@@ -90,8 +90,8 @@ function App() {
         <header className="header">
           <div className="header-content">
             <Link to="/" className="logo-link">
-              <h1 className="logo">星程航空</h1>
-              <p className="tagline">STARLUX AIRLINES</p>
+              <h1 className="logo">欸米航空</h1>
+              <p className="tagline">AMARS AIRLINES</p>
             </Link>
             <nav className="nav">
               <Link to="/" className="nav-link">搜尋航班</Link>
@@ -116,7 +116,7 @@ function App() {
         </Routes>
 
         <footer className="footer">
-          <p>© 2025 星程航空 Star Airways. All rights reserved.</p>
+          <p>© 2025 欸米航空 AMARS Airways. All rights reserved.</p>
         </footer>
       </div>
     </Router>
