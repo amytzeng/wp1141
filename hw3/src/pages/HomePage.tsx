@@ -236,6 +236,21 @@ function HomePage({ onSelectFlight }: HomePageProps) {
   }
 
   const getPrice = (flight: Flight, cabin: CabinClass): number => {
+    // 檢查是否有通關密語且是 10/17 航班
+    const isDate1017 = (dateStr: string): boolean => {
+      if (!dateStr) return false
+      const date = new Date(dateStr)
+      const month = date.getMonth() + 1 // getMonth() 返回 0-11
+      const day = date.getDate()
+      return month === 10 && day === 17
+    }
+
+    const hasSecretCode = searchParams?.hasSecretCode && isDate1017(flight.departureDate)
+    
+    if (hasSecretCode) {
+      return 0 // 通關密語有效時免費
+    }
+
     switch (cabin) {
       case 'economy':
         return flight.price_economy

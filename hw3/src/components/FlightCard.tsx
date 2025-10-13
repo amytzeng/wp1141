@@ -73,12 +73,28 @@ const FlightCard = ({ flight, cabin, price, onSelect }: FlightCardProps) => {
           <span className="seats-available">剩餘 {flight.availableSeats} 個座位</span>
         </div>
         <div className="booking-section">
-          <div className="price">
-            <span className="currency">NT$</span>
-            <span className="amount">{price.toLocaleString()}</span>
+          <div className={`price ${price === 0 ? 'free-price' : ''}`}>
+            {price === 0 ? (
+              <>
+                <span className="free-label">🎉 免費</span>
+                <span className="original-price">
+                  <span className="currency">NT$</span>
+                  <span className="amount">
+                    {cabin === 'economy' ? flight.price_economy : 
+                     cabin === 'business' ? flight.price_business : 
+                     flight.price_first}
+                  </span>
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="currency">NT$</span>
+                <span className="amount">{price.toLocaleString()}</span>
+              </>
+            )}
           </div>
           <button 
-            className="book-button"
+            className={`book-button ${price === 0 ? 'free-button' : ''}`}
             onClick={() => onSelect && onSelect(flight)}
           >
             選擇

@@ -28,10 +28,62 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
     { departure: '', destination: '', date: '', cabin: 'economy' },
     { departure: '', destination: '', date: '', cabin: 'economy' }
   ])
+  const [secretCode, setSecretCode] = useState('')
+  const [showSecretModal, setShowSecretModal] = useState(false)
+  const [secretModalMessage, setSecretModalMessage] = useState('')
+  const [hasValidSecretCode, setHasValidSecretCode] = useState(false)
 
 
 
 
+
+  // 檢查日期是否包含 10/17
+  const isDate1017 = (dateStr: string): boolean => {
+    if (!dateStr) return false
+    const date = new Date(dateStr)
+    const month = date.getMonth() + 1 // getMonth() 返回 0-11
+    const day = date.getDate()
+    return month === 10 && day === 17
+  }
+
+  // 檢查是否包含 10/17 日期
+  const hasDate1017 = (): boolean => {
+    if (tripType === 'oneway' || tripType === 'roundtrip') {
+      return isDate1017(departureDate) || isDate1017(returnDate)
+    } else if (tripType === 'multicity') {
+      return multiCityLegs.some(leg => isDate1017(leg.date))
+    }
+    return false
+  }
+
+  // 處理通關密語
+  const handleSecretCode = () => {
+    const isCorrectDate = hasDate1017()
+    const isCorrectCode = secretCode === '欸米生日快樂！'
+
+    if (isCorrectDate && isCorrectCode) {
+      setSecretModalMessage('欸米很開心！恭喜獲得免費機票！')
+      setShowSecretModal(true)
+      setHasValidSecretCode(true) // 設置為有效狀態
+      // 清空通關密語
+      setSecretCode('')
+      
+      // 延遲執行搜尋，讓用戶看到成功訊息
+      setTimeout(() => {
+        setShowSecretModal(false)
+        // 直接觸發搜尋
+        handleSubmit(new Event('submit') as any)
+      }, 2000)
+    } else if (!isCorrectDate) {
+      setSecretModalMessage('欸米不開心，該日期無法使用')
+      setShowSecretModal(true)
+      setSecretCode('')
+    } else if (isCorrectCode === false) {
+      setSecretModalMessage('欸米不開心，通關密語錯誤')
+      setShowSecretModal(true)
+      setSecretCode('')
+    }
+  }
 
   const handleAddLeg = () => {
     if (multiCityLegs.length < 4) {
@@ -94,8 +146,10 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
     setMultiCityMonths(new Array(multiCityLegs.length).fill(new Date()))
   }, [multiCityLegs.length])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = (e: React.FormEvent | Event) => {
+    if (e.preventDefault) {
+      e.preventDefault()
+    }
     
     if (tripType === 'multicity') {
       // 验证多個航段航班
@@ -137,7 +191,8 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
         destination, 
         date: departureDate, 
         cabin,
-        returnDate: tripType === 'roundtrip' ? returnDate : undefined
+        returnDate: tripType === 'roundtrip' ? returnDate : undefined,
+        hasSecretCode: hasValidSecretCode && hasDate1017()
       }
       
       console.log('✓ 實際傳送的資料:', searchData)
@@ -162,6 +217,8 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
     } else if (tripType === 'oneway') {
       setReturnDate('')
     }
+    // 重置通關密語狀態
+    setHasValidSecretCode(false)
     setShowSearchCalendar(false)
   }
 
@@ -372,6 +429,37 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
                 </select>
               </div>
             </div>
+
+            {/* 通關密語欄位 */}
+            <div className="form-row secret-code-row">
+              <div className="form-group">
+                <label htmlFor="secretCode">通關密語</label>
+                <div className="secret-code-wrapper">
+                  <input
+                    id="secretCode"
+                    type="text"
+                    value={secretCode}
+                    onChange={(e) => setSecretCode(e.target.value)}
+                    placeholder={hasDate1017() ? "輸入通關密語..." : "僅限 10/17 航班使用"}
+                    disabled={!hasDate1017()}
+                    className="form-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSecretCode}
+                    disabled={!hasDate1017() || !secretCode.trim()}
+                    className="secret-code-button"
+                  >
+                    確認
+                  </button>
+                </div>
+                {hasDate1017() && (
+                  <div className="secret-code-hint">
+                    💡 10/17 航班專屬優惠！
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         )}
 
@@ -429,6 +517,28 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
           onClose={() => setShowDestinationSelector(false)}
           excludeAirport={tripType === 'multicity' ? multiCityLegs[currentLegIndex]?.departure || '' : departure}
         />
+      )}
+
+      {/* 通關密語提示模態框 */}
+      {showSecretModal && (
+        <div className="secret-modal-overlay">
+          <div className="secret-modal">
+            <div className="secret-modal-content">
+              <div className="secret-modal-icon">
+                {secretModalMessage.includes('很開心') ? '🎉' : '😞'}
+              </div>
+              <div className="secret-modal-message">
+                {secretModalMessage}
+              </div>
+              <button
+                className="secret-modal-button"
+                onClick={() => setShowSecretModal(false)}
+              >
+                確定
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

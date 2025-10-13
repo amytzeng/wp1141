@@ -32,5 +32,6 @@ export interface SearchParams {
   cabin: CabinClass;
   returnDate?: string;
   multiCityLegs?: MultiCityLeg[];
+  hasSecretCode?: boolean; // 是否有有效的通關密語
 }
 

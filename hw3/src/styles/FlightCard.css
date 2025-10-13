@@ -183,6 +183,64 @@
   color: var(--gold-color);
 }
 
+/* 免費價格樣式 */
+.free-price {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.free-price .free-label {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ff4444;
+  text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+  animation: pulse 2s infinite;
+}
+
+.free-price .original-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.free-price .original-price .currency {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.free-price .original-price .amount {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.free-button {
+  background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%) !important;
+  box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3) !important;
+}
+
+.free-button:hover {
+  background: linear-gradient(135deg, #ff6666 0%, #ff0000 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4) !important;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .book-button {
   padding: 0.8rem 2rem;
   background: linear-gradient(135deg, var(--gold-color) 0%, #b8941f 100%);
