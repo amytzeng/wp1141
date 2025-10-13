@@ -9,6 +9,7 @@
 }
 
 .calendar-header {
+  position: relative;
   text-align: center;
   margin-bottom: 2rem;
 }
@@ -218,6 +219,50 @@
   margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
+}
+
+.calendar-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.calendar-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.confirm-large {
+  background: linear-gradient(135deg, #1a4d66, #0f3a4a);
+  color: #ffd700;
+  border: none;
+  padding: 1.2rem 3rem;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(26, 77, 102, 0.3);
+  min-width: 150px;
+}
+
+.confirm-large:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(26, 77, 102, 0.4);
+}
+
+.confirm-large:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .confirm-button {

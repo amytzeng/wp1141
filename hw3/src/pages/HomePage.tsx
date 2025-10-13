@@ -361,7 +361,7 @@ function HomePage({ onSelectFlight }: HomePageProps) {
 
   return (
     <main className="main-content">
-      {!searchParams && <SearchForm onSearch={handleSearch} />}
+      {!searchParams && <SearchForm onSearch={handleSearch} flights={flights} />}
       
       {searchParams && showFullCalendar && (
         <div className="calendar-modal">

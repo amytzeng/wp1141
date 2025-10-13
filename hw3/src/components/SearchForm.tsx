@@ -1,27 +1,26 @@
 import { useState, useEffect } from 'react'
 import { SearchParams, CabinClass, TripType, MultiCityLeg } from '../types/Flight'
 import AirportSelector from './AirportSelector'
+import SearchCalendar from './SearchCalendar'
 import '../styles/SearchForm.css'
 import '../styles/FullCalendar.css'
 
 interface SearchFormProps {
   onSearch: (params: SearchParams) => void
+  flights?: any[] // 航班數據用於顯示價格
 }
 
-const SearchForm = ({ onSearch }: SearchFormProps) => {
+const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
   const [tripType, setTripType] = useState<TripType>('roundtrip')
   const [departure, setDeparture] = useState('')
   const [destination, setDestination] = useState('')
   const [departureDate, setDepartureDate] = useState(new Date().toISOString().split('T')[0])
   const [returnDate, setReturnDate] = useState('')
-  const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
-  const [showReturnCalendar, setShowReturnCalendar] = useState(false)
+  const [showSearchCalendar, setShowSearchCalendar] = useState(false)
   const [showMultiCityCalendars, setShowMultiCityCalendars] = useState<boolean[]>([])
   const [showDepartureSelector, setShowDepartureSelector] = useState(false)
   const [showDestinationSelector, setShowDestinationSelector] = useState(false)
   const [currentLegIndex, setCurrentLegIndex] = useState(0)
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [returnCurrentMonth, setReturnCurrentMonth] = useState(new Date())
   const [multiCityMonths, setMultiCityMonths] = useState<Date[]>([])
   const [cabin, setCabin] = useState<CabinClass>('economy')
   const [multiCityLegs, setMultiCityLegs] = useState<MultiCityLeg[]>([
@@ -134,18 +133,8 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     return days
   }
 
-  const handleDateSelect = (date: string, type: 'departure' | 'return' | 'multicity', index?: number) => {
-    if (type === 'departure') {
-      setDepartureDate(date)
-      setShowDepartureCalendar(false)
-      // 如果是來回票且回程日期早於出發日期，清空回程日期
-      if (tripType === 'roundtrip' && returnDate && date >= returnDate) {
-        setReturnDate('')
-      }
-    } else if (type === 'return') {
-      setReturnDate(date)
-      setShowReturnCalendar(false)
-    } else if (type === 'multicity' && index !== undefined) {
+  const handleDateSelect = (date: string, type: 'multicity', index?: number) => {
+    if (type === 'multicity' && index !== undefined) {
       const newLegs = [...multiCityLegs]
       newLegs[index].date = date
       setMultiCityLegs(newLegs)
@@ -156,28 +145,16 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     }
   }
 
-  const handlePrevMonth = (type: 'departure' | 'return' | 'multicity', index?: number) => {
-    if (type === 'departure') {
-      setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
-    } else if (type === 'return') {
-      setReturnCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
-    } else if (type === 'multicity' && index !== undefined) {
-      const newMonths = [...multiCityMonths]
-      newMonths[index] = new Date(newMonths[index].getFullYear(), newMonths[index].getMonth() - 1, 1)
-      setMultiCityMonths(newMonths)
-    }
+  const handlePrevMonth = (index: number) => {
+    const newMonths = [...multiCityMonths]
+    newMonths[index] = new Date(newMonths[index].getFullYear(), newMonths[index].getMonth() - 1, 1)
+    setMultiCityMonths(newMonths)
   }
 
-  const handleNextMonth = (type: 'departure' | 'return' | 'multicity', index?: number) => {
-    if (type === 'departure') {
-      setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
-    } else if (type === 'return') {
-      setReturnCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
-    } else if (type === 'multicity' && index !== undefined) {
-      const newMonths = [...multiCityMonths]
-      newMonths[index] = new Date(newMonths[index].getFullYear(), newMonths[index].getMonth() + 1, 1)
-      setMultiCityMonths(newMonths)
-    }
+  const handleNextMonth = (index: number) => {
+    const newMonths = [...multiCityMonths]
+    newMonths[index] = new Date(newMonths[index].getFullYear(), newMonths[index].getMonth() + 1, 1)
+    setMultiCityMonths(newMonths)
   }
 
   const monthNames = [
@@ -251,6 +228,17 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
     const temp = departure
     setDeparture(destination)
     setDestination(temp)
+  }
+
+  // 處理搜尋日曆的日期選擇
+  const handleSearchCalendarDateSelect = (departureDate: string, returnDate?: string) => {
+    setDepartureDate(departureDate)
+    if (tripType === 'roundtrip' && returnDate) {
+      setReturnDate(returnDate)
+    } else if (tripType === 'oneway') {
+      setReturnDate('')
+    }
+    setShowSearchCalendar(false)
   }
 
   return (
@@ -419,50 +407,29 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
 
             <div className="form-row dates-row">
               <div className="form-group">
-                <label htmlFor="departureDate">出發日期</label>
+                <label>日期選擇</label>
                 <div className="date-input-wrapper">
                   <input
                     type="text"
-                    id="departureDate"
-                    value={departureDate ? new Date(departureDate).toLocaleDateString('zh-TW') : ''}
+                    value={
+                      tripType === 'roundtrip' 
+                        ? `${departureDate ? new Date(departureDate).toLocaleDateString('zh-TW') : '選擇出發日期'}${returnDate ? ' - ' + new Date(returnDate).toLocaleDateString('zh-TW') : ''}`
+                        : departureDate ? new Date(departureDate).toLocaleDateString('zh-TW') : '選擇出發日期'
+                    }
                     readOnly
-                    placeholder="選擇出發日期"
-                    onClick={() => setShowDepartureCalendar(true)}
+                    placeholder={tripType === 'roundtrip' ? '選擇來回日期' : '選擇出發日期'}
+                    onClick={() => setShowSearchCalendar(true)}
                     className="date-display-input"
                   />
                   <button
                     type="button"
                     className="calendar-icon-button"
-                    onClick={() => setShowDepartureCalendar(true)}
+                    onClick={() => setShowSearchCalendar(true)}
                   >
                     📅
                   </button>
                 </div>
               </div>
-
-              {tripType === 'roundtrip' && (
-                <div className="form-group">
-                  <label htmlFor="returnDate">回程日期</label>
-                  <div className="date-input-wrapper">
-                    <input
-                      type="text"
-                      id="returnDate"
-                      value={returnDate ? new Date(returnDate).toLocaleDateString('zh-TW') : ''}
-                      readOnly
-                      placeholder="選擇回程日期"
-                      onClick={() => setShowReturnCalendar(true)}
-                      className="date-display-input"
-                    />
-                    <button
-                      type="button"
-                      className="calendar-icon-button"
-                      onClick={() => setShowReturnCalendar(true)}
-                    >
-                      📅
-                    </button>
-                  </div>
-                </div>
-              )}
 
               <div className="form-group">
                 <label htmlFor="cabin">艙等</label>
@@ -486,116 +453,19 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
         </button>
       </form>
 
-      {/* 出發日期日曆 */}
-      {showDepartureCalendar && (
-        <div className="calendar-modal">
-          <div className="calendar-overlay" onClick={() => setShowDepartureCalendar(false)}></div>
-          <div className="calendar-container">
-            <div className="full-calendar">
-              <div className="calendar-header">
-                <div className="calendar-title">選擇出發日期</div>
-              </div>
-
-              <div className="calendar-navigation">
-                <button className="nav-button" onClick={() => handlePrevMonth('departure')}>
-                  ‹
-                </button>
-                <div className="month-year">
-                  {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-                </div>
-                <button className="nav-button" onClick={() => handleNextMonth('departure')}>
-                  ›
-                </button>
-              </div>
-
-              <div className="calendar-grid">
-                <div className="weekdays">
-                  {weekDays.map(day => (
-                    <div key={day} className="weekday">{day}</div>
-                  ))}
-                </div>
-                
-                <div className="days-grid">
-                  {getCalendarDays(currentMonth).map((dayData, index) => {
-                    const isSelected = dayData.date === departureDate
-                    const isWeekend = new Date(dayData.date).getDay() === 0 || new Date(dayData.date).getDay() === 6
-                    const isPast = dayData.date < new Date().toISOString().split('T')[0]
-
-                    return (
-                      <div
-                        key={`${dayData.date}-${index}`}
-                        className={`calendar-day ${!dayData.isCurrentMonth ? 'other-month' : ''} ${
-                          isSelected ? 'selected' : ''
-                        } ${isWeekend ? 'weekend' : ''} ${
-                          dayData.isToday ? 'today' : ''
-                        } ${isPast ? 'past-date' : ''}`}
-                        onClick={() => dayData.isCurrentMonth && !isPast && handleDateSelect(dayData.date, 'departure')}
-                      >
-                        <div className="day-number">{dayData.day}</div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 回程日期日曆 */}
-      {showReturnCalendar && (
-        <div className="calendar-modal">
-          <div className="calendar-overlay" onClick={() => setShowReturnCalendar(false)}></div>
-          <div className="calendar-container">
-            <div className="full-calendar">
-              <div className="calendar-header">
-                <div className="calendar-title">選擇回程日期</div>
-              </div>
-
-              <div className="calendar-navigation">
-                <button className="nav-button" onClick={() => handlePrevMonth('return')}>
-                  ‹
-                </button>
-                <div className="month-year">
-                  {monthNames[returnCurrentMonth.getMonth()]} {returnCurrentMonth.getFullYear()}
-                </div>
-                <button className="nav-button" onClick={() => handleNextMonth('return')}>
-                  ›
-                </button>
-              </div>
-
-              <div className="calendar-grid">
-                <div className="weekdays">
-                  {weekDays.map(day => (
-                    <div key={day} className="weekday">{day}</div>
-                  ))}
-                </div>
-                
-                <div className="days-grid">
-                  {getCalendarDays(returnCurrentMonth).map((dayData, index) => {
-                    const isSelected = dayData.date === returnDate
-                    const isWeekend = new Date(dayData.date).getDay() === 0 || new Date(dayData.date).getDay() === 6
-                    const isPast = dayData.date < departureDate
-
-                    return (
-                      <div
-                        key={`${dayData.date}-${index}`}
-                        className={`calendar-day ${!dayData.isCurrentMonth ? 'other-month' : ''} ${
-                          isSelected ? 'selected' : ''
-                        } ${isWeekend ? 'weekend' : ''} ${
-                          dayData.isToday ? 'today' : ''
-                        } ${isPast ? 'past-date' : ''}`}
-                        onClick={() => dayData.isCurrentMonth && !isPast && handleDateSelect(dayData.date, 'return')}
-                      >
-                        <div className="day-number">{dayData.day}</div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* 搜尋日曆 */}
+      {showSearchCalendar && (
+        <SearchCalendar
+          flights={flights}
+          cabin={cabin}
+          tripType={tripType === 'multicity' ? 'roundtrip' : tripType}
+          departure={departure}
+          destination={destination}
+          onDateSelect={handleSearchCalendarDateSelect}
+          onClose={() => setShowSearchCalendar(false)}
+          initialDepartureDate={departureDate}
+          initialReturnDate={returnDate}
+        />
       )}
 
       {/* 多程日曆 */}
@@ -613,13 +483,13 @@ const SearchForm = ({ onSearch }: SearchFormProps) => {
               </div>
 
               <div className="calendar-navigation">
-                <button className="nav-button" onClick={() => handlePrevMonth('multicity', index)}>
+                <button className="nav-button" onClick={() => handlePrevMonth(index)}>
                   ‹
                 </button>
                 <div className="month-year">
                   {monthNames[multiCityMonths[index]?.getMonth()]} {multiCityMonths[index]?.getFullYear()}
                 </div>
-                <button className="nav-button" onClick={() => handleNextMonth('multicity', index)}>
+                <button className="nav-button" onClick={() => handleNextMonth(index)}>
                   ›
                 </button>
               </div>
