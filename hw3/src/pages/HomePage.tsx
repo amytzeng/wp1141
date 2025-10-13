@@ -5,6 +5,7 @@ import SearchForm from '../components/SearchForm'
 import FlightList from '../components/FlightList'
 import FullCalendar from '../components/FullCalendar'
 import FlightPlanSelector from '../components/FlightPlanSelector'
+import SeatSelector from '../components/SeatSelector'
 import { Flight, SearchParams, CabinClass } from '../types/Flight'
 import { extractAirportCode } from '../data/airports'
 import '../styles/HomePage.css'
@@ -26,6 +27,8 @@ function HomePage({ onSelectFlight }: HomePageProps) {
   const [selectedDateRange, setSelectedDateRange] = useState<{start: string | null, end: string | null}>({start: null, end: null})
   const [showPlanSelector, setShowPlanSelector] = useState(false)
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null)
+  const [showSeatSelector, setShowSeatSelector] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<'value' | 'basic' | 'full' | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -269,12 +272,118 @@ function HomePage({ onSelectFlight }: HomePageProps) {
     setShowPlanSelector(true)
   }
 
+  const handleSeatConfirm = (seatNumber: string) => {
+    if (!selectedFlight || !searchParams || !selectedPlan) return
+
+    console.log('選擇座位:', seatNumber, '方案:', selectedPlan)
+    
+    // 根據方案調整價格（全額方案 +1000）
+    const priceModifier = 1000
+    const adjustedFlight = {
+      ...selectedFlight,
+      price_economy: selectedFlight.price_economy + priceModifier,
+      price_business: selectedFlight.price_business + priceModifier,
+      price_first: selectedFlight.price_first + priceModifier
+    }
+    
+    // 關閉座位選擇器
+    setShowSeatSelector(false)
+    setSelectedFlight(null)
+    setSelectedPlan(null)
+
+    // 繼續原本的選擇邏輯
+    if (searchParams.tripType === 'oneway') {
+      // 单程：直接加入购物车
+      onSelectFlight(adjustedFlight, searchParams.cabin)
+      navigate('/cart')
+    } else if (searchParams.tripType === 'roundtrip') {
+      // 来回
+      if (currentLegIndex === 0) {
+        // 选择了去程，保存並顯示回程
+        setSelectedFlights([adjustedFlight])
+        
+        const returnDateToUse = selectedDateRange.end || searchParams.returnDate
+        const departureCode = extractAirportCode(searchParams.destination)
+        const destinationCode = extractAirportCode(searchParams.departure)
+        
+        console.log('🟢 查找回程航班')
+        console.log('   出發地碼:', departureCode)
+        console.log('   目的地碼:', destinationCode)
+        console.log('   日期:', returnDateToUse)
+        
+        const returnFlights = flights.filter(f => {
+          const fDep = extractAirportCode(f.departure)
+          const fDest = extractAirportCode(f.destination)
+          const match = fDep === departureCode && 
+                       fDest === destinationCode && 
+                       f.departureDate === returnDateToUse
+          
+          if (match) {
+            console.log('   ✅ 找到回程:', f.flightNumber, f.departure, '->', f.destination)
+          }
+          return match
+        })
+        
+        console.log('🟢 回程航班數量:', returnFlights.length)
+        
+        setFilteredFlights(returnFlights)
+        setCurrentLegIndex(1)
+        setDisplayDate(returnDateToUse || '')
+      } else {
+        // 选择了回程，全部加入购物车
+        onSelectFlight(selectedFlights[0], searchParams.cabin)
+        onSelectFlight(adjustedFlight, searchParams.cabin)
+        navigate('/cart')
+      }
+    } else if (searchParams.tripType === 'multicity') {
+      // 多個航段
+      const newSelectedFlights = [...selectedFlights, adjustedFlight]
+      setSelectedFlights(newSelectedFlights)
+      
+      if (currentLegIndex < (searchParams.multiCityLegs?.length || 0) - 1) {
+        // 还有下一个航段
+        const nextIndex = currentLegIndex + 1
+        const nextLeg = searchParams.multiCityLegs![nextIndex]
+        const departureCode = extractAirportCode(nextLeg.departure)
+        const destinationCode = extractAirportCode(nextLeg.destination)
+        
+        const nextLegFlights = flights.filter(f => 
+          extractAirportCode(f.departure) === departureCode && 
+          extractAirportCode(f.destination) === destinationCode && 
+          f.departureDate === nextLeg.date
+        )
+        
+        setFilteredFlights(nextLegFlights)
+        setCurrentLegIndex(nextIndex)
+        setDisplayDate(nextLeg.date)
+      } else {
+        // 所有航段都选完了
+        newSelectedFlights.forEach(flight => {
+          const legIndex = newSelectedFlights.indexOf(flight)
+          const legCabin = searchParams.multiCityLegs![legIndex].cabin
+          onSelectFlight(flight, legCabin)
+        })
+        navigate('/cart')
+      }
+    }
+  }
+
   const handlePlanSelect = (plan: 'value' | 'basic' | 'full') => {
     if (!selectedFlight || !searchParams) return
 
     console.log('選擇方案:', plan, selectedFlight)
     
-    // 根據方案調整價格
+    // 保存選擇的方案
+    setSelectedPlan(plan)
+    
+    // 如果選擇全額方案，顯示座位選擇器
+    if (plan === 'full') {
+      setShowPlanSelector(false)
+      setShowSeatSelector(true)
+      return
+    }
+    
+    // 其他方案：根據方案調整價格後繼續
     const priceModifier = plan === 'value' ? 0 : plan === 'basic' ? 300 : 1000
     const adjustedFlight = {
       ...selectedFlight,
@@ -286,6 +395,7 @@ function HomePage({ onSelectFlight }: HomePageProps) {
     // 關閉方案選擇器
     setShowPlanSelector(false)
     setSelectedFlight(null)
+    setSelectedPlan(null)
 
     // 繼續原本的選擇邏輯
     if (!searchParams) return
@@ -515,6 +625,20 @@ function HomePage({ onSelectFlight }: HomePageProps) {
           onClose={() => {
             setShowPlanSelector(false)
             setSelectedFlight(null)
+            setSelectedPlan(null)
+          }}
+        />
+      )}
+
+      {showSeatSelector && selectedFlight && (
+        <SeatSelector
+          flight={selectedFlight}
+          cabin={searchParams?.cabin || 'economy'}
+          onConfirm={handleSeatConfirm}
+          onClose={() => {
+            setShowSeatSelector(false)
+            setSelectedFlight(null)
+            setSelectedPlan(null)
           }}
         />
       )}

@@ -29,6 +29,32 @@ const FlightCard = ({ flight, cabin, price, onSelect }: FlightCardProps) => {
     }
   }
 
+  // 根據機型和艙等計算座位數
+  const getAvailableSeats = (cabin: CabinClass): number => {
+    const isSmallAircraft = flight.aircraft === 'A321neo' // 180 seats
+    const totalSeats = isSmallAircraft ? 180 : 300 // A350-900 has 300 seats
+    
+    // 計算各艙等座位數
+    const firstClassSeats = Math.floor(totalSeats * 0.05)
+    const businessClassSeats = Math.floor(totalSeats * 0.15)
+    const economyClassSeats = totalSeats - firstClassSeats - businessClassSeats
+    
+    // 模擬可用座位（假設 70% 可用）
+    const availabilityRate = 0.7
+    
+    switch (cabin) {
+      case 'first':
+        // 頭等艙：1-1 配置，每排 2 座
+        return Math.floor(firstClassSeats * availabilityRate)
+      case 'business':
+        // 商務艙：2-2-2 配置，每排 6 座
+        return Math.floor(businessClassSeats * availabilityRate)
+      case 'economy':
+        // 經濟艙：小飛機 3-3-3 (9座/排)，大飛機 3-4-3 (10座/排)
+        return Math.floor(economyClassSeats * availabilityRate)
+    }
+  }
+
   return (
     <div className="flight-card">
       <div className="flight-header">
@@ -70,7 +96,7 @@ const FlightCard = ({ flight, cabin, price, onSelect }: FlightCardProps) => {
       <div className="flight-footer">
         <div className="cabin-info">
           <span className="cabin-class">{getCabinName(cabin)}</span>
-          <span className="seats-available">剩餘 {flight.availableSeats} 個座位</span>
+          <span className="seats-available">剩餘 {getAvailableSeats(cabin)} 個座位</span>
         </div>
         <div className="booking-section">
           <div className={`price ${price === 0 ? 'free-price' : ''}`}>
