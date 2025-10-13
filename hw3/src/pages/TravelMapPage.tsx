@@ -77,19 +77,27 @@ function TravelMapPage({ orders }: TravelMapPageProps) {
       
       try {
         // 初始化地圖
-        const map = (window as any).L.map(mapRef.current, {
+        const L = (window as any).L
+        const map = L.map(mapRef.current, {
           minZoom: 2,
-          maxZoom: 10
+          maxZoom: 10,
+          maxBoundsViscosity: 1.0  // 拖動到邊界自動反彈
         }).setView([20, 0], 2)
         
-        // 設定地圖可拖動範圍
-        map.setMaxBounds([
-          [-90, -180],
-          [90, 180]
-        ])
+        // 設定地圖可拖動範圍（整個世界緯度 -90~90，經度 -180~180）
+        const southWest = L.latLng(-90, -180)
+        const northEast = L.latLng(90, 180)
+        const bounds = L.latLngBounds(southWest, northEast)
+        
+        map.setMaxBounds(bounds)
+        
+        // 限制拖動範圍
+        map.on('drag', function() {
+          map.panInsideBounds(bounds, { animate: false })
+        })
         
         // 加入 OpenStreetMap 磚圖
-        ;(window as any).L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 18,
           attribution: '© OpenStreetMap'
         }).addTo(map)
@@ -99,7 +107,7 @@ function TravelMapPage({ orders }: TravelMapPageProps) {
         // 添加旗幟標記
         visitedAirports.forEach((airport, index) => {
           console.log(`添加標記 ${index + 1}:`, airport)
-          const flagIcon = (window as any).L.divIcon({
+          const flagIcon = L.divIcon({
             html: `<div style="
               font-size: 24px;
               text-align: center;
@@ -115,7 +123,7 @@ function TravelMapPage({ orders }: TravelMapPageProps) {
             popupAnchor: [0, -20]
           })
           
-          const marker = (window as any).L.marker([airport.coordinates.lat, airport.coordinates.lng], {
+          const marker = L.marker([airport.coordinates.lat, airport.coordinates.lng], {
             icon: flagIcon
           }).addTo(map)
           
