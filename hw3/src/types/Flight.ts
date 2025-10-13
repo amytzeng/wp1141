@@ -21,6 +21,7 @@ export interface MultiCityLeg {
   departure: string;
   destination: string;
   date: string;
+  cabin: CabinClass;
 }
 
 export interface SearchParams {

@@ -265,6 +265,46 @@
   transform: none;
 }
 
+.cabin-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.cabin-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.cabin-select {
+  padding: 0.8rem 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+  min-width: 120px;
+}
+
+.cabin-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.cabin-select:hover {
+  border-color: #9ca3af;
+}
+
 .confirm-button {
   background: linear-gradient(135deg, #1a4d66, #0f3a4a);
   color: #ffd700;

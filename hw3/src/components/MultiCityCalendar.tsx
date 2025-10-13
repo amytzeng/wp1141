@@ -1,0 +1,179 @@
+import React, { useState, useMemo } from 'react'
+import { CabinClass } from '../types/Flight'
+import '../styles/FullCalendar.css'
+
+interface MultiCityCalendarProps {
+  legIndex: number
+  onDateSelect: (date: string, legIndex: number) => void
+  onClose: () => void
+  initialDate?: string
+}
+
+const MultiCityCalendar: React.FC<MultiCityCalendarProps> = ({
+  legIndex,
+  onDateSelect,
+  onClose,
+  initialDate
+}) => {
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState<string | null>(initialDate || null)
+
+  const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+  const weekDays = ['日', '一', '二', '三', '四', '五', '六']
+
+  // 生成日曆天數
+  const getCalendarDays = (month: Date) => {
+    const year = month.getFullYear()
+    const monthIndex = month.getMonth()
+    
+    const firstDay = new Date(year, monthIndex, 1)
+    const lastDay = new Date(year, monthIndex + 1, 0)
+    const firstDayOfWeek = firstDay.getDay()
+    const daysInMonth = lastDay.getDate()
+    
+    const days = []
+    
+    // 上個月的結尾日期
+    const prevMonthDate = new Date(year, monthIndex - 1, 0)
+    const prevMonthYear = prevMonthDate.getFullYear()
+    const prevMonth = prevMonthDate.getMonth() + 1
+    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+      const day = prevMonthDate.getDate() - i
+      days.push({
+        date: formatDateString(prevMonthYear, prevMonth, day),
+        day,
+        isCurrentMonth: false,
+        isToday: false
+      })
+    }
+    
+    // 當月的日期
+    const today = new Date().toISOString().split('T')[0]
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = formatDateString(year, monthIndex + 1, day)
+      days.push({
+        date,
+        day,
+        isCurrentMonth: true,
+        isToday: date === today
+      })
+    }
+    
+    // 下個月的開始日期
+    const remainingDays = 42 - days.length
+    for (let day = 1; day <= remainingDays; day++) {
+      const date = formatDateString(year, monthIndex + 2, day)
+      days.push({
+        date,
+        day,
+        isCurrentMonth: false,
+        isToday: false
+      })
+    }
+    
+    return days
+  }
+
+  // 格式化日期字符串
+  const formatDateString = (year: number, month: number, day: number): string => {
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  }
+
+  // 處理日期點擊
+  const handleDateClick = (date: string) => {
+    const today = new Date().toISOString().split('T')[0]
+    if (date < today) return
+
+    setSelectedDate(date)
+  }
+
+  // 處理月份切換
+  const handlePrevMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
+  }
+
+  const handleNextMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+  }
+
+  // 確認選擇
+  const handleConfirm = () => {
+    if (selectedDate) {
+      onDateSelect(selectedDate, legIndex)
+    }
+    onClose()
+  }
+
+  const calendarDays = useMemo(() => getCalendarDays(currentMonth), [currentMonth])
+
+  return (
+    <div className="calendar-modal">
+      <div className="calendar-overlay" onClick={onClose}></div>
+      <div className="calendar-container">
+        <div className="full-calendar">
+          <div className="calendar-header">
+            <div className="calendar-title">選擇第 {legIndex + 1} 程日期</div>
+            <button className="calendar-close" onClick={onClose}>
+              ✕
+            </button>
+          </div>
+
+          <div className="calendar-navigation">
+            <button className="nav-button" onClick={handlePrevMonth}>
+              ‹
+            </button>
+            <div className="month-year">
+              {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+            </div>
+            <button className="nav-button" onClick={handleNextMonth}>
+              ›
+            </button>
+          </div>
+
+          <div className="calendar-grid">
+            <div className="weekdays">
+              {weekDays.map(day => (
+                <div key={day} className="weekday">{day}</div>
+              ))}
+            </div>
+            
+            <div className="days-grid">
+              {calendarDays.map((dayData, index) => {
+                const isSelected = dayData.date === selectedDate
+                const isWeekend = new Date(dayData.date).getDay() === 0 || new Date(dayData.date).getDay() === 6
+                const isPast = dayData.date < new Date().toISOString().split('T')[0]
+
+                return (
+                  <div
+                    key={`${dayData.date}-${index}`}
+                    className={`calendar-day ${!dayData.isCurrentMonth ? 'other-month' : ''} ${
+                      isSelected ? 'selected' : ''
+                    } ${isWeekend ? 'weekend' : ''} ${
+                      dayData.isToday ? 'today' : ''
+                    } ${isPast ? 'past-date' : ''}`}
+                    onClick={() => dayData.isCurrentMonth && !isPast && handleDateClick(dayData.date)}
+                  >
+                    <div className="day-number">{dayData.day}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+
+          <div className="calendar-actions">
+            <button 
+              className="calendar-button confirm-large" 
+              onClick={handleConfirm}
+              disabled={!selectedDate}
+            >
+              確認
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default MultiCityCalendar

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { SearchParams, CabinClass, TripType, MultiCityLeg } from '../types/Flight'
 import AirportSelector from './AirportSelector'
 import SearchCalendar from './SearchCalendar'
+import MultiCityCalendar from './MultiCityCalendar'
 import '../styles/SearchForm.css'
 import '../styles/FullCalendar.css'
 
@@ -24,21 +25,17 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
   const [multiCityMonths, setMultiCityMonths] = useState<Date[]>([])
   const [cabin, setCabin] = useState<CabinClass>('economy')
   const [multiCityLegs, setMultiCityLegs] = useState<MultiCityLeg[]>([
-    { departure: '', destination: '', date: '' },
-    { departure: '', destination: '', date: '' }
+    { departure: '', destination: '', date: '', cabin: 'economy' },
+    { departure: '', destination: '', date: '', cabin: 'economy' }
   ])
 
 
 
-  // 格式化日期字符串，避免時區問題
-  const formatDateString = (year: number, month: number, day: number): string => {
-    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-  }
 
 
   const handleAddLeg = () => {
     if (multiCityLegs.length < 4) {
-      setMultiCityLegs([...multiCityLegs, { departure: '', destination: '', date: '' }])
+      setMultiCityLegs([...multiCityLegs, { departure: '', destination: '', date: '', cabin: 'economy' }])
       setShowMultiCityCalendars([...showMultiCityCalendars, false])
       setMultiCityMonths([...multiCityMonths, new Date()])
     }
@@ -78,91 +75,18 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
   }
 
   // 日曆相關函數
-  const getCalendarDays = (month: Date) => {
-    const year = month.getFullYear()
-    const monthIndex = month.getMonth()
+
+  const handleMultiCityDateSelect = (date: string, legIndex: number) => {
+    const newLegs = [...multiCityLegs]
+    newLegs[legIndex].date = date
+    setMultiCityLegs(newLegs)
     
-    const firstDay = new Date(year, monthIndex, 1)
-    const lastDay = new Date(year, monthIndex + 1, 0)
-    const firstDayOfWeek = firstDay.getDay()
-    const daysInMonth = lastDay.getDate()
-    
-    const days = []
-    
-    // 上个月的结尾日期
-    const prevMonthDate = new Date(year, monthIndex - 1, 0)
-    const prevMonthYear = prevMonthDate.getFullYear()
-    const prevMonth = prevMonthDate.getMonth() + 1
-    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-      const day = prevMonthDate.getDate() - i
-      days.push({
-        date: formatDateString(prevMonthYear, prevMonth, day),
-        day,
-        isCurrentMonth: false,
-        isToday: false
-      })
-    }
-    
-    // 当前月的日期
-    const today = new Date()
-    const todayStr = formatDateString(today.getFullYear(), today.getMonth() + 1, today.getDate())
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = formatDateString(year, monthIndex + 1, day)
-      days.push({
-        date,
-        day,
-        isCurrentMonth: true,
-        isToday: date === todayStr
-      })
-    }
-    
-    // 下个月的开始日期
-    const nextMonthDate = new Date(year, monthIndex + 1, 1)
-    const nextMonthYear = nextMonthDate.getFullYear()
-    const nextMonth = nextMonthDate.getMonth() + 1
-    const remainingDays = 42 - days.length
-    for (let day = 1; day <= remainingDays; day++) {
-      days.push({
-        date: formatDateString(nextMonthYear, nextMonth, day),
-        day,
-        isCurrentMonth: false,
-        isToday: false
-      })
-    }
-    
-    return days
+    const newCalendars = [...showMultiCityCalendars]
+    newCalendars[legIndex] = false
+    setShowMultiCityCalendars(newCalendars)
   }
 
-  const handleDateSelect = (date: string, type: 'multicity', index?: number) => {
-    if (type === 'multicity' && index !== undefined) {
-      const newLegs = [...multiCityLegs]
-      newLegs[index].date = date
-      setMultiCityLegs(newLegs)
-      
-      const newCalendars = [...showMultiCityCalendars]
-      newCalendars[index] = false
-      setShowMultiCityCalendars(newCalendars)
-    }
-  }
 
-  const handlePrevMonth = (index: number) => {
-    const newMonths = [...multiCityMonths]
-    newMonths[index] = new Date(newMonths[index].getFullYear(), newMonths[index].getMonth() - 1, 1)
-    setMultiCityMonths(newMonths)
-  }
-
-  const handleNextMonth = (index: number) => {
-    const newMonths = [...multiCityMonths]
-    newMonths[index] = new Date(newMonths[index].getFullYear(), newMonths[index].getMonth() + 1, 1)
-    setMultiCityMonths(newMonths)
-  }
-
-  const monthNames = [
-    '一月', '二月', '三月', '四月', '五月', '六月',
-    '七月', '八月', '九月', '十月', '十一月', '十二月'
-  ]
-
-  const weekDays = ['日', '一', '二', '三', '四', '五', '六']
 
   // 初始化多程日曆狀態
   useEffect(() => {
@@ -348,6 +272,22 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
                       </button>
                     </div>
                   </div>
+                  <div className="form-group">
+                    <label>艙等</label>
+                    <select
+                      value={leg.cabin}
+                      onChange={(e) => {
+                        const newLegs = [...multiCityLegs]
+                        newLegs[index].cabin = e.target.value as CabinClass
+                        setMultiCityLegs(newLegs)
+                      }}
+                      className="form-select"
+                    >
+                      <option value="economy">經濟艙</option>
+                      <option value="business">商務艙</option>
+                      <option value="first">頭等艙</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             ))}
@@ -356,19 +296,6 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
                 + 新增行程
               </button>
             )}
-            <div className="form-group cabin-selector">
-              <label htmlFor="cabin">艙等</label>
-              <select
-                id="cabin"
-                value={cabin}
-                onChange={(e) => setCabin(e.target.value as CabinClass)}
-                className="form-select"
-              >
-                <option value="economy">經濟艙</option>
-                <option value="business">商務艙</option>
-                <option value="first">頭等艙</option>
-              </select>
-            </div>
           </div>
         ) : (
           <>
@@ -470,63 +397,17 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
 
       {/* 多程日曆 */}
       {showMultiCityCalendars.map((showCalendar, index) => showCalendar && (
-        <div key={`multicity-calendar-${index}`} className="calendar-modal">
-          <div className="calendar-overlay" onClick={() => {
+        <MultiCityCalendar
+          key={`multicity-calendar-${index}`}
+          legIndex={index}
+          onDateSelect={handleMultiCityDateSelect}
+          onClose={() => {
             const newCalendars = [...showMultiCityCalendars]
             newCalendars[index] = false
             setShowMultiCityCalendars(newCalendars)
-          }}></div>
-          <div className="calendar-container">
-            <div className="full-calendar">
-              <div className="calendar-header">
-                <div className="calendar-title">選擇第 {index + 1} 程日期</div>
-              </div>
-
-              <div className="calendar-navigation">
-                <button className="nav-button" onClick={() => handlePrevMonth(index)}>
-                  ‹
-                </button>
-                <div className="month-year">
-                  {monthNames[multiCityMonths[index]?.getMonth()]} {multiCityMonths[index]?.getFullYear()}
-                </div>
-                <button className="nav-button" onClick={() => handleNextMonth(index)}>
-                  ›
-                </button>
-              </div>
-
-              <div className="calendar-grid">
-                <div className="weekdays">
-                  {weekDays.map(day => (
-                    <div key={day} className="weekday">{day}</div>
-                  ))}
-                </div>
-                
-                <div className="days-grid">
-                  {getCalendarDays(multiCityMonths[index] || new Date()).map((dayData, dayIndex) => {
-                    const isSelected = dayData.date === multiCityLegs[index]?.date
-                    const isWeekend = new Date(dayData.date).getDay() === 0 || new Date(dayData.date).getDay() === 6
-                    const minDate = index === 0 ? new Date().toISOString().split('T')[0] : multiCityLegs[index - 1]?.date || new Date().toISOString().split('T')[0]
-                    const isPast = dayData.date < minDate
-
-                    return (
-                      <div
-                        key={`${dayData.date}-${dayIndex}`}
-                        className={`calendar-day ${!dayData.isCurrentMonth ? 'other-month' : ''} ${
-                          isSelected ? 'selected' : ''
-                        } ${isWeekend ? 'weekend' : ''} ${
-                          dayData.isToday ? 'today' : ''
-                        } ${isPast ? 'past-date' : ''}`}
-                        onClick={() => dayData.isCurrentMonth && !isPast && handleDateSelect(dayData.date, 'multicity', index)}
-                      >
-                        <div className="day-number">{dayData.day}</div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          }}
+          initialDate={multiCityLegs[index]?.date}
+        />
       ))}
       
       {/* 機場選擇器彈窗 */}
