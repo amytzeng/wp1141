@@ -73,7 +73,7 @@ function HomePage({ onSelectFlight }: HomePageProps) {
     }
 
     if (params.tripType === 'multicity' && params.multiCityLegs) {
-      // 多程：显示第一程
+      // 多個航段：显示第一程
       const firstLeg = params.multiCityLegs[0]
       const filtered = flights.filter(flight => {
         const departureCode = extractAirportCode(firstLeg.departure)
@@ -81,7 +81,7 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         const departureMatch = flight.departure.includes(departureCode)
         const destinationMatch = flight.destination.includes(destinationCode)
         const dateMatch = flight.departureDate === firstLeg.date
-        console.log(`多程搜尋航班: 出發地=${flight.departure}, 目的地=${flight.destination}, 日期=${flight.departureDate}`)
+        console.log(`多個航段搜尋航班: 出發地=${flight.departure}, 目的地=${flight.destination}, 日期=${flight.departureDate}`)
         console.log(`條件: 出發地匹配=${departureMatch}, 目的地匹配=${destinationMatch}, 日期匹配=${dateMatch}`)
         return departureMatch && destinationMatch && dateMatch
       })
@@ -204,7 +204,7 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         console.log('====================================')
       }
     } else {
-      // 单程票或多程票
+      // 单程票或多個航段
       setDisplayDate(date)
       setShowFullCalendar(false)
       
@@ -298,7 +298,7 @@ function HomePage({ onSelectFlight }: HomePageProps) {
         navigate('/cart')
       }
     } else if (searchParams.tripType === 'multicity' && searchParams.multiCityLegs) {
-      // 多程
+      // 多個航段
       const newSelectedFlights = [...selectedFlights, flight]
       setSelectedFlights(newSelectedFlights)
       

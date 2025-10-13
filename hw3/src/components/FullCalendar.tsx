@@ -197,7 +197,7 @@ const FullCalendar: React.FC<FullCalendarProps> = ({
         onDepartureDateSelect?.(date)
       }
     } else {
-      // 单程票或多程票
+      // 单程票或多個航段
       onDateSelect(date)
     }
     console.log('==================================================')

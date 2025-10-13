@@ -52,7 +52,7 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
 
   const handleAirportSelect = (airport: string, type: 'departure' | 'destination') => {
     if (tripType === 'multicity') {
-      // 多程票處理
+      // 多個航段處理
       const newLegs = [...multiCityLegs]
       if (type === 'departure') {
         newLegs[currentLegIndex].departure = airport
@@ -88,7 +88,7 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
 
 
 
-  // 初始化多程日曆狀態
+  // 初始化多個航段日曆狀態
   useEffect(() => {
     setShowMultiCityCalendars(new Array(multiCityLegs.length).fill(false))
     setMultiCityMonths(new Array(multiCityLegs.length).fill(new Date()))
@@ -98,7 +98,7 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
     e.preventDefault()
     
     if (tripType === 'multicity') {
-      // 验证多程航班
+      // 验证多個航段航班
       for (const leg of multiCityLegs) {
         if (!leg.departure || !leg.destination || !leg.date) {
           alert('請填寫所有行程的資訊')
@@ -198,7 +198,7 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
               checked={tripType === 'multicity'}
               onChange={(e) => setTripType(e.target.value as TripType)}
             />
-            <span>多程</span>
+            <span>多個航段</span>
           </label>
         </div>
         {tripType === 'multicity' ? (
@@ -395,7 +395,7 @@ const SearchForm = ({ onSearch, flights = [] }: SearchFormProps) => {
         />
       )}
 
-      {/* 多程日曆 */}
+      {/* 多個航段日曆 */}
       {showMultiCityCalendars.map((showCalendar, index) => showCalendar && (
         <MultiCityCalendar
           key={`multicity-calendar-${index}`}
