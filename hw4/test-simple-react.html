@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React 測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #e3f2fd;
+        }
+        .success { background: #c8e6c9; color: #2e7d32; }
+        .info { background: #fff3e0; color: #e65100; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover { background: #1976d2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 React 應用測試</h1>
+        
+        <div class="status info">
+            <strong>這個頁面是用來測試 React 是否能正常運行的</strong>
+        </div>
+
+        <h2>步驟 1: 確認服務狀態</h2>
+        <div id="service-status"></div>
+
+        <h2>步驟 2: 測試 API 連接</h2>
+        <button onclick="testAPI()">測試後端 API</button>
+        <div id="api-status"></div>
+
+        <h2>步驟 3: 測試前端</h2>
+        <button onclick="window.open('http://localhost:5173', '_blank')">打開前端應用</button>
+        <p><strong>重要：</strong>如果前端頁面空白，請按 <code>Cmd + Shift + R</code> (Mac) 強制重新整理</p>
+
+        <h2>步驟 4: 檢查瀏覽器控制台</h2>
+        <p>1. 按 <code>F12</code> 打開開發者工具</p>
+        <p>2. 查看 <code>Console</code> 標籤</p>
+        <p>3. 如果有紅色錯誤，請截圖或複製給我</p>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const status = document.getElementById('api-status');
+            status.innerHTML = '<div class="status">測試中...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                const data = await response.json();
+                status.innerHTML = `<div class="status success">✅ 後端 API 正常運行！<br>狀態: ${data.status}<br>時間: ${data.timestamp}</div>`;
+            } catch (error) {
+                status.innerHTML = `<div class="status">❌ 後端 API 無法連接: ${error.message}</div>`;
+            }
+        }
+
+        // 自動檢查服務
+        window.onload = () => {
+            fetch('http://localhost:3001/health')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('service-status').innerHTML = 
+                        `<div class="status success">✅ 後端服務正常運行</div>`;
+                })
+                .catch(err => {
+                    document.getElementById('service-status').innerHTML = 
+                        `<div class="status">❌ 後端服務無法連接</div>`;
+                });
+        };
+    </script>
+</body>
+</html>
+

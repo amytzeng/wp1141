@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試頁面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 50px auto;
+        }
+        h1 {
+            color: #333;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>🧪 測試頁面</h1>
+        <p class="success">✅ HTML 渲染正常</p>
+        <p class="success">✅ CSS 載入正常</p>
+        <p id="js-test">⏳ JavaScript 測試中...</p>
+        <hr>
+        <h2>後端連線測試</h2>
+        <button onclick="testBackend()">測試後端連線</button>
+        <div id="backend-result"></div>
+    </div>
+
+    <script>
+        // JavaScript 測試
+        document.getElementById('js-test').innerHTML = '<span class="success">✅ JavaScript 運行正常</span>';
+        
+        // 後端連線測試
+        async function testBackend() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.innerHTML = '測試中...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/health');
+                const data = await response.json();
+                resultDiv.innerHTML = `<p class="success">✅ 後端連線成功: ${JSON.stringify(data)}</p>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ 後端連線失敗: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
