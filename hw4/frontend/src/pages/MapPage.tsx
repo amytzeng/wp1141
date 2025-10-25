@@ -101,7 +101,7 @@ export default function MapPage() {
           </button>
         </div>
       </header>
-      <div className="flex-1">
+      <div className="flex-1 relative">
         <MapView
           places={places}
           onAddPlace={handleAddPlace}

@@ -47,11 +47,9 @@ export default function MapView({ places, onAddPlace, onUpdatePlace, onDeletePla
   }, []);
 
   const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
-    console.log('Map clicked:', e);
     if (e.latLng) {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
-      console.log('Clicked position:', { lat, lng });
       setClickedPosition({ lat, lng });
       setShowForm(true);
       setSelectedPlace(null);
@@ -59,7 +57,6 @@ export default function MapView({ places, onAddPlace, onUpdatePlace, onDeletePla
   }, []);
 
   const handleMarkerClick = (place: Place) => {
-    console.log('Marker clicked:', place);
     setSelectedPlace(place);
     setShowForm(true);
     setClickedPosition(null);
@@ -88,38 +85,38 @@ export default function MapView({ places, onAddPlace, onUpdatePlace, onDeletePla
   }
 
   return (
-    <div className="relative w-full h-full">
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        zoom={12}
-        center={center}
-        onClick={handleMapClick}
-        onLoad={(map) => setMap(map)}
-      >
-        {places.map((place) => (
-          <Marker
-            key={place.id}
-            position={{ lat: place.lat, lng: place.lng }}
-            onClick={() => handleMarkerClick(place)}
-          />
-        ))}
-      </GoogleMap>
+    <>
+      <div className="relative w-full h-full">
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          zoom={12}
+          center={center}
+          onClick={handleMapClick}
+          onLoad={(map) => setMap(map)}
+        >
+          {places.map((place) => (
+            <Marker
+              key={place.id}
+              position={{ lat: place.lat, lng: place.lng }}
+              onClick={() => handleMarkerClick(place)}
+            />
+          ))}
+        </GoogleMap>
+      </div>
 
       {(showForm || selectedPlace) && (
-        <div className="absolute top-4 right-4 bg-white p-6 rounded-lg shadow-lg max-w-md">
-          <PlaceForm
-            place={selectedPlace || undefined}
-            initialPosition={clickedPosition}
-            onSubmit={handleFormSubmit}
-            onCancel={() => {
-              setShowForm(false);
-              setSelectedPlace(null);
-              setClickedPosition(null);
-            }}
-            onDelete={selectedPlace ? handleDelete : undefined}
-          />
-        </div>
+        <PlaceForm
+          place={selectedPlace || undefined}
+          initialPosition={clickedPosition}
+          onSubmit={handleFormSubmit}
+          onCancel={() => {
+            setShowForm(false);
+            setSelectedPlace(null);
+            setClickedPosition(null);
+          }}
+          onDelete={selectedPlace ? handleDelete : undefined}
+        />
       )}
-    </div>
+    </>
   );
 }
