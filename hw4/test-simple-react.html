@@ -50,15 +50,28 @@
         <h2>步驟 1: 確認服務狀態</h2>
         <div id="service-status"></div>
 
-        <h2>步驟 2: 測試 API 連接</h2>
-        <button onclick="testAPI()">測試後端 API</button>
-        <div id="api-status"></div>
+        <h2>步驟 2: 手動檢查後端狀態</h2>
+        <p>點擊下方按鈕在新分頁中檢查後端狀態：</p>
+        <button onclick="window.open('http://localhost:3001/health', '_blank')">檢查後端服務 (http://localhost:3001/health)</button>
+        <div id="manual-check" style="margin-top: 10px; padding: 10px; background: #fff3e0; border-radius: 5px;">
+            <strong>預期結果：</strong>應該看到類似 <code>{"status":"ok","timestamp":"..."}</code> 的 JSON 回應
+        </div>
 
-        <h2>步驟 3: 測試前端</h2>
+        <h2>步驟 3: 打開前端應用</h2>
         <button onclick="window.open('http://localhost:5173', '_blank')">打開前端應用</button>
         <p><strong>重要：</strong>如果前端頁面空白，請按 <code>Cmd + Shift + R</code> (Mac) 強制重新整理</p>
 
-        <h2>步驟 4: 檢查瀏覽器控制台</h2>
+        <h2>步驟 4: 測試前端功能</h2>
+        <p>如果前端可以正常開啟，請嘗試以下操作：</p>
+        <ul>
+            <li>註冊/登入帳號</li>
+            <li>點擊地圖新增地點</li>
+            <li>編輯或刪除地點</li>
+            <li>查看地點清單</li>
+        </ul>
+        <p><strong>如果這些功能都正常，代表服務運行正常！</strong></p>
+
+        <h2>步驟 5: 檢查瀏覽器控制台</h2>
         <p>1. 按 <code>F12</code> 打開開發者工具</p>
         <p>2. 查看 <code>Console</code> 標籤</p>
         <p>3. 如果有紅色錯誤，請截圖或複製給我</p>
@@ -67,31 +80,29 @@
     </div>
 
     <script>
-        async function testAPI() {
-            const status = document.getElementById('api-status');
-            status.innerHTML = '<div class="status">測試中...</div>';
-            
-            try {
-                const response = await fetch('http://localhost:3001/health');
-                const data = await response.json();
-                status.innerHTML = `<div class="status success">✅ 後端 API 正常運行！<br>狀態: ${data.status}<br>時間: ${data.timestamp}</div>`;
-            } catch (error) {
-                status.innerHTML = `<div class="status">❌ 後端 API 無法連接: ${error.message}</div>`;
-            }
-        }
-
-        // 自動檢查服務
+        // 頁面載入時顯示提示
         window.onload = () => {
-            fetch('http://localhost:3001/health')
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('service-status').innerHTML = 
-                        `<div class="status success">✅ 後端服務正常運行</div>`;
-                })
-                .catch(err => {
-                    document.getElementById('service-status').innerHTML = 
-                        `<div class="status">❌ 後端服務無法連接</div>`;
-                });
+            // 檢查是否從 file:// 協議打開
+            if (window.location.protocol === 'file:') {
+                document.getElementById('service-status').innerHTML = 
+                    `<div class="status info">
+                        ℹ️ <strong>說明</strong><br>
+                        從檔案系統開啟此頁面時，由於瀏覽器安全限制，無法自動測試 API。<br>
+                        這不代表服務有問題！請直接點擊「打開前端應用」按鈕，如果應用程式可以正常使用，代表一切正常。
+                    </div>`;
+            } else {
+                // 如果不是 file:// 協議，嘗試自動檢查
+                fetch('http://localhost:3001/health')
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('service-status').innerHTML = 
+                            `<div class="status success">✅ 後端服務正常運行<br>狀態: ${data.status}</div>`;
+                    })
+                    .catch(err => {
+                        document.getElementById('service-status').innerHTML = 
+                            `<div class="status info">⚠️ 無法自動檢查，請手動點擊「檢查後端服務」按鈕</div>`;
+                    });
+            }
         };
     </script>
 </body>

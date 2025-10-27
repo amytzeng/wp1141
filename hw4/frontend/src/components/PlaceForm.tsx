@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import type { Place } from '../types';
 import { reverseGeocode } from '../api/maps';
+import toast from 'react-hot-toast';
 
 interface PlaceFormProps {
   place?: Place;
@@ -21,23 +22,31 @@ export default function PlaceForm({ place, initialPosition, onSubmit, onCancel, 
   const [loadingAddress, setLoadingAddress] = useState(false);
 
   useEffect(() => {
-    if (initialPosition) {
+    if (initialPosition && !place) {
       setLat(initialPosition.lat);
       setLng(initialPosition.lng);
-      // Auto-fetch address
-      if (!place) {
-        setLoadingAddress(true);
-        reverseGeocode(initialPosition.lat, initialPosition.lng)
-          .then((data) => {
-            setAddress(data.address || '');
-          })
-          .catch(() => {
-            setAddress('');
-          })
-          .finally(() => {
-            setLoadingAddress(false);
-          });
-      }
+      // Auto-fetch address when creating new place
+      setLoadingAddress(true);
+      console.log('Fetching address for:', initialPosition);
+      reverseGeocode(initialPosition.lat, initialPosition.lng)
+        .then((response) => {
+          console.log('Reverse geocode response:', response);
+          // Google Geocoding API returns { results: [...], status: 'OK' }
+          if (response && response.results && response.results.length > 0) {
+            const address = response.results[0].formatted_address;
+            console.log('Setting address:', address);
+            setAddress(address);
+          } else {
+            console.log('No address found in response');
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to fetch address:', error);
+          toast.error('無法獲取地址');
+        })
+        .finally(() => {
+          setLoadingAddress(false);
+        });
     }
   }, [initialPosition, place]);
 
@@ -161,8 +170,8 @@ export default function PlaceForm({ place, initialPosition, onSubmit, onCancel, 
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              placeholder={loadingAddress ? '載入地址中...' : '地址'}
-              disabled={loadingAddress}
+                          placeholder={loadingAddress ? '載入地址中...' : '請手動輸入地址或留空'}
+            disabled={loadingAddress}
             />
           </div>
 

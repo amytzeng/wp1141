@@ -15,35 +15,89 @@
 
 ## 🏗️ 專案架構
 
+### 目錄結構
+
 ```
 hw4/
-├── frontend/        ← React + TypeScript + Vite
-│   ├── src/
-│   │   ├── pages/          ← 頁面組件
-│   │   ├── components/     ← 可重用組件
-│   │   ├── api/           ← API 呼叫邏輯
-│   │   ├── contexts/      ← React Context
-│   │   ├── types/         ← TypeScript 類型定義
-│   │   └── App.tsx
-│   ├── .env
-│   ├── .env.example
-│   └── package.json
-│
-├── backend/         ← Node + Express + TypeScript
-│   ├── src/
-│   │   ├── routes/        ← API 路由
-│   │   ├── controllers/   ← 控制器邏輯
-│   │   ├── middleware/    ← 中間件
-│   │   ├── db/           ← 資料庫客戶端
-│   │   └── app.ts        ← 應用程式入口
-│   ├── prisma/           ← 資料庫 schema
-│   ├── .env
-│   ├── .env.example
-│   └── package.json
-│
-├── start.sh            ← 快速啟動腳本
-└── README.md
+├── README.md                    # 專案主要說明文件
+├── CHECKLIST.md                 # 專案檢查清單
+├── TEST_PAGE_README.md          # 測試頁面使用說明
+├── test-simple-react.html       # 整合測試工具頁面
+├── backend/                     # 後端專案
+│   ├── .env.example            # 後端環境變數範例
+│   ├── .env                    # 後端環境變數（不提交）
+│   ├── .gitignore              # Git 忽略清單
+│   ├── package.json            # 後端依賴套件
+│   ├── tsconfig.json           # TypeScript 配置
+│   ├── prisma/                 # 資料庫 Schema
+│   │   └── schema.prisma      # Prisma 資料模型
+│   └── src/                    # 後端原始碼
+│       ├── app.ts              # Express 應用程式入口
+│       ├── db/                 # 資料庫連線
+│       ├── middleware/         # 中間件（認證、錯誤處理）
+│       ├── controllers/        # 控制器（業務邏輯）
+│       ├── routes/             # 路由定義
+│       └── types/              # TypeScript 類型定義
+└── frontend/                    # 前端專案
+    ├── .env.example            # 前端環境變數範例
+    ├── .env                    # 前端環境變數（不提交）
+    ├── .gitignore              # Git 忽略清單
+    ├── package.json            # 前端依賴套件
+    ├── tsconfig.json           # TypeScript 配置
+    ├── vite.config.ts          # Vite 配置
+    ├── tailwind.config.js      # TailwindCSS 配置
+    ├── index.html              # HTML 入口
+    └── src/                    # 前端原始碼
+        ├── main.tsx            # React 應用程式入口
+        ├── App.tsx             # 主應用組件
+        ├── pages/              # 頁面組件
+        │   ├── LoginPage.tsx
+        │   ├── SignupPage.tsx
+        │   ├── MapPage.tsx
+        │   └── PlacesPage.tsx
+        ├── components/         # 可重用組件
+        │   ├── MapView.tsx
+        │   └── PlaceForm.tsx
+        ├── api/                # API 呼叫
+        │   ├── client.ts
+        │   ├── auth.ts
+        │   ├── places.ts
+        │   └── maps.ts
+        ├── contexts/           # React Context
+        │   └── AuthContext.tsx
+        ├── types/              # TypeScript 類型定義
+        │   └── index.ts
+        └── index.css           # 全域樣式
 ```
+
+### 核心檔案說明
+
+#### 根目錄檔案
+| 檔案名稱 | 說明 |
+|---------|------|
+| `README.md` | 專案主要說明文件，包含安裝、設定、使用說明 |
+| `CHECKLIST.md` | 專案檢查清單，驗證是否符合所有要求 |
+| `TEST_PAGE_README.md` | 測試頁面使用說明 |
+| `test-simple-react.html` | 整合測試工具頁面 |
+
+#### 後端核心檔案
+| 檔案/目錄 | 說明 |
+|----------|------|
+| `src/app.ts` | Express 應用程式主檔案，設定中間件和路由 |
+| `src/db/client.ts` | Prisma Client 實例化 |
+| `src/middleware/auth.ts` | JWT 認證中間件 |
+| `src/controllers/` | 業務邏輯處理（authController, placeController, mapsController） |
+| `src/routes/` | API 路由定義（authRoutes, placeRoutes, mapsRoutes） |
+| `prisma/schema.prisma` | 資料庫 Schema 定義 |
+
+#### 前端核心檔案
+| 檔案/目錄 | 說明 |
+|----------|------|
+| `src/App.tsx` | React 主應用組件和路由配置 |
+| `src/pages/` | 各個頁面組件（Login, Signup, Map, Places） |
+| `src/components/` | 可重用組件（MapView, PlaceForm） |
+| `src/api/` | API 呼叫封裝 |
+| `src/contexts/` | React Context（認證狀態管理） |
 
 ## 🚀 安裝與啟動
 
@@ -110,26 +164,20 @@ npm install
 PORT=3001
 NODE_ENV=development
 DATABASE_URL="file:./dev.db"
-JWT_SECRET=my_super_secret_jwt_key_12345_change_in_production
-GOOGLE_MAPS_API_KEY=你的API_Key_這裡
+JWT_SECRET=your_super_secret_jwt_key_here
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 FRONTEND_URL=http://localhost:5173
 ```
 
 **前端** (`frontend/.env`):
 ```env
-VITE_API_BASE_URL=http://localhost:3001/api
-VITE_GOOGLE_MAPS_API_KEY=你的API_Key_這裡
+VITE_API_BASE_URL=http://localhost:3001
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 ```
+
+> **⚠️ 重要提醒**：兩邊都需要 `.env` 和 `.env.example` 檔案！`.env` 不要提交到 Git。
 
 ### 3. 啟動服務
-
-#### 方式 1：自動啟動（推薦）
-```bash
-# 使用自動修復並啟動腳本
-./fix-and-run.sh
-```
-
-#### 方式 2：手動啟動
 
 **啟動後端：**
 ```bash
@@ -145,6 +193,21 @@ cd frontend
 npm run dev
 ```
 前端將在 http://localhost:5173 運行
+
+### 4. 使用測試頁面（可選）
+
+開啟整合測試工具頁面：
+```bash
+open test-simple-react.html
+```
+
+測試頁面功能：
+- 自動檢查後端服務狀態
+- 手動測試 API 連接
+- 快速開啟前端應用
+- 查看系統資訊
+
+詳細使用說明請參考 `TEST_PAGE_README.md`
 
 ## 🌐 使用說明
 
@@ -265,6 +328,24 @@ npm run dev
 - `GET /api/maps/geocode?address=xxx` - 地址轉座標
 - `GET /api/maps/reverse-geocode?lat=x&lng=y` - 座標轉地址
 
+## 🔄 資料流程
+
+1. 使用者操作 → 前端組件
+2. 前端組件 → API 呼叫 (Axios)
+3. API 呼叫 → 後端路由
+4. 後端路由 → 控制器
+5. 控制器 → 資料庫 (Prisma)
+6. 資料庫回應 → 控制器 → 前端
+7. 前端更新 UI
+
+## 🎯 重要配置
+
+- **後端端口**：3001
+- **前端端口**：5173
+- **資料庫**：SQLite (dev.db)
+- **JWT 有效期**：7天
+- **CORS 允許**：http://localhost:5173
+
 ## 🔧 開發說明
 
 本專案採用前後端分離架構，前端負責使用者介面與互動，後端提供 RESTful API 服務。所有地圖相關功能透過 Google Maps JavaScript API 實作，並與後端 API 緊密整合。
@@ -275,6 +356,11 @@ npm run dev
 3. 在地圖上顯示所有地點標記
 4. 點擊地圖可以新增地點，點擊標記可以編輯/刪除
 5. 所有操作都會同步更新到資料庫
+
+## 📄 其他文件
+
+- **CHECKLIST.md** - 專案檢查清單，驗證是否符合所有要求
+- **TEST_PAGE_README.md** - 測試頁面詳細使用說明
 
 ## 📄 License
 
