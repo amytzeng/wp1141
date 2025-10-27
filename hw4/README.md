@@ -42,50 +42,191 @@ hw4/
 │   └── package.json
 │
 ├── start.sh            ← 快速啟動腳本
-├── SETUP.md            ← 詳細設定說明
 └── README.md
 ```
 
-## 🚀 快速開始
+## 🚀 安裝與啟動
 
 ### 前置需求
 - Node.js 18+
 - npm 或 yarn
-- Google Maps API Key（詳見 [SETUP.md](./SETUP.md)）
+- Google Maps API Key（詳見下方設定說明）
 
-### 快速啟動（推薦）
+### 1. 安裝依賴套件
 
-**方式 1：自動修復並啟動（推薦）**
+**後端依賴安裝：**
 ```bash
-# 自動修復並啟動
+cd backend
+npm install
+```
+
+**前端依賴安裝：**
+```bash
+cd frontend
+npm install
+```
+
+### 2. Google Maps API Key 設定
+
+#### 獲取 API Key 步驟：
+
+1. **前往 Google Cloud Console**
+   - 開啟 https://console.cloud.google.com/
+   - 登入你的 Google 帳號
+
+2. **建立或選擇專案**
+   - 點擊左上角「專案」下拉選單
+   - 選擇現有專案或點擊「新增專案」
+   - 為新專案命名（例如：my-mapbook）
+
+3. **啟用所需 API**
+   - 在左側選單找到「API 和服務」→「程式庫」
+   - 搜尋並啟用以下 API：
+     - **Maps JavaScript API** (必須)
+     - **Geocoding API** (必須)
+   - 等待啟用完成（通常幾秒鐘）
+
+4. **建立 API Key**
+   - 前往「API 和服務」→「憑證」
+   - 點擊上方「建立憑證」→「API 金鑰」
+   - 複製生成的 API Key（格式類似：`AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`）
+
+5. **設定 API Key 限制（強烈建議）**
+   - 點擊剛建立的 API Key
+   - **應用程式限制**：選擇「HTTP 參照網址」
+   - 新增以下網址：
+     - `localhost:5173`
+     - `http://localhost:5173`
+   - **API 限制**：選擇「限制金鑰」
+   - 勾選以下 API：
+     - Maps JavaScript API
+     - Geocoding API
+   - 點擊「儲存」
+
+#### 環境變數設定：
+
+**後端** (`backend/.env`):
+```env
+PORT=3001
+NODE_ENV=development
+DATABASE_URL="file:./dev.db"
+JWT_SECRET=my_super_secret_jwt_key_12345_change_in_production
+GOOGLE_MAPS_API_KEY=你的API_Key_這裡
+FRONTEND_URL=http://localhost:5173
+```
+
+**前端** (`frontend/.env`):
+```env
+VITE_API_BASE_URL=http://localhost:3001/api
+VITE_GOOGLE_MAPS_API_KEY=你的API_Key_這裡
+```
+
+### 3. 啟動服務
+
+#### 方式 1：自動啟動（推薦）
+```bash
+# 使用自動修復並啟動腳本
 ./fix-and-run.sh
 ```
 
-**方式 2：手動啟動**
+#### 方式 2：手動啟動
+
+**啟動後端：**
 ```bash
-# 終端機 1 - 後端
-cd backend && npm run dev
-
-# 終端機 2 - 前端  
-cd frontend && npm run dev
+cd backend
+npm run dev
 ```
+後端將在 http://localhost:3001 運行
 
-**注意：** 前端默認在 `http://localhost:5173`，如果端口被占用會在 `http://localhost:5174`
-
-### 詳細設定
-
-請參考 [SETUP.md](./SETUP.md) 查看：
-- Google Maps API Key 取得方法
-- 環境變數設定
-- 常見問題解決
+**啟動前端：**
+```bash
+# 開啟新的終端機
+cd frontend
+npm run dev
+```
+前端將在 http://localhost:5173 運行
 
 ## 🌐 使用說明
 
-1. **註冊/登入** - 首次使用需要註冊帳號
-2. **地圖操作** - 在地圖上點擊可以新增地點標記
-3. **地點管理** - 點擊標記可以編輯或刪除地點
-4. **清單檢視** - 在「我的地點」頁面查看所有收藏地點
-5. **分類功能** - 為地點設定分類標籤便於管理
+### 首次使用步驟
+
+1. **打開瀏覽器**
+   訪問：http://localhost:5173
+
+2. **註冊帳號**
+   - 點擊「立即註冊」按鈕
+   - 填寫電子郵件（例如：test@example.com）
+   - 設置密碼（至少6個字符）
+   - 點擊「註冊」
+
+3. **開始使用地圖**
+   註冊成功後，您將看到：
+   - Google Maps 地圖
+   - 可以在地圖上點擊新增地點標記
+   - 可以編輯或刪除地點
+   - 查看地點清單
+
+### 主要功能操作
+
+#### 🗺️ 新增地點
+
+**方法 1: 在地圖上點擊（最簡單）**
+1. **點擊地圖上的任意位置**
+2. 會彈出「新增地點」表單
+3. **填寫資訊**：
+   - **名稱**：地點的名稱（必填）
+   - **描述**：詳細說明（選填）
+   - **分類**：如「餐廳」、「景點」、「學校」等（選填）
+4. **點擊「儲存」** 完成新增
+
+**方法 2: 透過地點清單**
+1. 點擊右上角 **「地點清單」** 按鈕
+2. 在清單頁面點擊 **「新增地點」**
+3. 填寫地點資訊
+4. 點擊「儲存」
+
+#### ✏️ 編輯地點
+1. **點擊地圖上的標記**（紅色圓點）
+2. 選擇 **「編輯」** 按鈕
+3. 修改資訊
+4. 點擊 **「儲存」**
+
+#### 🗑️ 刪除地點
+1. **點擊地圖上的標記**
+2. 選擇 **「刪除」** 按鈕
+3. 確認刪除
+
+#### 📋 查看所有地點
+1. 點擊右上角 **「地點清單」** 按鈕
+2. 瀏覽所有已保存的地點
+3. 可以：
+   - 點擊地點名稱查看詳情
+   - 點擊「編輯」修改地點
+   - 點擊「刪除」刪除地點
+
+#### 🧭 地圖操作
+- **拖曳**：移動地圖視角
+- **滾輪**：縮放地圖
+- **點擊**：新增地點
+- **點擊標記**：查看/編輯地點
+
+### 使用技巧
+
+#### 分類建議
+- 🍴 餐廳
+- 🏛️ 景點
+- 🏫 學校
+- 🏥 醫院
+- 🏪 商店
+- 🏠 住家
+- 🎮 娛樂
+- 🚗 交通
+
+#### 地點描述建議
+寫清楚為什麼保存這個地點，例如：
+- 「最好吃的義大利餐廳」
+- 「風景優美的觀景台」
+- 「朋友推薦的咖啡廳」
 
 ## 🛠️ 技術棧
 
@@ -123,41 +264,6 @@ cd frontend && npm run dev
 ### Google Maps 整合
 - `GET /api/maps/geocode?address=xxx` - 地址轉座標
 - `GET /api/maps/reverse-geocode?lat=x&lng=y` - 座標轉地址
-
-## 🎯 作業要求達成
-
-本專案完全符合作業要求：
-
-✅ **前後端分離架構** - React + Node/Express  
-✅ **Google Maps API 整合** - JavaScript API + Geocoding API  
-✅ **登入系統** - 完整的註冊/登入/登出功能  
-✅ **資料庫整合** - SQLite + Prisma ORM  
-✅ **CRUD 操作** - 地點的完整增刪改查功能  
-✅ **地圖互動** - 地圖點擊新增、標記點擊編輯  
-✅ **環境變數管理** - 前後端各自獨立的 .env.example 檔案  
-✅ **TypeScript** - 完整的類型安全
-
-## 📝 資料庫 Schema
-
-### User (使用者)
-- id: String (CUID)
-- email: String (唯一)
-- password: String (加密)
-- name: String (可選)
-- createdAt: DateTime
-- updatedAt: DateTime
-
-### Place (地點)
-- id: String (CUID)
-- title: String
-- description: String (可選)
-- category: String (可選)
-- lat: Float
-- lng: Float
-- address: String (可選)
-- userId: String (外鍵)
-- createdAt: DateTime
-- updatedAt: DateTime
 
 ## 🔧 開發說明
 
