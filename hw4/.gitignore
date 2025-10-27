@@ -42,11 +42,15 @@ backend/build/
 # ============================================
 # 資料庫
 # ============================================
-# SQLite 資料庫檔案
-backend/*.db
-backend/*.db-journal
-backend/*.db-wal
-backend/*.db-shm
+# SQLite 資料庫檔案（包含所有子目錄）
+backend/**/*.db
+backend/**/*.db-journal
+backend/**/*.db-wal
+backend/**/*.db-shm
+backend/prisma/*.db
+backend/prisma/*.db-journal
+backend/prisma/*.db-wal
+backend/prisma/*.db-shm
 
 # Prisma 生成的檔案
 backend/src/generated/
