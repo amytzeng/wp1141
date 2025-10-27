@@ -1,12 +1,15 @@
 import axios from 'axios';
 
 const rawBase = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:3001';
-const base = rawBase.endsWith('/api') ? rawBase.replace(/\/+$/, '') : rawBase.replace(/\/+$/, '') + '/api';
+const baseURL = rawBase.endsWith('/api') ? rawBase.replace(/\/+$/, '') : rawBase.replace(/\/+$/, '') + '/api';
 
 const api = axios.create({
-  baseURL: base,
+  baseURL: baseURL,
   timeout: 10000,
   withCredentials: false, // Disable credentials
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // Add token to requests

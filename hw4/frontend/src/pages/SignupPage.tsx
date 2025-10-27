@@ -17,12 +17,16 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
+      console.log('Attempting registration...', { email, name, password: '***' });
       const response = await register(email, password, name);
+      console.log('Registration response:', response);
       setAuth(response.token, response.user);
       toast.success('註冊成功！');
       navigate('/map');
     } catch (error: any) {
-      toast.error(error.response?.data?.error || '註冊失敗');
+      console.error('Registration error:', error);
+      console.error('Error response:', error.response);
+      toast.error(error.response?.data?.error || error.response?.data?.message || '註冊失敗');
     } finally {
       setLoading(false);
     }

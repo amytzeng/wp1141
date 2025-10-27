@@ -16,12 +16,16 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      console.log('Attempting login...', { email, password: '***' });
       const response = await login(email, password);
+      console.log('Login response:', response);
       setAuth(response.token, response.user);
       toast.success('登入成功！');
       navigate('/map');
     } catch (error: any) {
-      toast.error(error.response?.data?.error || '登入失敗');
+      console.error('Login error:', error);
+      console.error('Error response:', error.response);
+      toast.error(error.response?.data?.error || error.response?.data?.message || '登入失敗');
     } finally {
       setLoading(false);
     }
