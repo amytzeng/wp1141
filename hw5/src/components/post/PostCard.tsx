@@ -18,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { formatDistanceToNow } from "date-fns"
+import { formatDistanceToNow, format } from "date-fns"
 import { zhTW } from "date-fns/locale"
 import { useRouter } from "next/navigation"
 import { usePostUpdates } from "@/hooks/usePusher"
@@ -39,6 +39,12 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
   const { subscribe } = usePostUpdates(post.id)
 
   const isOwner = session?.user?.id === post.authorId
+  const createdAt = new Date(post.createdAt)
+  const relativeTime = formatDistanceToNow(createdAt, {
+    addSuffix: true,
+    locale: zhTW,
+  })
+  const exactDateTime = format(createdAt, "yyyy/MM/dd HH:mm")
 
   // Pusher: 監聽按讚更新
   useEffect(() => {
@@ -206,12 +212,14 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
                 @{post.author.userId}
               </Link>
               <span className="text-gray-500 text-sm">·</span>
-              <span className="text-gray-500 text-sm whitespace-nowrap">
-                {formatDistanceToNow(new Date(post.createdAt), {
-                  addSuffix: true,
-                  locale: zhTW,
-                })}
-              </span>
+              <div className="flex flex-col items-start">
+                <span className="text-gray-500 text-sm whitespace-nowrap">
+                  {relativeTime}
+                </span>
+                <span className="text-gray-400 text-xs whitespace-nowrap">
+                  {exactDateTime}
+                </span>
+              </div>
             </div>
 
             {isOwner && (

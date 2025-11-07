@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { X } from "lucide-react"
+import { X, Camera, Image as ImageIcon } from "lucide-react"
 
 interface EditProfileModalProps {
   user: any
@@ -20,6 +20,108 @@ export default function EditProfileModal({ user, onClose }: EditProfileModalProp
   const [coverImage, setCoverImage] = useState(user.coverImage || "")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [uploading, setUploading] = useState<'avatar' | 'cover' | null>(null)
+  
+  const avatarInputRef = useRef<HTMLInputElement>(null)
+  const coverInputRef = useRef<HTMLInputElement>(null)
+
+  // 處理圖片上傳到 Cloudinary
+  const uploadImage = async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', 'echo_preset') // 使用者需要在 Cloudinary 設定
+    
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    )
+    
+    if (!response.ok) {
+      throw new Error('圖片上傳失敗')
+    }
+    
+    const data = await response.json()
+    return data.secure_url
+  }
+
+  // 處理頭像上傳
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 檢查檔案大小 (最大 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('圖片大小不能超過 5MB')
+      return
+    }
+
+    // 檢查檔案類型
+    if (!file.type.startsWith('image/')) {
+      setError('只能上傳圖片檔案')
+      return
+    }
+
+    setUploading('avatar')
+    setError('')
+
+    try {
+      // 如果有設定 Cloudinary，上傳到雲端
+      if (process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) {
+        const url = await uploadImage(file)
+        setImage(url)
+      } else {
+        // 否則使用 base64（僅供開發）
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setImage(reader.result as string)
+        }
+        reader.readAsDataURL(file)
+      }
+    } catch (err) {
+      setError('圖片上傳失敗，請稍後再試')
+    } finally {
+      setUploading(null)
+    }
+  }
+
+  // 處理背景圖上傳
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('圖片大小不能超過 5MB')
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setError('只能上傳圖片檔案')
+      return
+    }
+
+    setUploading('cover')
+    setError('')
+
+    try {
+      if (process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) {
+        const url = await uploadImage(file)
+        setCoverImage(url)
+      } else {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setCoverImage(reader.result as string)
+        }
+        reader.readAsDataURL(file)
+      }
+    } catch (err) {
+      setError('圖片上傳失敗，請稍後再試')
+    } finally {
+      setUploading(null)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -69,7 +171,7 @@ export default function EditProfileModal({ user, onClose }: EditProfileModalProp
           {/* 背景圖預覽 */}
           <div>
             <label className="block text-sm font-medium mb-2">背景圖</label>
-            <div className="h-32 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg overflow-hidden">
+            <div className="relative h-32 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg overflow-hidden group">
               {coverImage && (
                 <img 
                   src={coverImage} 
@@ -77,13 +179,38 @@ export default function EditProfileModal({ user, onClose }: EditProfileModalProp
                   className="w-full h-full object-cover"
                 />
               )}
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                <Button
+                  type="button"
+                  onClick={() => coverInputRef.current?.click()}
+                  disabled={uploading !== null}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-75 hover:bg-opacity-90"
+                >
+                  {uploading === 'cover' ? (
+                    "上傳中..."
+                  ) : (
+                    <>
+                      <ImageIcon className="h-4 w-4 mr-2" />
+                      上傳背景圖
+                    </>
+                  )}
+                </Button>
+              </div>
+              <input
+                ref={coverInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleCoverChange}
+                className="hidden"
+              />
             </div>
             <Input
               type="url"
-              placeholder="背景圖 URL（選填）"
+              placeholder="或輸入背景圖 URL（選填）"
               value={coverImage}
               onChange={(e) => setCoverImage(e.target.value)}
               className="mt-2"
+              disabled={uploading !== null}
             />
           </div>
 
@@ -91,19 +218,47 @@ export default function EditProfileModal({ user, onClose }: EditProfileModalProp
           <div>
             <label className="block text-sm font-medium mb-2">頭像</label>
             <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={image} />
-                <AvatarFallback className="bg-blue-500 text-white text-2xl">
-                  {name?.[0] || "U"}
-                </AvatarFallback>
-              </Avatar>
-              <Input
-                type="url"
-                placeholder="頭像 URL（選填）"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-                className="flex-1"
-              />
+              <div className="relative group">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={image} />
+                  <AvatarFallback className="bg-blue-500 text-white text-2xl">
+                    {name?.[0] || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploading !== null}
+                  className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 rounded-full transition-all flex items-center justify-center cursor-pointer"
+                >
+                  <Camera className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                />
+              </div>
+              <div className="flex-1 space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploading !== null}
+                  className="w-full"
+                >
+                  {uploading === 'avatar' ? "上傳中..." : "上傳頭像"}
+                </Button>
+                <Input
+                  type="url"
+                  placeholder="或輸入頭像 URL（選填）"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  disabled={uploading !== null}
+                />
+              </div>
             </div>
           </div>
 

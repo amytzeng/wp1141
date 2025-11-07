@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -17,6 +17,7 @@ import PostModal from "../post/PostModal"
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { data: session } = useSession()
   const [showPostModal, setShowPostModal] = useState(false)
 
@@ -62,16 +63,20 @@ export default function Sidebar() {
           </Button>
         </nav>
 
-        {/* User Menu */}
+        {/* ==================== 左下角帳號區域 ==================== */}
+        {/* 點擊後會顯示下拉選單，包含「個人檔案」和「登出」選項 */}
         <DropdownMenu>
+          {/* 觸發按鈕：顯示使用者頭像、姓名和 userID */}
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="w-full justify-start p-3 hover:bg-gray-100">
+              {/* 使用者頭像 */}
               <Avatar className="h-10 w-10 mr-3">
                 <AvatarImage src={session?.user?.image || ""} />
                 <AvatarFallback className="bg-blue-500 text-white">
                   {session?.user?.name?.[0] || "U"}
                 </AvatarFallback>
               </Avatar>
+              {/* 使用者資訊：姓名和 userID */}
               <div className="flex-1 text-left overflow-hidden">
                 <p className="font-semibold text-sm truncate">{session?.user?.name}</p>
                 <p className="text-xs text-gray-500 truncate">
@@ -80,13 +85,29 @@ export default function Sidebar() {
               </div>
             </Button>
           </DropdownMenuTrigger>
+          
+          {/* 下拉選單內容 */}
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
+            {/* 選項 1：個人檔案 - 跳轉到使用者的個人頁面 */}
+            <DropdownMenuItem 
+              className="cursor-pointer"
+              onClick={() => router.push(`/profile/${session?.user?.userId}`)}
+            >
+              <User className="mr-2 h-4 w-4" />
+              個人檔案
+            </DropdownMenuItem>
+            
+            {/* 選項 2：登出 - 登出並返回登入頁面 */}
+            <DropdownMenuItem 
+              className="cursor-pointer"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+            >
               <LogOut className="mr-2 h-4 w-4" />
               登出
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        {/* ==================== 左下角帳號區域結束 ==================== */}
       </aside>
 
       {/* Post Modal */}

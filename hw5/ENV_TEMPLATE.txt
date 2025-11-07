@@ -1,0 +1,30 @@
+# ===================================
+# Echo - 環境變數設定範例
+# ===================================
+# 將此檔案內容複製到 .env 檔案中
+
+DATABASE_URL="file:./dev.db"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="請執行 openssl rand -base64 32 生成"
+
+# Google OAuth（必須）
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# GitHub OAuth（選填）
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
+
+# Facebook OAuth（選填）
+FACEBOOK_CLIENT_ID=""
+FACEBOOK_CLIENT_SECRET=""
+
+# Pusher（即時互動）
+NEXT_PUBLIC_PUSHER_APP_KEY="your-pusher-app-key"
+NEXT_PUBLIC_PUSHER_CLUSTER="your-pusher-cluster"
+PUSHER_APP_ID="your-pusher-app-id"
+PUSHER_SECRET="your-pusher-secret"
+
+# Cloudinary（選填，不設定會用 base64）
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=""
+
