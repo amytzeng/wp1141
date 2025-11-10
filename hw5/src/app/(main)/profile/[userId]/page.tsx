@@ -172,19 +172,19 @@ export default async function ProfilePage({
       select: { postId: true },
     })
     
-    const likedPostIds = new Set(userLikes.map(l => l.postId))
-    const repostedPostIds = new Set(userReposts.map(r => r.postId))
+    const likedPostIds = new Set(userLikes.map(l => l.postId).filter((id): id is string => id !== null))
+    const repostedPostIds = new Set(userReposts.map(r => r.postId).filter((id): id is string => id !== null))
     
     postsWithStatus = posts.map(post => ({
       ...post,
-      isLiked: likedPostIds.has(post.id),
-      isReposted: repostedPostIds.has(post.id) || post.isReposted, // 保留原有的 isReposted 標記（來自 Repost table）
+      isLiked: post.id ? likedPostIds.has(post.id) : false,
+      isReposted: post.id ? (repostedPostIds.has(post.id) || post.isReposted) : false, // 保留原有的 isReposted 標記（來自 Repost table）
     }))
 
-    likedPostsWithStatus = likedPosts.map(post => ({
+    likedPostsWithStatus = likedPosts.map((post: any) => ({
       ...post,
-      isLiked: likedPostIds.has(post.id),
-      isReposted: repostedPostIds.has(post.id),
+      isLiked: post.id ? likedPostIds.has(post.id) : false,
+      isReposted: post.id ? repostedPostIds.has(post.id) : false,
     }))
   }
 
