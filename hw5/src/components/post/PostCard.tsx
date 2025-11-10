@@ -26,9 +26,10 @@ import { usePostUpdates } from "@/hooks/usePusher"
 interface PostCardProps {
   post: any
   onDelete?: () => void
+  showCommentPreview?: boolean
 }
 
-export default function PostCard({ post, onDelete }: PostCardProps) {
+export default function PostCard({ post, onDelete, showCommentPreview = false }: PostCardProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const [liked, setLiked] = useState(post.isLiked || false)
@@ -36,6 +37,7 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
   const [reposted, setReposted] = useState(post.isReposted || false)
   const [repostsCount, setRepostsCount] = useState(post._count?.reposts || post.repostsCount || 0)
   const [commentsCount, setCommentsCount] = useState(post._count?.comments || post.commentsCount || 0)
+  const [userInteracted, setUserInteracted] = useState(false) // 追蹤使用者是否有互動過
   const { subscribe } = usePostUpdates(post.id)
 
   const isOwner = session?.user?.id === post.authorId
@@ -45,6 +47,19 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
     locale: zhTW,
   })
   const exactDateTime = format(createdAt, "yyyy/MM/dd HH:mm")
+
+  // 同步 props 變化到 state（但不覆蓋使用者的操作）
+  useEffect(() => {
+    if (!userInteracted) {
+      setLiked(post.isLiked || false)
+      setReposted(post.isReposted || false)
+    }
+  }, [post.isLiked, post.isReposted, userInteracted])
+  
+  // 當 post.id 改變時（切換到不同貼文），重置互動狀態
+  useEffect(() => {
+    setUserInteracted(false)
+  }, [post.id])
 
   // Pusher: 監聽按讚更新
   useEffect(() => {
@@ -72,6 +87,9 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
     const prevLiked = liked
     const prevCount = likesCount
     
+    // 標記使用者已互動，防止 useEffect 覆蓋
+    setUserInteracted(true)
+    
     // 樂觀更新
     setLiked(!liked)
     setLikesCount(liked ? likesCount - 1 : likesCount + 1)
@@ -96,6 +114,11 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
   const handleRepost = async () => {
     const prevReposted = reposted
     const prevCount = repostsCount
+    const wasReposted = reposted
+    const isRepostedPost = post.isReposted // 判斷這是否為「轉發的貼文」（在個人頁面顯示的轉發內容）
+    
+    // 標記使用者已互動，防止 useEffect 覆蓋
+    setUserInteracted(true)
     
     // 樂觀更新
     setReposted(!reposted)
@@ -106,7 +129,12 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
         method: "POST",
       })
 
-      if (!res.ok) {
+      if (res.ok) {
+        // 如果是在個人頁面取消轉發一則「轉發的貼文」，刷新頁面移除該項目
+        if (wasReposted && isRepostedPost) {
+          router.refresh()
+        }
+      } else {
         // 回滾
         setReposted(prevReposted)
         setRepostsCount(prevCount)
@@ -184,6 +212,14 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
   return (
     <div className="border-b border-gray-200 p-4 hover:bg-gray-50 transition-colors cursor-pointer"
          onClick={() => router.push(`/post/${post.id}`)}>
+      {/* 如果是轉發的貼文，顯示轉發標記 */}
+      {post.isReposted && (
+        <div className="flex items-center gap-2 mb-2 text-gray-500 text-sm">
+          <Repeat2 className="h-4 w-4" />
+          <span>轉發了</span>
+        </div>
+      )}
+      
       <div className="flex gap-3">
         <Link href={`/profile/${post.author.userId}`} onClick={(e) => e.stopPropagation()}>
           <Avatar className="h-12 w-12">
@@ -256,6 +292,7 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
               className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 -ml-2"
               onClick={(e) => {
                 e.stopPropagation()
+                router.push(`/post/${post.id}`)
               }}
             >
               <MessageCircle className="h-5 w-5 mr-1" />
@@ -268,13 +305,19 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                handleRepost()
+                if (!isOwner) {
+                  handleRepost()
+                }
               }}
+              disabled={isOwner}
               className={`-ml-2 ${
-                reposted
+                isOwner
+                  ? "text-gray-300 cursor-not-allowed opacity-50"
+                  : reposted
                   ? "text-green-600 hover:text-green-700 hover:bg-green-50"
                   : "text-gray-500 hover:text-green-600 hover:bg-green-50"
               }`}
+              title={isOwner ? "不能轉發自己的貼文" : ""}
             >
               <Repeat2 className="h-5 w-5 mr-1" />
               <span className="text-sm">{repostsCount}</span>
@@ -296,6 +339,54 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
               <span className="text-sm">{likesCount}</span>
             </Button>
           </div>
+
+          {/* 留言預覽 */}
+          {showCommentPreview && post.comments && post.comments.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+              {post.comments.map((comment: any) => (
+                <div
+                  key={comment.id}
+                  className="flex gap-2 text-sm hover:bg-gray-50 p-2 rounded-lg cursor-pointer transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    router.push(`/comment/${comment.id}`)
+                  }}
+                >
+                  <Avatar className="h-6 w-6 flex-shrink-0">
+                    <AvatarImage src={comment.author.image} />
+                    <AvatarFallback className="bg-blue-500 text-white text-xs">
+                      {comment.author.name?.[0] || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1">
+                      <span className="font-semibold truncate">{comment.author.name}</span>
+                      <span className="text-gray-500">@{comment.author.userId}</span>
+                      <span className="text-gray-500">·</span>
+                      <span className="text-gray-500">
+                        {formatDistanceToNow(new Date(comment.createdAt), {
+                          addSuffix: true,
+                          locale: zhTW,
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-gray-900 line-clamp-2">{comment.content}</p>
+                  </div>
+                </div>
+              ))}
+              {commentsCount > 2 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    router.push(`/post/${post.id}`)
+                  }}
+                  className="text-blue-600 hover:underline text-sm pl-8"
+                >
+                  查看全部 {commentsCount} 則留言
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

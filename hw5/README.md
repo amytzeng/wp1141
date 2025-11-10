@@ -25,11 +25,21 @@ npm install
 
 ### 2️⃣ 建立環境變數檔案
 
-建立 `.env` 檔案（參考 `ENV_TEMPLATE.txt`）：
+複製環境變數範本並填入實際的值：
 
 ```bash
-# 資料庫
-DATABASE_URL="file:./dev.db"
+cp ENV_EXAMPLE .env
+```
+
+然後編輯 `.env` 檔案，填入以下內容：
+
+```bash
+# 資料庫（PostgreSQL）
+# 開發環境選項：
+# 1. 使用線上免費 PostgreSQL（推薦）：Supabase, Neon, Railway
+# 2. 本地 PostgreSQL（需先安裝）
+# 3. 臨時開發可用 SQLite: file:./dev.db（但不符合作業要求）
+DATABASE_URL="postgresql://username:password@localhost:5432/echo_dev"
 
 # NextAuth
 NEXTAUTH_URL="http://localhost:3000"
@@ -52,6 +62,38 @@ NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=""
 **生成 NEXTAUTH_SECRET：**
 ```bash
 openssl rand -base64 32
+```
+
+**設定 PostgreSQL 資料庫：**
+
+**選項 A：使用 Supabase（推薦，免費）**
+1. 註冊 [Supabase](https://supabase.com/)
+2. 建立新專案
+3. 在 Settings → Database → Connection String 複製連接字串
+4. 選擇 "URI" 格式，複製到 `.env` 的 `DATABASE_URL`
+
+**選項 B：使用 Neon（免費 Serverless PostgreSQL）**
+1. 註冊 [Neon](https://neon.tech/)
+2. 建立專案
+3. 複製連接字串到 `.env`
+
+**選項 C：本地 PostgreSQL**
+```bash
+# macOS (使用 Homebrew)
+brew install postgresql
+brew services start postgresql
+createdb echo_dev
+
+# DATABASE_URL 設為：
+# postgresql://你的使用者名稱@localhost:5432/echo_dev
+```
+
+**臨時開發方案（不符合作業要求）：**
+```bash
+# 如果暫時還沒設定 PostgreSQL，可以先用 SQLite 開發
+DATABASE_URL="file:./dev.db"
+
+# ⚠️ 注意：部署前必須改回 PostgreSQL
 ```
 
 ### 3️⃣ 取得必要的 API 憑證
@@ -82,9 +124,17 @@ openssl rand -base64 32
 ### 4️⃣ 初始化資料庫
 
 ```bash
+# 推送資料庫 schema 到 PostgreSQL
 npx prisma db push
+
+# 生成 Prisma Client
 npx prisma generate
 ```
+
+**如果遇到連接錯誤：**
+- 確認 PostgreSQL 服務正在運行
+- 檢查 `DATABASE_URL` 格式是否正確
+- 確認資料庫已建立（如果使用本地 PostgreSQL）
 
 ### 5️⃣ 啟動專案
 
@@ -133,16 +183,18 @@ npm run dev
 ### 💬 互動功能
 - ✅ 按讚/取消讚
 - ✅ 轉發 (Repost)
+- ✅ **禁止轉發自己的貼文**
 - ✅ 留言（支援巢狀留言）
+- ✅ **留言獨立頁面**（可遞迴點擊進入下一層）
 - ✅ 即時更新（使用 Pusher）
-- ✅ 樂觀 UI 更新
+- ✅ 樂觀 UI 更新（無延遲）
 
 ### 👤 個人檔案
 - ✅ 查看自己/他人的個人頁面
 - ✅ 編輯個人資料（姓名、簡介）
 - ✅ **上傳頭貼和背景圖**（Cloudinary 或 Base64）
 - ✅ Follow / Unfollow
-- ✅ 查看個人貼文
+- ✅ **查看個人貼文和轉發**（Posts 標籤包含自己發的和轉發的貼文）
 - ✅ 查看按讚的文章（僅自己可見）
 - ✅ 顯示統計（貼文數、追蹤者、追蹤中）
 
@@ -150,9 +202,19 @@ npm run dev
 - ✅ 顯示所有貼文 (All)
 - ✅ 顯示追蹤的人的貼文 (Following)
 - ✅ 時間戳記（相對時間 + 絕對時間）
-- ✅ Inline 發文
+- ✅ **Inline 發文**（點擊展開）
 - ✅ 點擊貼文查看詳細頁面
-- ✅ 遞迴留言結構
+- ✅ **遞迴留言結構**（可無限層級點擊進入）
+- ✅ 列表中不顯示留言內容（符合 11/06 更新）
+
+### 🔍 搜尋功能
+- ✅ 搜尋頁面
+- ✅ 支援姓名搜尋
+- ✅ 支援使用者代碼（userId）搜尋
+- ✅ 顯示搜尋結果清單
+- ✅ 顯示使用者資訊（頭像、姓名、簡介、統計數字）
+- ✅ 直接在搜尋結果關注/取消關注
+- ✅ 點擊前往使用者個人頁面
 
 ### ⚡ 即時功能（Pusher）
 - ✅ 按讚即時更新
@@ -172,7 +234,7 @@ npm run dev
 
 ## 後端
 - **Framework**: Next.js API Routes
-- **Database**: SQLite (開發) / PostgreSQL (生產)
+- **Database**: PostgreSQL（符合作業要求）
 - **ORM**: Prisma
 - **Authentication**: NextAuth.js v4
 - **Real-time**: Pusher
@@ -279,7 +341,16 @@ npx prisma db push --force-reset  # 重置資料庫
 - [ ] 編輯姓名和簡介
 - [ ] 儲存成功
 
-### 5. 即時更新測試（重要！）
+### 5. 搜尋功能
+- [ ] 點擊側邊欄「搜尋」
+- [ ] 輸入使用者名稱搜尋
+- [ ] 查看搜尋結果
+- [ ] 點擊使用者前往個人頁面
+- [ ] 回到搜尋頁面
+- [ ] 輸入 userId 搜尋（例如：amy）
+- [ ] 在搜尋結果直接關注/取消關注
+
+### 6. 即時更新測試（重要！）
 - [ ] 開啟兩個瀏覽器視窗
 - [ ] 用不同帳號登入
 - [ ] 在 A 視窗按讚某貼文
@@ -350,6 +421,48 @@ npm run dev
 2. `NEXT_PUBLIC_PUSHER_APP_KEY` 和 `NEXT_PUBLIC_PUSHER_CLUSTER` 前綴是否有 `NEXT_PUBLIC_`
 3. Browser Console 是否有錯誤訊息
 
+### Q7: PostgreSQL 連接錯誤
+
+**錯誤訊息：**
+```
+Can't reach database server at `localhost:5432`
+```
+
+**解決方案：**
+
+**如果使用 Supabase/Neon：**
+- 確認連接字串正確複製到 `.env`
+- 連接字串應包含密碼，格式：`postgresql://user:password@host:5432/dbname`
+
+**如果使用本地 PostgreSQL：**
+```bash
+# 檢查 PostgreSQL 是否運行
+brew services list | grep postgresql
+
+# 啟動 PostgreSQL
+brew services start postgresql
+
+# 確認資料庫存在
+psql -l
+```
+
+**臨時開發方案：**
+```bash
+# 可以暫時改回 SQLite 開發，部署前再改回 PostgreSQL
+# .env
+DATABASE_URL="file:./dev.db"
+
+# prisma/schema.prisma（臨時改回 SQLite）
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+# 重新推送
+npx prisma db push
+npx prisma generate
+```
+
 ---
 
 # 🚀 進階設定
@@ -417,11 +530,11 @@ DATABASE_URL="你的 PostgreSQL 連接字串"
 
 # 📚 相關文件
 
+- **[ENV_EXAMPLE](./ENV_EXAMPLE)** - ⭐ 環境變數範本（可直接複製）
+- **[PostgreSQL設定.md](./PostgreSQL設定.md)** - PostgreSQL 快速設定（Supabase 5 分鐘搞定）
 - **[Google登入權限設定.md](./Google登入權限設定.md)** - OAuth 詳細設定
 - **[圖片上傳設定.md](./圖片上傳設定.md)** - Cloudinary 設定指南
 - **[環境變數設定.md](./環境變數設定.md)** - 完整環境變數說明
-- **[錯誤排除.md](./錯誤排除.md)** - 更多錯誤解決方案
-- **[ENV_TEMPLATE.txt](./ENV_TEMPLATE.txt)** - 環境變數範本
 
 ---
 
@@ -435,13 +548,17 @@ DATABASE_URL="你的 PostgreSQL 連接字串"
 - [ ] ✅ 可以發文（測試 280 字限制）
 - [ ] ✅ 可以按讚
 - [ ] ✅ 可以留言
-- [ ] ✅ 可以轉發
+- [ ] ✅ 可以轉發（但不能轉發自己的貼文）
+- [ ] ✅ 轉發狀態在所有頁面同步
 - [ ] ✅ 即時更新有效（開兩個視窗測試）
 - [ ] ✅ 可以上傳頭貼
 - [ ] ✅ 可以編輯個人資料
 - [ ] ✅ 可以查看他人頁面
 - [ ] ✅ 可以 Follow/Unfollow
 - [ ] ✅ 側邊欄帳號選單可以點擊
+- [ ] ✅ 可以搜尋其他使用者
+- [ ] ✅ 點擊留言可遞迴進入下一層
+- [ ] ✅ 個人頁面 Posts 標籤包含轉發的貼文
 
 ---
 

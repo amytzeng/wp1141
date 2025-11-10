@@ -155,9 +155,11 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // 檢查當前使用者是否已按讚
+    // 檢查當前使用者是否已按讚和轉發
     if (session?.user?.id) {
       const postIds = posts.map(p => p.id)
+      
+      // 檢查按讚
       const userLikes = await prisma.like.findMany({
         where: {
           userId: session.user.id,
@@ -166,15 +168,26 @@ export async function GET(req: NextRequest) {
         select: { postId: true },
       })
       
-      const likedPostIds = new Set(userLikes.map(l => l.postId))
+      // 檢查轉發
+      const userReposts = await prisma.repost.findMany({
+        where: {
+          userId: session.user.id,
+          postId: { in: postIds },
+        },
+        select: { postId: true },
+      })
       
-      const postsWithLikeStatus = posts.map(post => ({
+      const likedPostIds = new Set(userLikes.map(l => l.postId))
+      const repostedPostIds = new Set(userReposts.map(r => r.postId))
+      
+      const postsWithStatus = posts.map(post => ({
         ...post,
         isLiked: likedPostIds.has(post.id),
+        isReposted: repostedPostIds.has(post.id),
       }))
 
       return NextResponse.json({
-        posts: postsWithLikeStatus,
+        posts: postsWithStatus,
         nextCursor: posts.length === limit ? posts[posts.length - 1].id : null,
       })
     }

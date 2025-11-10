@@ -3,7 +3,14 @@
 # ===================================
 # 將此檔案內容複製到 .env 檔案中
 
-DATABASE_URL="file:./dev.db"
+# 資料庫連接（PostgreSQL）
+# 開發環境選項：
+# 1. 本地 PostgreSQL: postgresql://username:password@localhost:5432/echo_dev
+# 2. Vercel Postgres: 從 Vercel Dashboard 取得連接字串
+# 3. Supabase: 從 Supabase 專案設定取得
+# 4. 臨時開發可用 SQLite: file:./dev.db （但部署時必須改 PostgreSQL）
+DATABASE_URL="postgresql://username:password@localhost:5432/echo_dev"
+
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="請執行 openssl rand -base64 32 生成"
 

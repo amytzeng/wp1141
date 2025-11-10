@@ -47,11 +47,9 @@ export default async function ProfilePage({
     isFollowing = !!follow
   }
 
-  // 取得使用者的貼文
-  const posts = await prisma.post.findMany({
+  // 取得使用者的貼文（包含自己發的和轉發的）
+  const ownPosts = await prisma.post.findMany({
     where: { authorId: user.id },
-    orderBy: { createdAt: "desc" },
-    take: 20,
     include: {
       author: {
         select: {
@@ -70,6 +68,49 @@ export default async function ProfilePage({
       },
     },
   })
+
+  // 取得使用者轉發的貼文
+  const reposts = await prisma.repost.findMany({
+    where: { userId: user.id },
+    include: {
+      post: {
+        include: {
+          author: {
+            select: {
+              id: true,
+              userId: true,
+              name: true,
+              image: true,
+            },
+          },
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
+              reposts: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // 合併貼文和轉發，標記轉發的貼文
+  const repostedPosts = reposts.map(r => ({
+    ...r.post,
+    isReposted: true,
+    repostedAt: r.createdAt,
+  }))
+
+  const allPosts = [...ownPosts, ...repostedPosts]
+    .sort((a, b) => {
+      const timeA = 'repostedAt' in a ? new Date(a.repostedAt).getTime() : new Date(a.createdAt).getTime()
+      const timeB = 'repostedAt' in b ? new Date(b.repostedAt).getTime() : new Date(b.createdAt).getTime()
+      return timeB - timeA
+    })
+    .slice(0, 20)
+
+  const posts = allPosts
 
   // 如果是本人，取得按讚的貼文
   let likedPosts = []
@@ -106,12 +147,14 @@ export default async function ProfilePage({
     likedPosts = likes.map(like => like.post).filter(Boolean)
   }
 
-  // 檢查當前使用者對這些貼文的按讚狀態
-  let postsWithLikeStatus = posts
+  // 檢查當前使用者對這些貼文的按讚和轉發狀態
+  let postsWithStatus = posts
   let likedPostsWithStatus = likedPosts
   
   if (session?.user?.id) {
     const postIds = [...posts.map(p => p.id), ...likedPosts.map(p => p.id)]
+    
+    // 檢查按讚
     const userLikes = await prisma.like.findMany({
       where: {
         userId: session.user.id,
@@ -120,16 +163,28 @@ export default async function ProfilePage({
       select: { postId: true },
     })
     
-    const likedPostIds = new Set(userLikes.map(l => l.postId))
+    // 檢查轉發
+    const userReposts = await prisma.repost.findMany({
+      where: {
+        userId: session.user.id,
+        postId: { in: postIds },
+      },
+      select: { postId: true },
+    })
     
-    postsWithLikeStatus = posts.map(post => ({
+    const likedPostIds = new Set(userLikes.map(l => l.postId))
+    const repostedPostIds = new Set(userReposts.map(r => r.postId))
+    
+    postsWithStatus = posts.map(post => ({
       ...post,
       isLiked: likedPostIds.has(post.id),
+      isReposted: repostedPostIds.has(post.id) || post.isReposted, // 保留原有的 isReposted 標記（來自 Repost table）
     }))
 
     likedPostsWithStatus = likedPosts.map(post => ({
       ...post,
       isLiked: likedPostIds.has(post.id),
+      isReposted: repostedPostIds.has(post.id),
     }))
   }
 
@@ -145,7 +200,7 @@ export default async function ProfilePage({
       />
       
       <ProfileTabs
-        posts={postsWithLikeStatus}
+        posts={postsWithStatus}
         likedPosts={likedPostsWithStatus}
         isOwnProfile={isOwnProfile}
       />

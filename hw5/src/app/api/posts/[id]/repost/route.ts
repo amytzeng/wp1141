@@ -16,6 +16,21 @@ export async function POST(
 
     const postId = params.id
 
+    // 檢查貼文是否存在以及是否為自己的貼文
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { authorId: true },
+    })
+
+    if (!post) {
+      return NextResponse.json({ error: "找不到貼文" }, { status: 404 })
+    }
+
+    // 不能轉發自己的貼文
+    if (post.authorId === session.user.id) {
+      return NextResponse.json({ error: "不能轉發自己的貼文" }, { status: 400 })
+    }
+
     // 檢查是否已經轉發
     const existingRepost = await prisma.repost.findUnique({
       where: {

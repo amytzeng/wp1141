@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Home, User, PenSquare, LogOut } from "lucide-react"
+import { Home, User, PenSquare, LogOut, Search } from "lucide-react"
 import { useState } from "react"
 import PostModal from "../post/PostModal"
 
@@ -23,6 +23,7 @@ export default function Sidebar() {
 
   const navItems = [
     { href: "/home", label: "首頁", icon: Home },
+    { href: "/search", label: "搜尋", icon: Search },
     { href: `/profile/${session?.user?.userId}`, label: "個人檔案", icon: User },
   ]
 

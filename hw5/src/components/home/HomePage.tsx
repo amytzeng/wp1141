@@ -127,6 +127,7 @@ export default function HomePage() {
             key={post.id}
             post={post}
             onDelete={() => fetchPosts()}
+            showCommentPreview={false}
           />
         ))
       )}

@@ -1,0 +1,110 @@
+# ========================================
+# Echo 專案環境變數設定
+# ========================================
+# 使用方式：
+# 1. 複製此檔案為 .env：cp ENV_EXAMPLE .env
+# 2. 填入實際的值
+# 3. 執行 npm run dev
+# ========================================
+
+# ----------------------------------------
+# 資料庫設定（PostgreSQL - 作業要求）
+# ----------------------------------------
+# 選項 1：Supabase（推薦，免費）
+#   註冊 https://supabase.com/ → 建立專案 → 取得連接字串
+#   DATABASE_URL="postgresql://postgres.[ref]:[password]@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
+#
+# 選項 2：Neon（免費 Serverless PostgreSQL）
+#   註冊 https://neon.tech/ → 建立專案 → 取得連接字串
+#   DATABASE_URL="postgresql://user:password@ep-xxx.ap-southeast-1.aws.neon.tech/neondb"
+#
+# 選項 3：本地 PostgreSQL
+#   DATABASE_URL="postgresql://username@localhost:5432/echo_dev"
+#
+# 選項 4：臨時開發用 SQLite（不符合作業要求，僅供開發測試）
+#   DATABASE_URL="file:./dev.db"
+#   注意：部署前必須改回 PostgreSQL
+DATABASE_URL="postgresql://username:password@localhost:5432/echo_dev"
+
+# ----------------------------------------
+# NextAuth 設定
+# ----------------------------------------
+# NEXTAUTH_URL：應用程式的 URL
+# 開發環境：http://localhost:3000
+# 生產環境：https://your-app.vercel.app
+NEXTAUTH_URL="http://localhost:3000"
+
+# NEXTAUTH_SECRET：用於加密 session 的密鑰
+# 生成方式：執行 openssl rand -base64 32
+# 範例輸出：abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx==
+NEXTAUTH_SECRET="your-generated-secret-here"
+
+# ----------------------------------------
+# Google OAuth（必須設定至少一個 OAuth）
+# ----------------------------------------
+# 取得方式：
+# 1. 前往 https://console.cloud.google.com/
+# 2. 建立專案
+# 3. 啟用 OAuth 2.0
+# 4. 建立憑證
+# 5. Authorized redirect URIs 填入：
+#    http://localhost:3000/api/auth/callback/google
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# ----------------------------------------
+# GitHub OAuth（選填）
+# ----------------------------------------
+# 取得方式：
+# 1. 前往 https://github.com/settings/developers
+# 2. New OAuth App
+# 3. Authorization callback URL：
+#    http://localhost:3000/api/auth/callback/github
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
+
+# ----------------------------------------
+# Facebook OAuth（選填）
+# ----------------------------------------
+# 取得方式：
+# 1. 前往 https://developers.facebook.com/
+# 2. 建立應用程式
+# 3. 設定 OAuth 重定向 URI：
+#    http://localhost:3000/api/auth/callback/facebook
+FACEBOOK_CLIENT_ID=""
+FACEBOOK_CLIENT_SECRET=""
+
+# ----------------------------------------
+# Pusher 設定（即時更新功能）
+# ----------------------------------------
+# 取得方式：
+# 1. 註冊 https://pusher.com/
+# 2. 建立 Channels app
+# 3. 在 App Keys 標籤頁取得以下 4 個值
+# 注意：NEXT_PUBLIC_ 前綴的變數會暴露給瀏覽器
+NEXT_PUBLIC_PUSHER_APP_KEY="your-pusher-app-key"
+NEXT_PUBLIC_PUSHER_CLUSTER="ap3"
+PUSHER_APP_ID="your-pusher-app-id"
+PUSHER_SECRET="your-pusher-secret"
+
+# ----------------------------------------
+# Cloudinary 設定（圖片上傳，選填）
+# ----------------------------------------
+# 取得方式：
+# 1. 註冊 https://cloudinary.com/
+# 2. 建立 Upload Preset
+#    - 名稱：echo_preset
+#    - Signing Mode：Unsigned
+# 3. 在 Dashboard 取得 Cloud Name
+# 
+# 如果不設定：系統會使用 Base64 儲存圖片（適合開發）
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=""
+
+# ========================================
+# 設定完成後執行：
+# ========================================
+# npx prisma generate
+# npx prisma db push
+# npm run dev
+# ========================================
+
