@@ -7,13 +7,9 @@
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma)
 ![Pusher](https://img.shields.io/badge/Pusher-Realtime-300D4F?style=flat-square&logo=pusher)
 
-**完成度：100%** | **作業要求：✅ 全部完成**
-
 ---
 
-## 🎯 第一次使用？從這裡開始！
-
-如果你是從 GitHub clone 這個專案，請按照以下步驟（預計 10-15 分鐘）：
+## 從 GitHub 
 
 ### 1️⃣ 安裝依賴
 
@@ -55,8 +51,6 @@ NEXT_PUBLIC_PUSHER_CLUSTER="你的值"
 PUSHER_APP_ID="你的值"
 PUSHER_SECRET="你的值"
 
-# Cloudinary（選填）
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=""
 ```
 
 **生成 NEXTAUTH_SECRET：**
@@ -66,18 +60,13 @@ openssl rand -base64 32
 
 **設定 PostgreSQL 資料庫：**
 
-**選項 A：使用 Supabase（推薦，免費）**
-1. 註冊 [Supabase](https://supabase.com/)
-2. 建立新專案
-3. 在 Settings → Database → Connection String 複製連接字串
-4. 選擇 "URI" 格式，複製到 `.env` 的 `DATABASE_URL`
+使用 Neon（免費 Serverless PostgreSQL）
 
-**選項 B：使用 Neon（免費 Serverless PostgreSQL）**
 1. 註冊 [Neon](https://neon.tech/)
 2. 建立專案
 3. 複製連接字串到 `.env`
 
-**選項 C：本地 PostgreSQL**
+本地 PostgreSQL
 ```bash
 # macOS (使用 Homebrew)
 brew install postgresql
@@ -86,15 +75,6 @@ createdb echo_dev
 
 # DATABASE_URL 設為：
 # postgresql://你的使用者名稱@localhost:5432/echo_dev
-```
-
-**臨時開發方案（不符合作業要求）：**
-```bash
-# 如果暫時還沒設定 PostgreSQL，可以先用 SQLite 開發
-DATABASE_URL="file:./dev.db"
-
-# ⚠️ 注意：部署前必須改回 PostgreSQL
-```
 
 ### 3️⃣ 取得必要的 API 憑證
 
@@ -306,268 +286,6 @@ npx prisma db push         # 推送 schema 變更
 npx prisma generate        # 生成 Prisma Client
 npx prisma db push --force-reset  # 重置資料庫
 ```
-
----
-
-# 🧪 測試指南
-
-## 基本功能測試
-
-### 1. 登入流程
-- [ ] 訪問 http://localhost:3000
-- [ ] 點擊「Google 登入」
-- [ ] 完成 OAuth 授權
-- [ ] 設定 userId
-- [ ] 成功進入首頁
-
-### 2. 發文功能
-- [ ] 點擊側邊欄「發文」按鈕
-- [ ] 輸入文字（測試 280 字限制）
-- [ ] 加入 #hashtag 和 @mention
-- [ ] 加入連結（測試 23 字元計算）
-- [ ] 發布成功
-
-### 3. 互動功能
-- [ ] 按讚/取消讚
-- [ ] 轉發貼文
-- [ ] 新增留言
-- [ ] 刪除自己的貼文
-
-### 4. 個人頁面
-- [ ] 點擊側邊欄「個人檔案」
-- [ ] 點擊「Edit Profile」
-- [ ] 上傳頭貼
-- [ ] 上傳背景圖
-- [ ] 編輯姓名和簡介
-- [ ] 儲存成功
-
-### 5. 搜尋功能
-- [ ] 點擊側邊欄「搜尋」
-- [ ] 輸入使用者名稱搜尋
-- [ ] 查看搜尋結果
-- [ ] 點擊使用者前往個人頁面
-- [ ] 回到搜尋頁面
-- [ ] 輸入 userId 搜尋（例如：amy）
-- [ ] 在搜尋結果直接關注/取消關注
-
-### 6. 即時更新測試（重要！）
-- [ ] 開啟兩個瀏覽器視窗
-- [ ] 用不同帳號登入
-- [ ] 在 A 視窗按讚某貼文
-- [ ] B 視窗立即看到讚數增加
-- [ ] 在 A 視窗留言
-- [ ] B 視窗立即看到新留言
-
----
-
-# ❗ 錯誤排除
-
-## 常見問題
-
-### Q1: `npm install` 失敗
-
-```bash
-rm -rf node_modules package-lock.json
-npm cache clean --force
-npm install
-```
-
-### Q2: Google 登入錯誤 "redirect_uri_mismatch"
-
-**原因：** Redirect URI 設定不正確
-
-**解決：** 確認 Google Cloud Console 的設定**完全一致**：
-```
-http://localhost:3000/api/auth/callback/google
-```
-
-常見錯誤：
-- ❌ `https://...` (應該是 http)
-- ❌ `http://127.0.0.1:3000/...` (應該是 localhost)
-- ❌ `.../google/` (結尾多一個斜線)
-
-詳見：[Google登入權限設定.md](./Google登入權限設定.md)
-
-### Q3: Google 登入「沒有權限」
-
-**原因：** OAuth 應用程式在測試模式
-
-**解決方法（擇一）：**
-1. 在 OAuth consent screen → Test users → 加入你的 Gmail
-2. 或點擊「PUBLISH APP」發布應用程式
-
-### Q4: 下拉選單點擊沒反應
-
-**原因：** `@radix-ui/react-dropdown-menu` 沒安裝或版本錯誤
-
-**解決：**
-```bash
-npm install @radix-ui/react-dropdown-menu
-npm run dev
-```
-
-### Q5: Prisma 錯誤
-
-```bash
-npx prisma generate
-npx prisma db push
-npm run dev
-```
-
-### Q6: Pusher 即時更新不運作
-
-**檢查：**
-1. `.env` 的 Pusher 設定是否正確
-2. `NEXT_PUBLIC_PUSHER_APP_KEY` 和 `NEXT_PUBLIC_PUSHER_CLUSTER` 前綴是否有 `NEXT_PUBLIC_`
-3. Browser Console 是否有錯誤訊息
-
-### Q7: PostgreSQL 連接錯誤
-
-**錯誤訊息：**
-```
-Can't reach database server at `localhost:5432`
-```
-
-**解決方案：**
-
-**如果使用 Supabase/Neon：**
-- 確認連接字串正確複製到 `.env`
-- 連接字串應包含密碼，格式：`postgresql://user:password@host:5432/dbname`
-
-**如果使用本地 PostgreSQL：**
-```bash
-# 檢查 PostgreSQL 是否運行
-brew services list | grep postgresql
-
-# 啟動 PostgreSQL
-brew services start postgresql
-
-# 確認資料庫存在
-psql -l
-```
-
-**臨時開發方案：**
-```bash
-# 可以暫時改回 SQLite 開發，部署前再改回 PostgreSQL
-# .env
-DATABASE_URL="file:./dev.db"
-
-# prisma/schema.prisma（臨時改回 SQLite）
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-
-# 重新推送
-npx prisma db push
-npx prisma generate
-```
-
----
-
-# 🚀 進階設定
-
-## Cloudinary 圖片上傳（選填）
-
-如果想要將圖片上傳到雲端（推薦正式環境）：
-
-1. 註冊 [Cloudinary](https://cloudinary.com/) 免費帳號
-2. 建立 Upload Preset：
-   - 名稱：`echo_preset`
-   - Signing Mode：`Unsigned`
-3. 在 `.env` 加入：
-   ```bash
-   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="你的cloud-name"
-   ```
-4. 重啟伺服器
-
-不設定的話，系統會使用 Base64 儲存圖片（適合開發環境）。
-
-詳見：[圖片上傳設定.md](./圖片上傳設定.md)
-
----
-
-# 🌐 部署到 Vercel
-
-## 步驟
-
-### 1. 推送到 GitHub
-
-```bash
-git add .
-git commit -m "Initial commit"
-git push origin main
-```
-
-### 2. 連接 Vercel
-
-1. 前往 [Vercel](https://vercel.com/)
-2. 點擊「Import Project」
-3. 選擇你的 GitHub repository
-4. 設定環境變數
-
-### 3. 環境變數設定
-
-在 Vercel 專案設定中加入所有 `.env` 的變數：
-
-**必須更新的：**
-```bash
-NEXTAUTH_URL="https://your-app.vercel.app"
-DATABASE_URL="你的 PostgreSQL 連接字串"
-```
-
-**Google OAuth 更新：**
-- 在 Google Cloud Console 的 Authorized redirect URIs 加入：
-  ```
-  https://your-app.vercel.app/api/auth/callback/google
-  ```
-
-### 4. 部署
-
-點擊「Deploy」，等待建置完成。
-
----
-
-# 📚 相關文件
-
-## 🚀 快速開始
-- **[ENV_EXAMPLE](./ENV_EXAMPLE)** - ⭐ 環境變數範本（可直接複製）
-- **[PostgreSQL設定.md](./PostgreSQL設定.md)** - PostgreSQL 快速設定（Supabase 5 分鐘搞定）
-- **[測試清單.md](./測試清單.md)** - 18 個測試點完整清單
-
-## 🔧 設定指南
-- **[Google登入權限設定.md](./Google登入權限設定.md)** - OAuth 詳細設定
-- **[圖片上傳設定.md](./圖片上傳設定.md)** - Cloudinary 設定指南
-- **[環境變數設定.md](./環境變數設定.md)** - 完整環境變數說明
-
-## 🌐 部署
-- **[Vercel部署指南.md](./Vercel部署指南.md)** - ⭐ 完整部署流程
-- **[部署步驟.md](./部署步驟.md)** - 簡易步驟版本
-
----
-
-# 🎯 快速檢查清單
-
-設定完成後，確認以下功能：
-
-- [ ] ✅ 可以訪問 http://localhost:3000
-- [ ] ✅ 可以使用 Google 登入
-- [ ] ✅ 可以設定 userId
-- [ ] ✅ 可以發文（測試 280 字限制）
-- [ ] ✅ 可以按讚
-- [ ] ✅ 可以留言
-- [ ] ✅ 可以轉發（但不能轉發自己的貼文）
-- [ ] ✅ 轉發狀態在所有頁面同步
-- [ ] ✅ 即時更新有效（開兩個視窗測試）
-- [ ] ✅ 可以上傳頭貼
-- [ ] ✅ 可以編輯個人資料
-- [ ] ✅ 可以查看他人頁面
-- [ ] ✅ 可以 Follow/Unfollow
-- [ ] ✅ 側邊欄帳號選單可以點擊
-- [ ] ✅ 可以搜尋其他使用者
-- [ ] ✅ 點擊留言可遞迴進入下一層
-- [ ] ✅ 個人頁面 Posts 標籤包含轉發的貼文
-
 ---
 
 # 📊 資料庫 Schema
@@ -583,17 +301,6 @@ DATABASE_URL="你的 PostgreSQL 連接字串"
 - **Draft** - 草稿
 
 查看完整 schema：`prisma/schema.prisma`
-
----
-
-# 🙏 致謝
-
-- **Next.js** - React 框架
-- **Prisma** - ORM
-- **Pusher** - 即時通訊
-- **NextAuth** - 身份驗證
-- **shadcn/ui** - UI 元件
-- **Tailwind CSS** - CSS 框架
 
 ---
 

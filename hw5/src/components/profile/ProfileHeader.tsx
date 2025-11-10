@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import EditProfileModal from "./EditProfileModal"
+import FollowListModal from "./FollowListModal"
 
 interface ProfileHeaderProps {
   user: any
@@ -27,8 +28,10 @@ export default function ProfileHeader({
 }: ProfileHeaderProps) {
   const router = useRouter()
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showFollowListModal, setShowFollowListModal] = useState<"following" | "followers" | null>(null)
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing)
   const [followers, setFollowers] = useState(followersCount)
+  const [following, setFollowing] = useState(followingCount)
 
   const handleFollow = async () => {
     const prevFollowing = isFollowing
@@ -43,7 +46,10 @@ export default function ProfileHeader({
         method: "POST",
       })
 
-      if (!res.ok) {
+      if (res.ok) {
+        // 成功後刷新頁面，確保數字同步
+        router.refresh()
+      } else {
         // 回滾
         setIsFollowing(prevFollowing)
         setFollowers(prevFollowers)
@@ -129,14 +135,20 @@ export default function ProfileHeader({
 
           {/* 統計數字 */}
           <div className="flex gap-6 mt-4">
-            <div className="hover:underline cursor-pointer">
-              <span className="font-bold">{followingCount}</span>
+            <button
+              onClick={() => setShowFollowListModal("following")}
+              className="hover:underline cursor-pointer transition-colors"
+            >
+              <span className="font-bold">{following}</span>
               <span className="text-gray-500 ml-1">關注中</span>
-            </div>
-            <div className="hover:underline cursor-pointer">
+            </button>
+            <button
+              onClick={() => setShowFollowListModal("followers")}
+              className="hover:underline cursor-pointer transition-colors"
+            >
               <span className="font-bold">{followers}</span>
               <span className="text-gray-500 ml-1">關注者</span>
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -149,6 +161,16 @@ export default function ProfileHeader({
             setShowEditModal(false)
             router.refresh()
           }}
+        />
+      )}
+
+      {/* 關注列表 Modal */}
+      {showFollowListModal && (
+        <FollowListModal
+          userId={user.userId}
+          type={showFollowListModal}
+          onClose={() => setShowFollowListModal(null)}
+          onFollowChange={() => router.refresh()}
         />
       )}
     </>
