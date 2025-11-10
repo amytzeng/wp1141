@@ -113,7 +113,7 @@ export default async function ProfilePage({
   const posts = allPosts
 
   // 如果是本人，取得按讚的貼文
-  let likedPosts = []
+  let likedPosts: any[] = []
   if (isOwnProfile) {
     const likes = await prisma.like.findMany({
       where: { 
