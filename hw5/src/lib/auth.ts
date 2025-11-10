@@ -1,7 +1,6 @@
 import { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import GithubProvider from "next-auth/providers/github"
-import FacebookProvider from "next-auth/providers/facebook"
 import { prisma } from "./prisma"
 
 export const authOptions: NextAuthOptions = {
@@ -13,10 +12,11 @@ export const authOptions: NextAuthOptions = {
     GithubProvider({
       clientId: process.env.GITHUB_CLIENT_ID || '',
       clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID || '',
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
+      authorization: {
+        params: {
+          scope: 'read:user user:email',
+        },
+      },
     }),
   ].filter(provider => {
     // 只加入有設定的 provider
@@ -25,9 +25,17 @@ export const authOptions: NextAuthOptions = {
   }),
   callbacks: {
     async signIn({ user, account }) {
-      if (!account) return false
+      if (!account) {
+        console.error('No account provided')
+        return false
+      }
       
       try {
+        console.log('Attempting sign in:', {
+          provider: account.provider,
+          email: user.email,
+        })
+
         const existingUser = await prisma.user.findFirst({
           where: {
             provider: account.provider,
@@ -35,22 +43,32 @@ export const authOptions: NextAuthOptions = {
           },
         })
 
-        if (!existingUser && user.email) {
+        if (!existingUser) {
+          console.log('Creating new user')
+          
+          // GitHub 可能不提供 email，使用 providerId 作為唯一標識
+          const email = user.email || `${account.providerAccountId}@${account.provider}.placeholder`
+          
           await prisma.user.create({
             data: {
-              email: user.email,
-              name: user.name || '',
+              email: email,
+              name: user.name || account.provider,
               image: user.image || '',
               provider: account.provider,
               providerId: account.providerAccountId,
             },
           })
+          console.log('User created successfully')
+        } else {
+          console.log('Existing user found')
         }
 
         return true
       } catch (error) {
         console.error('Sign in error:', error)
-        return false
+        // 即使資料庫錯誤也嘗試讓用戶登入
+        // 在 session callback 會再次嘗試
+        return true
       }
     },
     async session({ session, token }) {

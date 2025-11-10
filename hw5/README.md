@@ -37,7 +37,7 @@ NEXTAUTH_SECRET="執行 openssl rand -base64 32 生成"
 GOOGLE_CLIENT_ID="你的Google-Client-ID"
 GOOGLE_CLIENT_SECRET="你的Google-Client-Secret"
 
-# GitHub OAuth（選填）
+# GitHub OAuth
 GITHUB_CLIENT_ID="你的GitHub-Client-ID"
 GITHUB_CLIENT_SECRET="你的GitHub-Client-Secret"
 
@@ -68,7 +68,7 @@ npm run dev
 ## ✨ 主要功能
 
 ### 核心功能
-- 🔐 **OAuth 認證**：Google / GitHub / Facebook 多種登入方式
+- 🔐 **OAuth 認證**：Google 和 GitHub 雙重登入方式
 - 📝 **發文系統**：280 字符限制、智能字數計算、草稿功能
 - 💬 **互動功能**：按讚、轉發、留言（支援無限層級遞迴）
 - 👤 **個人檔案**：編輯資料、上傳圖片、查看關注列表
@@ -145,7 +145,7 @@ openssl rand -base64 32
    - `secret`
    - `cluster`
 
-### 選填設定
+### 其他設定
 
 #### GitHub OAuth
 
@@ -155,6 +155,7 @@ openssl rand -base64 32
    ```
    http://localhost:3000/api/auth/callback/github
    ```
+4. 複製 Client ID 和生成 Client Secret
 
 ---
 
@@ -218,17 +219,28 @@ https://wp1141-omega.vercel.app/api/auth/callback/google
 
 儲存。
 
-#### 2. 更新 GitHub OAuth（如果有設定）
+#### 2. 更新 GitHub OAuth
 
 https://github.com/settings/developers → Echo app
 
-在「Authorization callback URL」**添加**（換行分隔）：
-```
-http://localhost:3000/api/auth/callback/github
-https://wp1141-omega.vercel.app/api/auth/callback/github
-```
+**重要設定：**
 
-Update application。
+1. **Homepage URL：** 改為
+   ```
+   https://wp1141-omega.vercel.app
+   ```
+
+2. **Authorization callback URL：** 必須包含兩個（換行或逗號分隔）
+   ```
+   http://localhost:3000/api/auth/callback/github
+   https://wp1141-omega.vercel.app/api/auth/callback/github
+   ```
+
+3. Update application
+
+**檢查 Email 權限：**
+- 確認你的 GitHub OAuth App 有要求 `user:email` scope
+- 或在 GitHub Settings → Emails → 取消勾選「Keep my email addresses private」
 
 #### 3. 更新 Vercel 環境變數
 

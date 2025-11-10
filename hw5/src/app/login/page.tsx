@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Chrome, Github, Facebook } from "lucide-react"
+import { Chrome, Github } from "lucide-react"
 
 export default function LoginPage() {
   return (
@@ -29,14 +29,6 @@ export default function LoginPage() {
           >
             <Github className="mr-2 h-5 w-5" />
             使用 GitHub 繼續
-          </Button>
-          
-          <Button
-            onClick={() => signIn("facebook", { callbackUrl: "/home" })}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Facebook className="mr-2 h-5 w-5" />
-            使用 Facebook 繼續
           </Button>
         </div>
 
