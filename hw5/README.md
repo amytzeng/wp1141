@@ -1,6 +1,6 @@
-# 🌊 Echo - 社群媒體平台
+# Echo - 社群媒體平台
 
-> 一個功能完整的社群媒體平台，類似 Twitter/X，使用 Next.js、TypeScript、PostgreSQL 和 Pusher 建構
+Echo 是一個社群媒體平台，採用 Next.js 14 全端框架、TypeScript、PostgreSQL 資料庫以及 Pusher 即時通訊技術建構。平臺支援 Google 和 GitHub OAuth 登入方式，實作了發文、按讚、轉發和無限層級遞迴留言等核心社交功能。除了滿足所有作業要求外，我也開發了**使用者搜尋系統、可以關注列表的人、還有圖片上傳，可以自己更改頭貼跟背景（支援 Cloudinary）**、完整的草稿管理系統，以及樂觀更新機制確保所有互動操作皆無延遲。專案採用 RESTful API 架構，並透過 Pusher 實現跨裝置即時同步，已成功部署至 Vercel 平台。
 
 ![Next.js](https://img.shields.io/badge/Next.js-14+-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue?style=flat-square&logo=typescript)
