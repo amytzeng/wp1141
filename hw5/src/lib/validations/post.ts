@@ -3,14 +3,14 @@ import { z } from "zod"
 // 解析貼文內容
 export function parsePostContent(content: string) {
   // 提取 hashtags
-  const hashtags = [...content.matchAll(/#(\w+)/g)].map((m) => m[1])
+  const hashtags = Array.from(content.matchAll(/#(\w+)/g)).map((m) => m[1])
   
   // 提取 mentions
-  const mentions = [...content.matchAll(/@(\w+)/g)].map((m) => m[1])
+  const mentions = Array.from(content.matchAll(/@(\w+)/g)).map((m) => m[1])
   
   // 提取 URLs
   const urlRegex = /(https?:\/\/[^\s]+)/g
-  const links = [...content.matchAll(urlRegex)].map((m) => m[0])
+  const links = Array.from(content.matchAll(urlRegex)).map((m) => m[0])
   
   return {
     hashtags: hashtags.join(','),
