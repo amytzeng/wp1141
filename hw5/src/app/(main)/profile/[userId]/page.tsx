@@ -178,7 +178,7 @@ export default async function ProfilePage({
     postsWithStatus = posts.map(post => ({
       ...post,
       isLiked: post.id ? likedPostIds.has(post.id) : false,
-      isReposted: post.id ? (repostedPostIds.has(post.id) || post.isReposted) : false, // 保留原有的 isReposted 標記（來自 Repost table）
+      isReposted: post.id ? (repostedPostIds.has(post.id) || ('isReposted' in post && post.isReposted)) : false, // 保留原有的 isReposted 標記（來自 Repost table）
     }))
 
     likedPostsWithStatus = likedPosts.map((post: any) => ({
