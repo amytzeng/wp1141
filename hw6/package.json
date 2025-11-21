@@ -1,0 +1,29 @@
+{
+  "name": "line-ai-chatbot",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@line/bot-sdk": "^9.3.0",
+    "mongodb": "^7.0.0",
+    "mongoose": "^8.0.3",
+    "next": "^14.0.4",
+    "openai": "^4.20.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-react": "^5.10.5",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "typescript": "^5.3.3"
+  }
+}
