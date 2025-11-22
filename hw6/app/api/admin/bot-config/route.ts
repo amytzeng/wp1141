@@ -54,7 +54,12 @@ export async function GET() {
         version: 1,
       });
       await defaultConfig.save();
-      config = defaultConfig.toObject();
+      // Re-query with lean() to get the correct type
+      const savedDefaultConfig = await BotConfig.findOne({ _id: defaultConfig._id }).lean().exec();
+      if (!savedDefaultConfig) {
+        throw new Error('Failed to retrieve saved default configuration');
+      }
+      config = savedDefaultConfig;
     }
 
     return NextResponse.json({
@@ -178,9 +183,19 @@ export async function PUT(request: NextRequest) {
 
     await newConfig.save();
 
+    // Re-query with lean() to get the correct type
+    const savedConfig = await BotConfig.findOne({ _id: newConfig._id }).lean().exec();
+
+    if (!savedConfig) {
+      return NextResponse.json(
+        { error: 'Failed to retrieve saved configuration' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      config: newConfig.toObject(),
+      config: savedConfig,
     });
   } catch (error) {
     console.error('Error updating bot config:', error);
