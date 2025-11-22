@@ -53,8 +53,8 @@ export async function handleTextMessage(event: LineEvent): Promise<void> {
   const lineUserId = source.userId;
   const text = message?.text || '';
 
-  if (!replyToken || !text) {
-    console.error('Missing replyToken or message text');
+  if (!replyToken || !text || !message) {
+    console.error('Missing replyToken, message text, or message object');
     return;
   }
 
