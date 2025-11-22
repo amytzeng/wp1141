@@ -146,12 +146,13 @@ export async function getConversationsByStatus(
   status: SessionStatus,
   limit: number = 20
 ): Promise<IConversation[]> {
-  // Use type assertion because .lean() returns FlattenMaps type,
+  // Use double type assertion because .lean() returns FlattenMaps type,
   // but the runtime structure is identical to IConversation
+  // TypeScript requires conversion through 'unknown' for types that don't overlap
   return (await Conversation.find({ status })
     .sort({ lastActivityAt: -1 })
     .limit(limit)
     .lean()
-    .exec()) as IConversation[];
+    .exec()) as unknown as IConversation[];
 }
 
