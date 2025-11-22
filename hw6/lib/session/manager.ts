@@ -146,10 +146,12 @@ export async function getConversationsByStatus(
   status: SessionStatus,
   limit: number = 20
 ): Promise<IConversation[]> {
-  return await Conversation.find({ status })
+  // Use type assertion because .lean() returns FlattenMaps type,
+  // but the runtime structure is identical to IConversation
+  return (await Conversation.find({ status })
     .sort({ lastActivityAt: -1 })
     .limit(limit)
     .lean()
-    .exec();
+    .exec()) as IConversation[];
 }
 
