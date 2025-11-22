@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import UserCard from '@/components/admin/UserCard';
 import ConversationItem from '@/components/admin/ConversationItem';
@@ -19,7 +19,7 @@ import styles from './detail.module.css';
 
 type ViewMode = 'users' | 'conversations';
 
-export default function ConversationDetailPage() {
+function ConversationDetailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const viewMode = (searchParams.get('view') as ViewMode) || 'users';
@@ -200,6 +200,20 @@ export default function ConversationDetailPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function ConversationDetailPage() {
+  return (
+    <Suspense fallback={
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <p>載入中...</p>
+        </div>
+      </div>
+    }>
+      <ConversationDetailContent />
+    </Suspense>
   );
 }
 

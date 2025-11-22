@@ -3,6 +3,9 @@ import connectDB from '@/lib/db/connect';
 import Conversation, { SessionStatus } from '@/lib/db/models/Conversation';
 import { getConversationsByStatus, updateConversationStatus } from '@/lib/session/manager';
 
+// Mark this route as dynamic since it uses searchParams
+export const dynamic = 'force-dynamic';
+
 /**
  * @swagger
  * /api/admin/sessions:

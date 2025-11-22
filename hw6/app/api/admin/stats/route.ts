@@ -3,6 +3,9 @@ import connectDB from '@/lib/db/connect';
 import Conversation from '@/lib/db/models/Conversation';
 import Message from '@/lib/db/models/Message';
 
+// Mark this route as dynamic since it uses searchParams
+export const dynamic = 'force-dynamic';
+
 /**
  * @swagger
  * /api/admin/stats:

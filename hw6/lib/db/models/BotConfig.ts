@@ -51,7 +51,6 @@ const BotConfigSchema: Schema = new Schema(
     isActive: {
       type: Boolean,
       default: true,
-      index: true,
     },
     version: {
       type: Number,

@@ -4,6 +4,9 @@ import Conversation from '@/lib/db/models/Conversation';
 import Message from '@/lib/db/models/Message';
 import mongoose from 'mongoose';
 
+// Mark this route as dynamic since it uses searchParams
+export const dynamic = 'force-dynamic';
+
 /**
  * @swagger
  * /api/admin/conversations:

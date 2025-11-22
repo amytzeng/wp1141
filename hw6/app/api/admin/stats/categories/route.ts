@@ -3,6 +3,9 @@ import connectDB from '@/lib/db/connect';
 import Message from '@/lib/db/models/Message';
 import { getAllCategoryDefinitions } from '@/lib/classification/keywords';
 
+// Mark this route as dynamic since it uses searchParams
+export const dynamic = 'force-dynamic';
+
 /**
  * @swagger
  * /api/admin/stats/categories:

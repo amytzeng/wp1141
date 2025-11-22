@@ -36,7 +36,6 @@ const ConversationSchema: Schema = new Schema(
     sessionId: {
       type: String,
       required: true,
-      index: true,
     },
     status: {
       type: String,
