@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理後台 - 設計預覽</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #e2f0ef;
+            color: #000;
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #065758;
+            color: #fff;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: #82c3c5;
+            color: #000;
+        }
+
+        .nav-item.active {
+            background-color: #82c3c5;
+            color: #000;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+        }
+
+        /* Dashboard */
+        .page-title {
+            font-size: 2rem;
+            color: #065758;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid #a9d4d6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-card:hover {
+            background-color: #a9d4d6;
+            transition: background-color 0.2s;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #065758;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: #fff;
+            border: 1px solid #a9d4d6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            color: #065758;
+            margin-bottom: 1rem;
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #e2f0ef 0%, #a9d4d6 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #065758;
+            font-weight: 600;
+        }
+
+        /* Table */
+        .table-container {
+            background: #fff;
+            border: 1px solid #a9d4d6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #065758;
+            color: #fff;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #a9d4d6;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #a9d4d6;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: #82c3c5;
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background-color: #065758;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #a9d4d6;
+            color: #000;
+        }
+
+        .btn-danger {
+            background-color: #c46960;
+            color: #fff;
+        }
+
+        /* Filters */
+        .filters {
+            background: #fff;
+            border: 1px solid #a9d4d6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            color: #065758;
+            font-weight: 600;
+        }
+
+        input, select {
+            padding: 0.5rem;
+            border: 1px solid #a9d4d6;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #82c3c5;
+            box-shadow: 0 0 0 3px rgba(130, 195, 197, 0.1);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #a9d4d6;
+            background: #fff;
+            color: #000;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            background-color: #a9d4d6;
+        }
+
+        .page-btn.active {
+            background-color: #82c3c5;
+            border-color: #82c3c5;
+            font-weight: 600;
+        }
+
+        /* Message Bubbles */
+        .message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            max-width: 70%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message-bubble {
+            padding: 1rem;
+            border-radius: 12px;
+            color: #000;
+        }
+
+        .message.user .message-bubble {
+            background-color: #82c3c5;
+        }
+
+        .message.bot .message-bubble {
+            background-color: #e2f0ef;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #065758;
+            margin-top: 0.5rem;
+        }
+
+        .message-meta {
+            font-size: 0.75rem;
+            color: #065758;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(6, 87, 88, 0.2);
+        }
+
+        /* Category Badge */
+        .category-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .category-humanities {
+            background-color: #82c3c5;
+            color: #000;
+        }
+
+        .category-business {
+            background-color: #a9d4d6;
+            color: #000;
+        }
+
+        .category-stem {
+            background-color: #065758;
+            color: #fff;
+        }
+
+        .category-life {
+            background-color: #e2f0ef;
+            color: #000;
+        }
+
+        .category-others {
+            background-color: #f0f0f0;
+            color: #000;
+        }
+
+        /* Health Status */
+        .health-status {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .health-item {
+            background: #fff;
+            border: 1px solid #a9d4d6;
+            border-radius: 8px;
+            padding: 1rem;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .health-item.healthy {
+            border-left: 4px solid #82c3c5;
+        }
+
+        .health-item.warning {
+            border-left: 4px solid #c46960;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #a9d4d6;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #065758;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            border-bottom-color: #82c3c5;
+            color: #000;
+        }
+
+        /* Preview Tabs */
+        .preview-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #a9d4d6;
+        }
+
+        .preview-tab {
+            padding: 0.5rem 1rem;
+            background: #e2f0ef;
+            border: 1px solid #a9d4d6;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #000;
+        }
+
+        .preview-tab.active {
+            background: #82c3c5;
+            border-color: #82c3c5;
+        }
+
+        .preview-content {
+            display: none;
+        }
+
+        .preview-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>管理後台</h1>
+            </div>
+            <nav>
+                <a href="#" class="nav-item active">Dashboard</a>
+                <a href="#" class="nav-item">對話列表</a>
+                <a href="#" class="nav-item">分類統計</a>
+                <a href="#" class="nav-item">Bot 配置</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Preview Tabs -->
+            <div class="preview-tabs">
+                <div class="preview-tab active" onclick="showPreview('dashboard')">Dashboard</div>
+                <div class="preview-tab" onclick="showPreview('conversations')">對話列表</div>
+                <div class="preview-tab" onclick="showPreview('detail')">對話詳情</div>
+                <div class="preview-tab" onclick="showPreview('categories')">分類統計</div>
+                <div class="preview-tab" onclick="showPreview('bot-config')">Bot 配置</div>
+            </div>
+
+            <!-- Dashboard Preview -->
+            <div id="dashboard" class="preview-content active">
+                <h1 class="page-title">統計總覽</h1>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">總訊息數</div>
+                        <div class="stat-value">1,234</div>
+                        <div class="stat-change">↑ 12% 較上週</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">總使用者數</div>
+                        <div class="stat-value">89</div>
+                        <div class="stat-change">↑ 5 新使用者</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">總對話數</div>
+                        <div class="stat-value">456</div>
+                        <div class="stat-change">→ 持平</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">今日訊息</div>
+                        <div class="stat-value">67</div>
+                        <div class="stat-change">↑ 8% 較昨日</div>
+                    </div>
+                </div>
+
+                <!-- Category Distribution Chart -->
+                <div class="chart-container">
+                    <h2 class="chart-title">五大方向分類統計</h2>
+                    <div class="chart-placeholder" style="position: relative; height: 400px;">
+                        <svg width="350" height="350" style="margin: 0 auto; display: block;">
+                            <!-- Pie chart representation -->
+                            <circle cx="175" cy="175" r="130" fill="none" stroke="#82c3c5" stroke-width="50" stroke-dasharray="81.7 816.8" transform="rotate(-90 175 175)" />
+                            <circle cx="175" cy="175" r="130" fill="none" stroke="#a9d4d6" stroke-width="50" stroke-dasharray="65.4 816.8" stroke-dashoffset="-81.7" transform="rotate(-90 175 175)" />
+                            <circle cx="175" cy="175" r="130" fill="none" stroke="#065758" stroke-width="50" stroke-dasharray="98.0 816.8" stroke-dashoffset="-147.1" transform="rotate(-90 175 175)" />
+                            <circle cx="175" cy="175" r="130" fill="none" stroke="#e2f0ef" stroke-width="50" stroke-dasharray="49.0 816.8" stroke-dashoffset="-245.1" transform="rotate(-90 175 175)" />
+                            <circle cx="175" cy="175" r="130" fill="none" stroke="#f0f0f0" stroke-width="50" stroke-dasharray="32.7 816.8" stroke-dashoffset="-294.1" transform="rotate(-90 175 175)" />
+                        </svg>
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #065758;">1,234</div>
+                            <div style="font-size: 0.875rem; color: #666;">總訊息數</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #82c3c5; border-radius: 4px;"></div>
+                            <span style="font-size: 0.875rem;">文史哲 25% (308)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #a9d4d6; border-radius: 4px;"></div>
+                            <span style="font-size: 0.875rem;">商管經濟 20% (247)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #065758; border-radius: 4px;"></div>
+                            <span style="font-size: 0.875rem;">數理科學 30% (370)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #e2f0ef; border-radius: 4px;"></div>
+                            <span style="font-size: 0.875rem;">生物醫學 15% (185)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #f0f0f0; border-radius: 4px;"></div>
+                            <span style="font-size: 0.875rem;">其他 10% (124)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Health -->
+                <div class="chart-container">
+                    <h2 class="chart-title">系統健康狀態</h2>
+                    <div class="health-status">
+                        <div class="health-item healthy">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">資料庫</div>
+                            <div style="color: #065758;">已連線</div>
+                        </div>
+                        <div class="health-item healthy">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">Line API</div>
+                            <div style="color: #065758;">正常運作</div>
+                        </div>
+                        <div class="health-item healthy">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">LLM 服務</div>
+                            <div style="color: #065758;">正常運作</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversations List Preview -->
+            <div id="conversations" class="preview-content">
+                <h1 class="page-title">對話列表</h1>
+
+                <!-- Filters -->
+                <div class="filters">
+                    <div class="filter-group">
+                        <label class="filter-label">使用者 ID</label>
+                        <input type="text" placeholder="搜尋使用者 ID">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">關鍵字</label>
+                        <input type="text" placeholder="搜尋訊息內容">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">開始日期</label>
+                        <input type="date">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">結束日期</label>
+                        <input type="date">
+                    </div>
+                    <div class="filter-group" style="justify-content: flex-end;">
+                        <label class="filter-label" style="opacity: 0;">搜尋</label>
+                        <button class="btn btn-primary">搜尋</button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>使用者 ID</th>
+                                <th>最後訊息時間</th>
+                                <th>訊息數量</th>
+                                <th>建立時間</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>U1234567890abcdef</td>
+                                <td>2 小時前</td>
+                                <td>15</td>
+                                <td>2024-01-15 10:30</td>
+                                <td><button class="btn btn-primary">查看詳情</button></td>
+                            </tr>
+                            <tr>
+                                <td>U0987654321fedcba</td>
+                                <td>5 小時前</td>
+                                <td>8</td>
+                                <td>2024-01-15 08:20</td>
+                                <td><button class="btn btn-primary">查看詳情</button></td>
+                            </tr>
+                            <tr>
+                                <td>Uabcdef1234567890</td>
+                                <td>1 天前</td>
+                                <td>23</td>
+                                <td>2024-01-14 14:15</td>
+                                <td><button class="btn btn-primary">查看詳情</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="page-btn">上一頁</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">下一頁</button>
+                </div>
+            </div>
+
+            <!-- Conversation Detail Preview -->
+            <div id="detail" class="preview-content">
+                <!-- Layer 1: User List (Default View) -->
+                <div id="user-list-view">
+                <h1 class="page-title">對話詳情</h1>
+                <div style="background: #fff; border: 1px solid #a9d4d6; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <button class="btn btn-secondary" onclick="showUserListView()" style="display: none;">← 返回使用者列表</button>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #065758; margin-bottom: 0.5rem;">選擇使用者以查看對話</div>
+                                <div style="font-size: 0.875rem; color: #666;">點擊下方使用者卡片查看該使用者的所有對話</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                        <div class="user-card" onclick="showConversationList('U1234567890abcdef')" style="background: #fff; border: 1px solid #a9d4d6; border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #065758; margin-bottom: 0.5rem;">U1234567890abcdef</div>
+                            <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">對話數: 5</div>
+                            <div style="font-size: 0.875rem; color: #666;">最後活動: 2 小時前</div>
+                        </div>
+                        <div class="user-card" onclick="showConversationList('U0987654321fedcba')" style="background: #fff; border: 1px solid #a9d4d6; border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #065758; margin-bottom: 0.5rem;">U0987654321fedcba</div>
+                            <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">對話數: 3</div>
+                            <div style="font-size: 0.875rem; color: #666;">最後活動: 5 小時前</div>
+                        </div>
+                        <div class="user-card" onclick="showConversationList('Uabcdef1234567890')" style="background: #fff; border: 1px solid #a9d4d6; border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #065758; margin-bottom: 0.5rem;">Uabcdef1234567890</div>
+                            <div style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">對話數: 8</div>
+                            <div style="font-size: 0.875rem; color: #666;">最後活動: 1 天前</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layer 2: Conversation List (After clicking a user) -->
+                <div id="conversation-list-view" style="display: none;">
+                    <h1 class="page-title">使用者對話列表</h1>
+                    <div style="background: #fff; border: 1px solid #a9d4d6; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <button class="btn btn-secondary" onclick="showUserListView()">← 返回使用者列表</button>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #065758; margin-bottom: 0.5rem;">使用者 ID: <span id="current-user-id">U1234567890abcdef</span></div>
+                                <div style="font-size: 0.875rem; color: #666;">點擊下方對話項目查看詳細內容</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="conversation-item" onclick="showConversationModal('conv1')" style="background: #fff; border: 1px solid #a9d4d6; border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #065758; margin-bottom: 0.5rem;">什麼是微積分？</div>
+                            <div style="display: flex; gap: 1rem; font-size: 0.875rem; color: #666;">
+                                <span>2024-01-15 10:30</span>
+                                <span>•</span>
+                                <span>15 則訊息</span>
+                            </div>
+                        </div>
+                        <div class="conversation-item" onclick="showConversationModal('conv2')" style="background: #fff; border: 1px solid #a9d4d6; border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #065758; margin-bottom: 0.5rem;">可以解釋一下線性代數嗎？</div>
+                            <div style="display: flex; gap: 1rem; font-size: 0.875rem; color: #666;">
+                                <span>2024-01-14 14:20</span>
+                                <span>•</span>
+                                <span>8 則訊息</span>
+                            </div>
+                        </div>
+                        <div class="conversation-item" onclick="showConversationModal('conv3')" style="background: #fff; border: 1px solid #a9d4d6; border-radius: 8px; padding: 1.5rem; cursor: pointer; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #065758; margin-bottom: 0.5rem;">統計學的基本概念是什麼？</div>
+                            <div style="display: flex; gap: 1rem; font-size: 0.875rem; color: #666;">
+                                <span>2024-01-13 09:15</span>
+                                <span>•</span>
+                                <span>12 則訊息</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layer 3: Conversation Detail Modal -->
+            <div id="conversation-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                <div class="modal-content" style="background: #fff; border-radius: 8px; padding: 2rem; max-width: 800px; max-height: 90vh; overflow-y: auto; margin: 2rem; position: relative;">
+                    <button onclick="closeConversationModal()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #065758;">×</button>
+                    <h2 style="color: #065758; margin-bottom: 1.5rem;">對話詳情</h2>
+                    <div style="background: #e2f0ef; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <div style="margin-bottom: 0.5rem;"><strong>會話 ID:</strong> U1234567890abcdef_1705296000000</div>
+                        <div style="margin-bottom: 0.5rem;"><strong>建立時間:</strong> 2024-01-15 10:30:00</div>
+                    <div><strong>訊息數量:</strong> 15</div>
+                </div>
+                <div class="message-list">
+                    <div class="message user">
+                        <div class="message-bubble">
+                            <div>什麼是微積分？</div>
+                                <div class="message-time">2024-01-15 10:30:15</div>
+                            <div class="message-meta">
+                                <span class="category-badge category-stem">數理科學 - 數學</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message bot">
+                        <div class="message-bubble">
+                            <div>微積分是數學的一個分支，主要研究函數的導數和積分...</div>
+                                <div class="message-time">2024-01-15 10:30:18</div>
+                            <div class="message-meta">
+                                    LLM: OpenAI GPT-3.5 | Model: gpt-3.5-turbo | Tokens: 150 | 處理時間: 3.2s
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message user">
+                        <div class="message-bubble">
+                            <div>可以給我一個例子嗎？</div>
+                                <div class="message-time">2024-01-15 10:32:05</div>
+                            <div class="message-meta">
+                                <span class="category-badge category-stem">數理科學 - 數學</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message bot">
+                        <div class="message-bubble">
+                            <div>當然可以！例如，如果我們有函數 f(x) = x²，它的導數是 f'(x) = 2x...</div>
+                                <div class="message-time">2024-01-15 10:32:08</div>
+                            <div class="message-meta">
+                                    LLM: OpenAI GPT-3.5 | Model: gpt-3.5-turbo | Tokens: 200 | 處理時間: 2.8s
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Statistics Preview -->
+            <div id="categories" class="preview-content">
+                <h1 class="page-title">分類統計</h1>
+
+                <!-- Overview -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">總訊息數</div>
+                        <div class="stat-value">1,234</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">已分類</div>
+                        <div class="stat-value">1,180</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">未分類</div>
+                        <div class="stat-value">54</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">分類率</div>
+                        <div class="stat-value">95.6%</div>
+                    </div>
+                </div>
+
+                <!-- Time Filter -->
+                <div class="filters" style="margin-bottom: 1.5rem;">
+                    <div class="filter-group">
+                        <label class="filter-label">時間範圍</label>
+                        <select id="time-range-select" onchange="updateCategoryChart()">
+                            <option value="date">日期</option>
+                            <option value="week">週</option>
+                            <option value="month">月</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" id="date-range-group">
+                        <label class="filter-label">開始日期</label>
+                        <input type="date" id="category-start-date" onchange="updateCategoryChart()">
+                    </div>
+                    <div class="filter-group" id="date-range-group-end">
+                        <label class="filter-label">結束日期</label>
+                        <input type="date" id="category-end-date" onchange="updateCategoryChart()">
+                    </div>
+                </div>
+
+                <!-- Main Category Chart -->
+                <div class="chart-container">
+                    <h2 class="chart-title">五大方向分布</h2>
+                    <div class="chart-placeholder" style="position: relative; height: 500px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="450" height="450" style="margin: 0 auto; display: block;">
+                            <!-- Pie chart representation -->
+                            <circle cx="225" cy="225" r="170" fill="none" stroke="#82c3c5" stroke-width="60" stroke-dasharray="106.8 1068.1" transform="rotate(-90 225 225)" />
+                            <circle cx="225" cy="225" r="170" fill="none" stroke="#a9d4d6" stroke-width="60" stroke-dasharray="85.4 1068.1" stroke-dashoffset="-106.8" transform="rotate(-90 225 225)" />
+                            <circle cx="225" cy="225" r="170" fill="none" stroke="#065758" stroke-width="60" stroke-dasharray="128.1 1068.1" stroke-dashoffset="-192.2" transform="rotate(-90 225 225)" />
+                            <circle cx="225" cy="225" r="170" fill="none" stroke="#e2f0ef" stroke-width="60" stroke-dasharray="64.1 1068.1" stroke-dashoffset="-320.3" transform="rotate(-90 225 225)" />
+                            <circle cx="225" cy="225" r="170" fill="none" stroke="#f0f0f0" stroke-width="60" stroke-dasharray="42.7 1068.1" stroke-dashoffset="-384.4" transform="rotate(-90 225 225)" />
+                        </svg>
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: #065758;">1,234</div>
+                            <div style="font-size: 0.875rem; color: #666;">總訊息數</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #82c3c5; border-radius: 4px;"></div>
+                            <span style="font-size: 0.875rem;">文史哲 25% (308)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #a9d4d6; border-radius: 4px;"></div>
+                            <span style="font-size: 0.875rem;">商管經濟 20% (247)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #065758; border-radius: 4px;"></div>
+                            <span style="font-size: 0.875rem;">數理科學 30% (370)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #e2f0ef; border-radius: 4px;"></div>
+                            <span style="font-size: 0.875rem;">生物醫學 15% (185)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 16px; height: 16px; background: #f0f0f0; border-radius: 4px;"></div>
+                            <span style="font-size: 0.875rem;">其他 10% (124)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub Categories -->
+                <div class="chart-container">
+                    <h2 class="chart-title">細分類別統計</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                        <!-- Humanities -->
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 1rem; color: #065758; font-size: 1.125rem;">文史哲</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <span class="category-badge category-humanities">中國文學 (80)</span>
+                                <span class="category-badge category-humanities">外國文學 (60)</span>
+                                <span class="category-badge category-humanities">歷史 (50)</span>
+                                <span class="category-badge category-humanities">哲學 (40)</span>
+                                <span class="category-badge category-humanities">語言學 (20)</span>
+                            </div>
+                        </div>
+                        <!-- Business -->
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 1rem; color: #065758; font-size: 1.125rem;">商管經濟</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <span class="category-badge category-business">經濟學 (50)</span>
+                                <span class="category-badge category-business">管理學 (45)</span>
+                                <span class="category-badge category-business">會計學 (40)</span>
+                                <span class="category-badge category-business">財務金融 (60)</span>
+                                <span class="category-badge category-business">行銷學 (52)</span>
+                            </div>
+                        </div>
+                        <!-- STEM -->
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 1rem; color: #065758; font-size: 1.125rem;">數理科學</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <span class="category-badge category-stem">數學 (120)</span>
+                                <span class="category-badge category-stem">物理學 (80)</span>
+                                <span class="category-badge category-stem">化學 (60)</span>
+                                <span class="category-badge category-stem">資訊科學 (100)</span>
+                                <span class="category-badge category-stem">統計學 (40)</span>
+                            </div>
+                        </div>
+                        <!-- Life Sciences -->
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 1rem; color: #065758; font-size: 1.125rem;">生物醫學</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <span class="category-badge category-life">生物學 (50)</span>
+                                <span class="category-badge category-life">醫學 (45)</span>
+                                <span class="category-badge category-life">農學 (30)</span>
+                                <span class="category-badge category-life">食品科學 (35)</span>
+                                <span class="category-badge category-life">環境科學 (25)</span>
+                            </div>
+                        </div>
+                        <!-- Others -->
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 1rem; color: #065758; font-size: 1.125rem;">其他</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <span class="category-badge category-others">藝術設計 (30)</span>
+                                <span class="category-badge category-others">教育學 (25)</span>
+                                <span class="category-badge category-others">心理學 (35)</span>
+                                <span class="category-badge category-others">社會學 (20)</span>
+                                <span class="category-badge category-others">法律 (14)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trends -->
+                <div class="chart-container">
+                    <h2 class="chart-title">每日趨勢（最近 7 天）</h2>
+                    <div class="chart-placeholder">
+                        折線圖：顯示各類別每日訊息數量趨勢
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bot Config Preview -->
+            <div id="bot-config" class="preview-content">
+                <h1 class="page-title">Bot 配置管理</h1>
+
+                <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <button class="btn btn-secondary" onclick="showConfigHistory()">查看歷史紀錄</button>
+                    <button class="btn btn-secondary" onclick="resetToDefault()">還原為預設模式</button>
+                </div>
+
+                <div class="chart-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 class="chart-title" style="margin: 0;">當前配置</h2>
+                        <div style="font-size: 0.875rem; color: #666;">版本: 1 | 建立時間: 2024-01-15 10:00:00</div>
+                    </div>
+
+                    <form style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div class="filter-group">
+                            <label class="filter-label">System Prompt</label>
+                            <textarea id="system-prompt" rows="6" style="padding: 0.5rem; border: 1px solid #a9d4d6; border-radius: 4px; font-size: 0.875rem; font-family: inherit; resize: vertical;">You are a friendly and helpful learning assistant. Provide clear, well-structured answers.</textarea>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">Personality</label>
+                            <textarea id="personality" rows="4" style="padding: 0.5rem; border: 1px solid #a9d4d6; border-radius: 4px; font-size: 0.875rem; font-family: inherit; resize: vertical;">Friendly, helpful, and encouraging learning assistant.</textarea>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                            <div class="filter-group">
+                                <label class="filter-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="enable-fallback" checked style="width: auto;">
+                                    Enable Fallback
+                                </label>
+                                <div style="font-size: 0.75rem; color: #666; margin-top: 0.25rem;">當 LLM 服務不可用時啟用降級回覆</div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Max Response Length</label>
+                                <input type="number" id="max-length" value="500" min="100" max="2000" step="50" style="padding: 0.5rem; border: 1px solid #a9d4d6; border-radius: 4px; font-size: 0.875rem;">
+                                <div style="font-size: 0.75rem; color: #666; margin-top: 0.25rem;">最大回覆長度（字元數）</div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Temperature: <span id="temp-value">0.7</span></label>
+                                <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7" oninput="document.getElementById('temp-value').textContent = this.value" style="width: 100%;">
+                                <div style="font-size: 0.75rem; color: #666; margin-top: 0.25rem;">控制回覆的創造性（0-2）</div>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">Custom Instructions</label>
+                            <textarea id="custom-instructions" rows="4" placeholder="可選：自訂額外的回覆規則或指示..." style="padding: 0.5rem; border: 1px solid #a9d4d6; border-radius: 4px; font-size: 0.875rem; font-family: inherit; resize: vertical;"></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">重置表單</button>
+                            <button type="button" class="btn btn-primary" onclick="saveConfig()">儲存配置</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Config History Modal -->
+            <div id="config-history-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                <div class="modal-content" style="background: #fff; border-radius: 8px; padding: 2rem; max-width: 900px; max-height: 90vh; overflow-y: auto; margin: 2rem; position: relative;">
+                    <button onclick="closeConfigHistory()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #065758;">×</button>
+                    <h2 style="color: #065758; margin-bottom: 1.5rem;">配置歷史紀錄</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>版本</th>
+                                    <th>建立時間</th>
+                                    <th>System Prompt 預覽</th>
+                                    <th>狀態</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2024-01-15 10:00:00</td>
+                                    <td>You are a friendly and helpful learning assistant...</td>
+                                    <td><span style="color: #82c3c5; font-weight: 600;">使用中</span></td>
+                                    <td><button class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">查看詳情</button></td>
+                                </tr>
+                                <tr>
+                                    <td>0</td>
+                                    <td>2024-01-10 08:00:00</td>
+                                    <td>You are a helpful assistant...</td>
+                                    <td><span style="color: #666;">已停用</span></td>
+                                    <td><button class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">查看詳情</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        .user-card:hover {
+            background-color: #a9d4d6 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .conversation-item:hover {
+            background-color: #a9d4d6 !important;
+            transform: translateX(4px);
+        }
+
+        .modal-overlay {
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        textarea {
+            width: 100%;
+        }
+    </style>
+
+    <script>
+        function showPreview(page) {
+            // Hide all previews
+            document.querySelectorAll('.preview-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Remove active from all tabs
+            document.querySelectorAll('.preview-tab').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show selected preview
+            document.getElementById(page).classList.add('active');
+            
+            // Add active to clicked tab
+            event.target.classList.add('active');
+
+            // Reset conversation detail views
+            if (page === 'detail') {
+                showUserListView();
+            }
+        }
+
+        function showUserListView() {
+            document.getElementById('user-list-view').style.display = 'block';
+            document.getElementById('conversation-list-view').style.display = 'none';
+            closeConversationModal();
+        }
+
+        function showConversationList(userId) {
+            document.getElementById('user-list-view').style.display = 'none';
+            document.getElementById('conversation-list-view').style.display = 'block';
+            document.getElementById('current-user-id').textContent = userId;
+        }
+
+        function showConversationModal(conversationId) {
+            document.getElementById('conversation-modal').classList.add('active');
+        }
+
+        function closeConversationModal() {
+            document.getElementById('conversation-modal').classList.remove('active');
+        }
+
+        function updateCategoryChart() {
+            // This would update the chart based on selected time range
+            // In the actual implementation, this would fetch new data and re-render the chart
+            console.log('Updating category chart with new time range');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('conversation-modal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeConversationModal();
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeConversationModal();
+                closeConfigHistory();
+            }
+        });
+
+        function showConfigHistory() {
+            document.getElementById('config-history-modal').classList.add('active');
+        }
+
+        function closeConfigHistory() {
+            document.getElementById('config-history-modal').classList.remove('active');
+        }
+
+        function resetToDefault() {
+            if (confirm('確定要還原為預設模式嗎？這將會建立一個新的配置版本。')) {
+                document.getElementById('system-prompt').value = 'You are a friendly and helpful learning assistant. Provide clear, well-structured answers.';
+                document.getElementById('personality').value = 'Friendly, helpful, and encouraging learning assistant.';
+                document.getElementById('enable-fallback').checked = true;
+                document.getElementById('max-length').value = 500;
+                document.getElementById('temperature').value = 0.7;
+                document.getElementById('temp-value').textContent = '0.7';
+                document.getElementById('custom-instructions').value = '';
+                alert('已還原為預設值，請點擊「儲存配置」以套用變更。');
+            }
+        }
+
+        function resetForm() {
+            if (confirm('確定要重置表單嗎？未儲存的變更將會遺失。')) {
+                location.reload();
+            }
+        }
+
+        function saveConfig() {
+            alert('配置已儲存！');
+        }
+    </script>
+</body>
+</html>
+

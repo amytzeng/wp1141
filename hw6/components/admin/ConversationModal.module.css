@@ -1,0 +1,126 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.modalContent {
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  width: 100%;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #065758;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: #e2f0ef;
+}
+
+.modalTitle {
+  color: #065758;
+  margin-bottom: 1.5rem;
+}
+
+.conversationInfo {
+  background: #e2f0ef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.conversationInfo > div {
+  margin-bottom: 0.5rem;
+}
+
+.conversationInfo > div:last-child {
+  margin-bottom: 0;
+}
+
+.messageList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.message {
+  display: flex;
+  gap: 1rem;
+  max-width: 70%;
+}
+
+.message.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.message.bot {
+  align-self: flex-start;
+}
+
+.messageBubble {
+  padding: 1rem;
+  border-radius: 12px;
+  color: #000;
+}
+
+.message.user .messageBubble {
+  background-color: #82c3c5;
+}
+
+.message.bot .messageBubble {
+  background-color: #e2f0ef;
+}
+
+.messageContent {
+  margin-bottom: 0.5rem;
+}
+
+.messageTime {
+  font-size: 0.75rem;
+  color: #065758;
+  margin-top: 0.5rem;
+}
+
+.messageMeta {
+  font-size: 0.75rem;
+  color: #065758;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(6, 87, 88, 0.2);
+}
+
+.botMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+

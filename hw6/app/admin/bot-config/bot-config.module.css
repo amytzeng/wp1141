@@ -1,0 +1,92 @@
+.botConfig {
+  width: 100%;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  color: #065758;
+  margin-bottom: 2rem;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.historyButton {
+  padding: 0.5rem 1rem;
+  background-color: #a9d4d6;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.historyButton:hover {
+  background-color: #82c3c5;
+}
+
+.chartContainer {
+  background: #fff;
+  border: 1px solid #a9d4d6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  color: #065758;
+  margin: 0;
+}
+
+.versionInfo {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.errorMessage {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #ffe0e0;
+  border: 1px solid #c46960;
+  border-radius: 4px;
+  color: #c46960;
+}
+
+.loading,
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+.error button {
+  padding: 0.5rem 1rem;
+  background-color: #82c3c5;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.error button:hover {
+  background-color: #065758;
+  color: #fff;
+}
+

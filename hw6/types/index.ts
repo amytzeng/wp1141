@@ -29,5 +29,11 @@ export interface MessageMetadata {
   tokensUsed?: number;
   error?: string;
   processingTime?: number;
+  category?: {
+    mainCategory: string;
+    subCategory: string;
+    confidence: number;
+    method: 'keyword' | 'llm' | 'default';
+  };
 }
 

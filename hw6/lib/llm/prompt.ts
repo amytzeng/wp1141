@@ -1,9 +1,21 @@
 import { IMessage } from '@/lib/db/models/Message';
+import BotConfig from '@/lib/db/models/BotConfig';
 
 /**
- * System prompt template for the AI learning assistant
+ * Gets the active system prompt from BotConfig, or returns default
  */
-const SYSTEM_PROMPT = `You are a friendly and helpful learning assistant. Your role is to help users understand concepts, organize notes, and answer questions related to their studies.
+async function getSystemPrompt(): Promise<string> {
+  try {
+    const config = await BotConfig.findOne({ isActive: true }).lean().exec();
+    if (config && config.systemPrompt) {
+      return config.systemPrompt;
+    }
+  } catch (error) {
+    console.error('Error fetching bot config:', error);
+  }
+  
+  // Default system prompt
+  return `You are a friendly and helpful learning assistant. Your role is to help users understand concepts, organize notes, and answer questions related to their studies.
 
 Guidelines:
 - Provide clear, well-structured answers
@@ -13,14 +25,18 @@ Guidelines:
 - If you don't know something, admit it honestly
 
 Remember to maintain context from previous messages in the conversation.`;
+}
 
 /**
  * Builds a complete prompt from system prompt, conversation context, and user question
  */
-export function buildPrompt(
+export async function buildPrompt(
   userQuestion: string,
   contextMessages: IMessage[] = []
-): string {
+): Promise<string> {
+  // Get system prompt from config
+  const systemPrompt = await getSystemPrompt();
+
   // Build conversation context string
   let contextString = '';
   if (contextMessages.length > 0) {
@@ -32,7 +48,7 @@ export function buildPrompt(
   }
 
   // Combine system prompt, context, and user question
-  const fullPrompt = `${SYSTEM_PROMPT}${contextString}\n\nUser's question: ${userQuestion}\n\nPlease provide a helpful response:`;
+  const fullPrompt = `${systemPrompt}${contextString}\n\nUser's question: ${userQuestion}\n\nPlease provide a helpful response:`;
 
   return fullPrompt;
 }

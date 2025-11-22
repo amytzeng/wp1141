@@ -1,6 +1,7 @@
 import Message, { IMessage } from '@/lib/db/models/Message';
 import Conversation, { IConversation } from '@/lib/db/models/Conversation';
 import { compressContext } from '@/lib/llm/prompt';
+import { updateFlowStage, updateConversationStatus } from '@/lib/session/manager';
 
 /**
  * Generates a unique session ID based on timestamp and user ID
@@ -102,7 +103,14 @@ export async function incrementMessageCount(
 ): Promise<void> {
   await Conversation.findByIdAndUpdate(conversationId, {
     $inc: { messageCount: 1 },
-    $set: { updatedAt: new Date() },
+    $set: { 
+      updatedAt: new Date(),
+      lastActivityAt: new Date(),
+    },
   }).exec();
+
+  // Update flow stage and status
+  await updateFlowStage(conversationId);
+  await updateConversationStatus(conversationId);
 }
 

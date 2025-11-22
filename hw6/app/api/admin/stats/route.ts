@@ -7,8 +7,10 @@ import Message from '@/lib/db/models/Message';
  * @swagger
  * /api/admin/stats:
  *   get:
- *     summary: Get statistics
- *     description: Retrieves system statistics including message counts, user counts, LLM usage, and daily trends
+ *     summary: Get comprehensive statistics
+ *     description: |
+ *       Retrieves system statistics including message counts, user counts, LLM usage, daily trends,
+ *       and detailed user analytics (active users, new users, user engagement).
  *     tags: [Admin]
  *     parameters:
  *       - in: query
@@ -25,7 +27,7 @@ import Message from '@/lib/db/models/Message';
  *         description: Filter statistics until this date
  *     responses:
  *       200:
- *         description: Statistics data
+ *         description: Statistics data including user analytics
  *         content:
  *           application/json:
  *             schema:
@@ -138,6 +140,117 @@ export async function GET(request: NextRequest) {
       { $sort: { _id: 1 } },
     ]).exec();
 
+    // User Analytics
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    // Active users (users who sent messages in the last 7 days)
+    const activeUsers = await Message.distinct('lineUserId', {
+      ...dateFilter,
+      timestamp: {
+        $gte: sevenDaysAgo,
+        ...dateFilter.timestamp,
+      },
+    }).then((users) => users.length);
+
+    // New users (users who sent their first message in the last 7 days)
+    const allUserFirstMessages = await Message.aggregate([
+      {
+        $match: {
+          ...dateFilter,
+          type: 'user',
+        },
+      },
+      {
+        $group: {
+          _id: '$lineUserId',
+          firstMessageDate: { $min: '$timestamp' },
+        },
+      },
+    ]).exec();
+
+    const newUsers = allUserFirstMessages.filter(
+      (user) => new Date(user.firstMessageDate) >= sevenDaysAgo
+    ).length;
+
+    // User engagement: average messages per user
+    const userEngagement = await Message.aggregate([
+      {
+        $match: {
+          ...dateFilter,
+          type: 'user',
+        },
+      },
+      {
+        $group: {
+          _id: '$lineUserId',
+          messageCount: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          avgMessagesPerUser: { $avg: '$messageCount' },
+          maxMessagesPerUser: { $max: '$messageCount' },
+          minMessagesPerUser: { $min: '$messageCount' },
+        },
+      },
+    ]).exec();
+
+    const engagement = userEngagement[0] || {
+      avgMessagesPerUser: 0,
+      maxMessagesPerUser: 0,
+      minMessagesPerUser: 0,
+    };
+
+    // Top active users (users with most messages)
+    const topUsers = await Message.aggregate([
+      {
+        $match: {
+          ...dateFilter,
+          type: 'user',
+        },
+      },
+      {
+        $group: {
+          _id: '$lineUserId',
+          messageCount: { $sum: 1 },
+          lastActivity: { $max: '$timestamp' },
+        },
+      },
+      { $sort: { messageCount: -1 } },
+      { $limit: 10 },
+    ]).exec();
+
+    // User growth trend (last 30 days)
+    const userGrowthTrend = await Message.aggregate([
+      {
+        $match: {
+          ...dateFilter,
+          type: 'user',
+          timestamp: {
+            $gte: thirtyDaysAgo,
+            ...dateFilter.timestamp,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$timestamp' },
+          },
+          uniqueUsers: { $addToSet: '$lineUserId' },
+        },
+      },
+      {
+        $project: {
+          date: '$_id',
+          newUsers: { $size: '$uniqueUsers' },
+        },
+      },
+      { $sort: { date: 1 } },
+    ]).exec();
+
     return NextResponse.json({
       overview: {
         totalMessages,
@@ -145,6 +258,25 @@ export async function GET(request: NextRequest) {
         totalConversations,
         todayMessages,
         successRate: Math.round(successRate * 100) / 100,
+      },
+      users: {
+        total: totalUsers,
+        active: activeUsers,
+        new: newUsers,
+        engagement: {
+          avgMessagesPerUser: Math.round(engagement.avgMessagesPerUser * 100) / 100,
+          maxMessagesPerUser: engagement.maxMessagesPerUser,
+          minMessagesPerUser: engagement.minMessagesPerUser,
+        },
+        topUsers: topUsers.map((user) => ({
+          lineUserId: user._id,
+          messageCount: user.messageCount,
+          lastActivity: user.lastActivity,
+        })),
+        growthTrend: userGrowthTrend.map((item) => ({
+          date: item.date,
+          newUsers: item.newUsers,
+        })),
       },
       llmUsage: llmStats,
       dailyTrend: dailyTrend.map((item) => ({

@@ -5,6 +5,7 @@ import Message from '@/lib/db/models/Message';
 import { getLLMClient } from '@/lib/llm/client';
 import { buildPrompt } from '@/lib/llm/prompt';
 import { getFallbackResponse } from '@/lib/llm/fallback';
+import { classifyMessage } from '@/lib/classification/classifier';
 
 /**
  * Checks if a message is a command (starts with /)
@@ -63,6 +64,9 @@ export async function handleTextMessage(event: LineEvent): Promise<void> {
     // Get or create conversation
     const conversation = await getOrCreateConversation(lineUserId);
 
+    // Classify the message by subject category
+    const classification = classifyMessage(text);
+
     // Save user message to database
     const userMessage = new Message({
       conversationId: conversation._id,
@@ -73,6 +77,12 @@ export async function handleTextMessage(event: LineEvent): Promise<void> {
       metadata: {
         messageId: message.id,
         replyToken,
+        category: {
+          mainCategory: classification.mainCategory,
+          subCategory: classification.subCategory,
+          confidence: classification.confidence,
+          method: classification.method,
+        },
       },
     });
     await userMessage.save();
@@ -104,7 +114,7 @@ export async function handleTextMessage(event: LineEvent): Promise<void> {
       // Try to get LLM response
       try {
         const llmClient = getLLMClient();
-        const prompt = buildPrompt(text, contextMessages);
+        const prompt = await buildPrompt(text, contextMessages);
         const llmResult = await llmClient.generateResponse(prompt, []);
 
         if (llmResult.error) {

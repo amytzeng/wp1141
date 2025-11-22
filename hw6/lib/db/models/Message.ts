@@ -45,6 +45,12 @@ const MessageSchema: Schema = new Schema(
       tokensUsed: Number,
       error: String,
       processingTime: Number,
+      category: {
+        mainCategory: String,
+        subCategory: String,
+        confidence: Number,
+        method: String,
+      },
     },
   },
   {

@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "@line/bot-sdk": "^9.3.0",
+    "date-fns": "^4.1.0",
     "mongodb": "^7.0.0",
     "mongoose": "^8.0.3",
     "next": "^14.0.4",
     "openai": "^4.20.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "recharts": "^3.4.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-react": "^5.10.5",
     "zod": "^3.22.4"

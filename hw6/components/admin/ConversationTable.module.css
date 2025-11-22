@@ -1,0 +1,62 @@
+.tableContainer {
+  background: #fff;
+  border: 1px solid #a9d4d6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHead {
+  background-color: #065758;
+  color: #fff;
+}
+
+.tableHeader {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.tableCell {
+  padding: 1rem;
+  border-bottom: 1px solid #a9d4d6;
+}
+
+.tableRow {
+  transition: background-color 0.2s;
+}
+
+.tableRow:hover {
+  background-color: #a9d4d6;
+}
+
+.tableRow:last-child .tableCell {
+  border-bottom: none;
+}
+
+.emptyCell {
+  text-align: center;
+  color: #666;
+  padding: 2rem !important;
+}
+
+.viewButton {
+  padding: 0.5rem 1rem;
+  background-color: #82c3c5;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.viewButton:hover {
+  background-color: #065758;
+  color: #fff;
+}
+

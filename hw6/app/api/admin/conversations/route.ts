@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/connect';
 import Conversation from '@/lib/db/models/Conversation';
 import Message from '@/lib/db/models/Message';
+import mongoose from 'mongoose';
 
 /**
  * @swagger
  * /api/admin/conversations:
  *   get:
- *     summary: Get list of conversations
- *     description: Retrieves a paginated list of conversations with optional filtering
+ *     summary: Get list of conversations with advanced filtering
+ *     description: |
+ *       Retrieves a paginated list of conversations with optional filtering.
+ *       Supports filtering by user ID, date range, platform, and message content search.
  *     tags: [Admin]
  *     parameters:
  *       - in: query
@@ -27,7 +30,7 @@ import Message from '@/lib/db/models/Message';
  *         name: lineUserId
  *         schema:
  *           type: string
- *         description: Filter by Line user ID
+ *         description: Filter by Line user ID (exact match)
  *       - in: query
  *         name: startDate
  *         schema:
@@ -40,6 +43,18 @@ import Message from '@/lib/db/models/Message';
  *           type: string
  *           format: date-time
  *         description: Filter conversations created before this date
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search message content (searches in all messages within conversations)
+ *       - in: query
+ *         name: platform
+ *         schema:
+ *           type: string
+ *           enum: [line]
+ *           default: line
+ *         description: Filter by platform (currently only 'line' is supported)
  *     responses:
  *       200:
  *         description: List of conversations
@@ -64,8 +79,10 @@ export async function GET(request: NextRequest) {
     const lineUserId = searchParams.get('lineUserId');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
+    const search = searchParams.get('search'); // Message content search
+    const platform = searchParams.get('platform') || 'line'; // Platform filter
 
-    // Build query
+    // Build base query
     const query: any = {};
     if (lineUserId) {
       query.lineUserId = lineUserId;
@@ -79,6 +96,44 @@ export async function GET(request: NextRequest) {
         query.createdAt.$lte = new Date(endDate);
       }
     }
+
+    // If message content search is provided, find conversations that contain matching messages
+    let conversationIds: string[] | null = null;
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), 'i'); // Case-insensitive search
+      const matchingMessages = await Message.find({
+        content: { $regex: searchRegex },
+        type: 'user', // Only search in user messages
+      })
+        .select('conversationId')
+        .lean()
+        .exec();
+
+      conversationIds = [
+        ...new Set(matchingMessages.map((msg) => msg.conversationId.toString())),
+      ];
+
+      // If no matching messages found, return empty result
+      if (conversationIds.length === 0) {
+        return NextResponse.json({
+          conversations: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+          },
+        });
+      }
+
+      // Filter conversations by matching IDs (convert to ObjectId)
+      query._id = {
+        $in: conversationIds.map((id) => new mongoose.Types.ObjectId(id)),
+      };
+    }
+
+    // Platform filter (currently only 'line' is supported, but structure allows for future expansion)
+    // For now, all conversations are from Line, so this is a placeholder for future platforms
 
     // Calculate skip for pagination
     const skip = (page - 1) * limit;

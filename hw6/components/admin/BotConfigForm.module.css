@@ -1,0 +1,121 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: #065758;
+  font-weight: 600;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #065758;
+  font-weight: 600;
+}
+
+.checkbox {
+  width: auto;
+}
+
+.textarea,
+.input {
+  padding: 0.5rem;
+  border: 1px solid #a9d4d6;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.textarea:focus,
+.input:focus {
+  outline: none;
+  border-color: #82c3c5;
+  box-shadow: 0 0 0 3px rgba(130, 195, 197, 0.1);
+}
+
+.range {
+  width: 100%;
+}
+
+.tempValue {
+  color: #065758;
+  font-weight: 600;
+}
+
+.helpText {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.formActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.resetButton,
+.defaultButton,
+.saveButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.resetButton {
+  background-color: #a9d4d6;
+  color: #000;
+}
+
+.resetButton:hover {
+  background-color: #82c3c5;
+}
+
+.defaultButton {
+  background-color: #a9d4d6;
+  color: #000;
+}
+
+.defaultButton:hover {
+  background-color: #82c3c5;
+}
+
+.saveButton {
+  background-color: #82c3c5;
+  color: #000;
+  font-weight: 600;
+}
+
+.saveButton:hover {
+  background-color: #065758;
+  color: #fff;
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

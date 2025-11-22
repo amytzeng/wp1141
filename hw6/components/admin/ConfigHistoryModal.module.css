@@ -1,0 +1,123 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.modalContent {
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  width: 100%;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #065758;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: #e2f0ef;
+}
+
+.modalTitle {
+  color: #065758;
+  margin-bottom: 1.5rem;
+}
+
+.tableContainer {
+  background: #fff;
+  border: 1px solid #a9d4d6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHead {
+  background-color: #065758;
+  color: #fff;
+}
+
+.tableHeader {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.tableCell {
+  padding: 1rem;
+  border-bottom: 1px solid #a9d4d6;
+}
+
+.tableRow {
+  transition: background-color 0.2s;
+}
+
+.tableRow:hover {
+  background-color: #a9d4d6;
+}
+
+.tableRow:last-child .tableCell {
+  border-bottom: none;
+}
+
+.emptyCell {
+  text-align: center;
+  color: #666;
+  padding: 2rem !important;
+}
+
+.active {
+  color: #82c3c5;
+  font-weight: 600;
+}
+
+.inactive {
+  color: #666;
+}
+
+.viewButton {
+  padding: 0.25rem 0.75rem;
+  background-color: #82c3c5;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.viewButton:hover {
+  background-color: #065758;
+  color: #fff;
+}
+

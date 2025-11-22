@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db/connect';
 import mongoose from 'mongoose';
+import Message from '@/lib/db/models/Message';
 
 /**
  * Checks database connection status
@@ -89,6 +90,98 @@ function checkLLMService(): { status: string; error?: string } {
 }
 
 /**
+ * Calculates performance metrics from message data
+ */
+async function calculatePerformanceMetrics(): Promise<{
+  avgResponseTime: number;
+  p95ResponseTime: number;
+  p99ResponseTime: number;
+  failureRate: number;
+  requestsPerMinute: number;
+  totalRequests: number;
+  errorCount: number;
+}> {
+  try {
+    await connectDB();
+
+    // Get bot messages from last 24 hours
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const botMessages = await Message.find({
+      type: 'bot',
+      timestamp: { $gte: twentyFourHoursAgo },
+      'metadata.processingTime': { $exists: true },
+    })
+      .select('metadata.processingTime metadata.error timestamp')
+      .lean()
+      .exec();
+
+    if (botMessages.length === 0) {
+      return {
+        avgResponseTime: 0,
+        p95ResponseTime: 0,
+        p99ResponseTime: 0,
+        failureRate: 0,
+        requestsPerMinute: 0,
+        totalRequests: 0,
+        errorCount: 0,
+      };
+    }
+
+    // Calculate response times
+    const responseTimes = botMessages
+      .map((msg) => msg.metadata?.processingTime || 0)
+      .filter((time) => time > 0)
+      .sort((a, b) => a - b);
+
+    const avgResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
+        : 0;
+
+    // Calculate percentiles
+    const p95Index = Math.floor(responseTimes.length * 0.95);
+    const p99Index = Math.floor(responseTimes.length * 0.99);
+    const p95ResponseTime = responseTimes[p95Index] || 0;
+    const p99ResponseTime = responseTimes[p99Index] || 0;
+
+    // Calculate failure rate
+    const errorCount = botMessages.filter(
+      (msg) => msg.metadata?.error && msg.metadata.error !== null
+    ).length;
+    const failureRate =
+      botMessages.length > 0 ? (errorCount / botMessages.length) * 100 : 0;
+
+    // Calculate requests per minute (last hour)
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const recentMessages = botMessages.filter(
+      (msg) => new Date(msg.timestamp) >= oneHourAgo
+    );
+    const requestsPerMinute = recentMessages.length / 60;
+
+    return {
+      avgResponseTime: Math.round(avgResponseTime),
+      p95ResponseTime,
+      p99ResponseTime,
+      failureRate: Math.round(failureRate * 100) / 100,
+      requestsPerMinute: Math.round(requestsPerMinute * 100) / 100,
+      totalRequests: botMessages.length,
+      errorCount,
+    };
+  } catch (error) {
+    console.error('Error calculating performance metrics:', error);
+    return {
+      avgResponseTime: 0,
+      p95ResponseTime: 0,
+      p99ResponseTime: 0,
+      failureRate: 0,
+      requestsPerMinute: 0,
+      totalRequests: 0,
+      errorCount: 0,
+    };
+  }
+}
+
+/**
  * Determines overall health status based on service statuses
  */
 function determineOverallStatus(services: {
@@ -115,10 +208,10 @@ function determineOverallStatus(services: {
  * @swagger
  * /api/health:
  *   get:
- *     summary: Health check
+ *     summary: Health check with performance metrics
  *     description: |
- *       Verifies database connection and checks service configuration status.
- *       Returns detailed status for each service (database, LINE, LLM).
+ *       Verifies database connection, checks service configuration status, and provides
+ *       performance metrics including response times, failure rates, and request statistics.
  *       - **healthy**: All critical services are operational
  *       - **degraded**: Database is connected but some optional services are missing
  *       - **unhealthy**: Critical services (database) are not available
@@ -139,11 +232,12 @@ function determineOverallStatus(services: {
  */
 export async function GET() {
   try {
-    // Check all services independently
-    const [database, line, llm] = await Promise.all([
+    // Check all services independently and calculate performance metrics
+    const [database, line, llm, performance] = await Promise.all([
       checkDatabase(),
       Promise.resolve(checkLineService()),
       Promise.resolve(checkLLMService()),
+      calculatePerformanceMetrics(),
     ]);
 
     const services = {
@@ -163,6 +257,15 @@ export async function GET() {
         database: database.status,
         line: line.status,
         llm: llm.status,
+      },
+      performance: {
+        avgResponseTime: performance.avgResponseTime,
+        p95ResponseTime: performance.p95ResponseTime,
+        p99ResponseTime: performance.p99ResponseTime,
+        failureRate: performance.failureRate,
+        requestsPerMinute: performance.requestsPerMinute,
+        totalRequests: performance.totalRequests,
+        errorCount: performance.errorCount,
       },
       // Include errors if any service has issues
       ...(database.error || line.error || llm.error

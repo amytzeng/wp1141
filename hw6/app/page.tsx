@@ -51,10 +51,31 @@ export default function Home() {
           </li>
         </ul>
       </div>
-      <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-        <p>
-          <strong>Note:</strong> The admin dashboard will be implemented in the frontend phase.
+      <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: '#e2f0ef', borderRadius: '8px', border: '1px solid #a9d4d6' }}>
+        <h2 style={{ color: '#065758', marginBottom: '1rem' }}>管理後台</h2>
+        <p style={{ marginBottom: '1rem' }}>
+          <Link
+            href="/admin"
+            style={{
+              color: '#065758',
+              textDecoration: 'underline',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+            }}
+          >
+            前往管理後台 Dashboard →
+          </Link>
         </p>
+        <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#666' }}>
+          <p>管理後台功能：</p>
+          <ul style={{ marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
+            <li>Dashboard - 統計總覽與五大方向分類</li>
+            <li>對話列表 - 搜尋與篩選對話記錄</li>
+            <li>對話詳情 - 查看使用者對話內容</li>
+            <li>分類統計 - 分類分析與趨勢圖表</li>
+            <li>Bot 配置 - 管理 AI 回覆設定</li>
+          </ul>
+        </div>
       </div>
     </main>
   );

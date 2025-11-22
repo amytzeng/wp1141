@@ -1,0 +1,27 @@
+.conversationItem {
+  background: #fff;
+  border: 1px solid #a9d4d6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.conversationItem:hover {
+  background-color: #a9d4d6;
+  transform: translateX(4px);
+}
+
+.messagePreview {
+  font-weight: 600;
+  color: #065758;
+  margin-bottom: 0.5rem;
+}
+
+.conversationMeta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #666;
+}
+
