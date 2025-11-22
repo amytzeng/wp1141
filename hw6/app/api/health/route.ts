@@ -26,6 +26,13 @@ async function checkDatabase(): Promise<{ status: string; error?: string }> {
     // Perform actual ping to verify database is accessible
     // This ensures the connection is not just established but actually working
     try {
+      // Check if db is available before accessing it
+      if (!mongoose.connection.db) {
+        return {
+          status: 'error',
+          error: 'Database connection object is not available',
+        };
+      }
       await mongoose.connection.db.admin().ping();
       return { status: 'connected' };
     } catch (pingError) {

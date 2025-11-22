@@ -42,6 +42,14 @@ export async function GET() {
       databaseName?: string;
       collections?: string[];
       error?: string;
+      errorName?: string;
+      errorCode?: string;
+      tip?: string;
+      hasMongoDbUri?: boolean;
+      uriFormat?: string;
+      fullError?: any;
+      serverVersion?: string;
+      uptime?: string;
     };
   } = {
     success: false,
@@ -51,7 +59,8 @@ export async function GET() {
 
   try {
     // Check if MONGODB_URI is set
-    if (!process.env.MONGODB_URI) {
+    const mongoDbUri = process.env.MONGODB_URI;
+    if (!mongoDbUri) {
       return NextResponse.json(
         {
           success: false,
@@ -63,7 +72,7 @@ export async function GET() {
     }
 
     // Mask sensitive information for logging
-    const maskedUri = process.env.MONGODB_URI.replace(
+    const maskedUri = mongoDbUri.replace(
       /mongodb\+srv:\/\/([^:]+):([^@]+)@/,
       'mongodb+srv://$1:***@'
     );
@@ -89,21 +98,36 @@ export async function GET() {
       );
     }
 
+    // Check if db is available before accessing it
+    if (!mongoose.connection.db) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Database connection object is not available',
+          details: results.details,
+        },
+        { status: 500 }
+      );
+    }
+
+    // Store db reference to avoid repeated checks
+    const db = mongoose.connection.db;
+
     // Step 3: Perform ping test
     const pingStartTime = Date.now();
-    await mongoose.connection.db.admin().ping();
+    await db.admin().ping();
     const pingTime = Date.now() - pingStartTime;
     results.details.pingTime = pingTime;
 
     // Step 4: Get database information
-    results.details.databaseName = mongoose.connection.db.databaseName;
+    results.details.databaseName = db.databaseName;
 
     // Step 5: List collections
-    const collections = await mongoose.connection.db.listCollections().toArray();
+    const collections = await db.listCollections().toArray();
     results.details.collections = collections.map((c) => c.name);
 
     // Step 6: Get server status
-    const serverStatus = await mongoose.connection.db.admin().serverStatus();
+    const serverStatus = await db.admin().serverStatus();
 
     results.success = true;
     results.message = `Database connection successful! Connected in ${connectTime}ms, ping: ${pingTime}ms`;
@@ -173,10 +197,11 @@ export async function GET() {
     }
 
     // Check if MONGODB_URI is set but connection failed
-    const hasUri = !!process.env.MONGODB_URI;
-    const uriFormat = hasUri
-      ? process.env.MONGODB_URI.startsWith('mongodb+srv://') ||
-        process.env.MONGODB_URI.startsWith('mongodb://')
+    const mongoDbUri = process.env.MONGODB_URI;
+    const hasUri = !!mongoDbUri;
+    const uriFormat = hasUri && mongoDbUri
+      ? mongoDbUri.startsWith('mongodb+srv://') ||
+        mongoDbUri.startsWith('mongodb://')
         ? 'valid'
         : 'invalid'
       : 'not_set';

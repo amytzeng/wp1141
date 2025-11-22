@@ -53,26 +53,34 @@ async function testConnection() {
     const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
     console.log(`Connection state: ${states[readyState]} (${readyState})\n`);
 
+    // Check if db is available before accessing it
+    if (!mongoose.connection.db) {
+      throw new Error('Database connection object is not available');
+    }
+
+    // Store db reference to avoid repeated checks
+    const db = mongoose.connection.db;
+
     // Perform ping test
     console.log('Performing ping test...');
     const pingStartTime = Date.now();
-    await mongoose.connection.db.admin().ping();
+    await db.admin().ping();
     const pingTime = Date.now() - pingStartTime;
     console.log(`✅ Ping successful (${pingTime}ms)\n`);
 
     // Get database information
-    const dbName = mongoose.connection.db.databaseName;
+    const dbName = db.databaseName;
     console.log(`Database name: ${dbName}`);
 
     // List collections
-    const collections = await mongoose.connection.db.listCollections().toArray();
+    const collections = await db.listCollections().toArray();
     console.log(`Collections: ${collections.length}`);
     if (collections.length > 0) {
       console.log('  -', collections.map((c) => c.name).join(', '));
     }
 
     // Get server information
-    const serverStatus = await mongoose.connection.db.admin().serverStatus();
+    const serverStatus = await db.admin().serverStatus();
     console.log(`\nMongoDB version: ${serverStatus.version}`);
     console.log(`Uptime: ${Math.floor(serverStatus.uptime / 3600)} hours`);
 
