@@ -65,7 +65,7 @@ export async function handleTextMessage(event: LineEvent): Promise<void> {
     const conversation = await getOrCreateConversation(lineUserId);
 
     // Classify the message by subject category
-    const classification = classifyMessage(text);
+    const classification = await classifyMessage(text);
 
     // Save user message to database
     const userMessage = new Message({

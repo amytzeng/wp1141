@@ -1,9 +1,16 @@
 // LLM service type definitions
 
+export interface LLMGenerationOptions {
+  temperature?: number;
+  maxTokens?: number;
+  systemPrompt?: string;
+}
+
 export interface LLMClient {
   generateResponse(
     prompt: string,
-    context?: string[]
+    context?: string[],
+    options?: LLMGenerationOptions
   ): Promise<LLMResponse>;
   checkQuota(): Promise<boolean>;
   handleError(error: unknown): LLMErrorInfo;

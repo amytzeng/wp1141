@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     // Classify each message
     for (const message of messages) {
       try {
-        const classification = classifyMessage(message.content);
+        const classification = await classifyMessage(message.content);
 
         // Update message with classification
         await Message.findByIdAndUpdate(message._id, {

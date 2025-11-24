@@ -18,26 +18,32 @@ export class OpenAIClient implements LLMClient {
    */
   async generateResponse(
     prompt: string,
-    context?: string[]
+    context?: string[],
+    options?: { temperature?: number; maxTokens?: number; systemPrompt?: string }
   ): Promise<LLMResponse> {
     const startTime = Date.now();
 
     try {
+      const systemPrompt =
+        options?.systemPrompt ||
+        'You are a friendly and helpful learning assistant. Provide clear, well-structured answers.';
+      const temperature = options?.temperature ?? 0.7;
+      const maxTokens = options?.maxTokens ?? this.config.maxTokens;
+
       const completion = await this.client.chat.completions.create({
         model: this.config.model,
         messages: [
           {
             role: 'system',
-            content:
-              'You are a friendly and helpful learning assistant. Provide clear, well-structured answers.',
+            content: systemPrompt,
           },
           {
             role: 'user',
             content: prompt,
           },
         ],
-        max_tokens: this.config.maxTokens,
-        temperature: 0.7,
+        max_tokens: maxTokens,
+        temperature,
       });
 
       const content =

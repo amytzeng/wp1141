@@ -216,7 +216,7 @@ export async function POST(request: NextRequest) {
         for (let k = 0; k < messagesPerConversation; k++) {
           // User message
           const userMessageText = randomItem(userMessages);
-          const classification = classifyMessage(userMessageText);
+          const classification = await classifyMessage(userMessageText);
 
           const userMessage = new Message({
             conversationId: conversation._id,
