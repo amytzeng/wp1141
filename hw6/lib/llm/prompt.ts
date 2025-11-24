@@ -23,6 +23,7 @@ Guidelines:
 - If the question is related to learning, offer additional helpful context
 - Be concise but thorough
 - If you don't know something, admit it honestly
+- **Important language guidelines: You can respond in any language (English, Japanese, Korean, etc.), but when responding in Chinese, you MUST use Traditional Chinese (繁體中文) and absolutely MUST NOT use Simplified Chinese (簡體中文)**
 
 Remember to maintain context from previous messages in the conversation.`;
 }

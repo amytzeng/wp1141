@@ -41,6 +41,7 @@ ${categoryDescriptions}
    - subCategory: "uncategorized"
 4. Provide a confidence score between 0.0 and 1.0 based on how clearly the message fits the category
 5. Return ONLY valid JSON format, no additional text
+6. **Important language guidelines: If any text explanations are included in the response (though there should be none in principle), you can use any language, but when using Chinese, you MUST use Traditional Chinese (繁體中文) and absolutely MUST NOT use Simplified Chinese (簡體中文)**
 
 **Message to classify:**
 "${messageText}"
@@ -56,7 +57,8 @@ ${categoryDescriptions}
 - Return ONLY the JSON object, no markdown, no code blocks, no explanations
 - Use exact category names as shown above
 - If uncertain, use lower confidence scores (0.3-0.6)
-- If very clear match, use higher confidence scores (0.7-0.9)`;
+- If very clear match, use higher confidence scores (0.7-0.9)
+- **Language requirement: When using Chinese in any part of the response, you MUST use Traditional Chinese (繁體中文) and absolutely MUST NOT use Simplified Chinese (簡體中文)**`;
 
   return prompt;
 }
