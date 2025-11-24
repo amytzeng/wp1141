@@ -35,7 +35,17 @@ export async function updateBotConfig(
   });
   
   if (!response.ok) {
-    throw new Error(`Failed to update bot config: ${response.statusText}`);
+    // Try to get detailed error message from response
+    let errorMessage = response.statusText;
+    try {
+      const errorData = await response.json();
+      if (errorData.error) {
+        errorMessage = errorData.error;
+      }
+    } catch {
+      // If response is not JSON, use statusText
+    }
+    throw new Error(errorMessage);
   }
 
   return response.json();

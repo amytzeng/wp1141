@@ -157,6 +157,13 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
     const { systemPrompt, personality, responseRules } = body;
+    
+    // Log received data for debugging
+    console.log('Received bot config update:', {
+      systemPrompt: systemPrompt?.substring(0, 50) + '...',
+      personality: personality?.substring(0, 50) + '...',
+      responseRules,
+    });
 
     // Deactivate current active config
     await BotConfig.updateMany({ isActive: true }, { isActive: false }).exec();
@@ -204,8 +211,9 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error updating bot config:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json(
-      { error: 'Failed to update bot configuration' },
+      { error: `Failed to update bot configuration: ${errorMessage}` },
       { status: 500 }
     );
   }
