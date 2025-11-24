@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db/connect';
 import BotConfig from '@/lib/db/models/BotConfig';
 
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic';
+
 /**
  * @swagger
  * /api/admin/bot-config:
