@@ -11,6 +11,15 @@ interface BotConfigFormProps {
   loading?: boolean;
 }
 
+// Available OpenAI models
+const AVAILABLE_MODELS = [
+  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+  { value: 'gpt-4', label: 'GPT-4' },
+  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+  { value: 'gpt-4o', label: 'GPT-4o' },
+  { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+];
+
 const DEFAULT_CONFIG: BotConfigInput = {
   systemPrompt: 'You are a friendly and helpful learning assistant. Provide clear, well-structured answers.',
   personality: 'Friendly, helpful, and encouraging learning assistant.',
@@ -19,6 +28,7 @@ const DEFAULT_CONFIG: BotConfigInput = {
     maxResponseLength: 500,
     temperature: 0.7,
     customInstructions: '',
+    model: 'gpt-3.5-turbo',
   },
 };
 
@@ -41,6 +51,7 @@ export default function BotConfigForm({
           maxResponseLength: config.responseRules.maxResponseLength || 500,
           temperature: config.responseRules.temperature || 0.7,
           customInstructions: config.responseRules.customInstructions || '',
+          model: config.responseRules.model || 'gpt-3.5-turbo',
         },
       });
       setTemperature(config.responseRules.temperature || 0.7);
@@ -63,6 +74,7 @@ export default function BotConfigForm({
             maxResponseLength: config.responseRules.maxResponseLength || 500,
             temperature: config.responseRules.temperature || 0.7,
             customInstructions: config.responseRules.customInstructions || '',
+            model: config.responseRules.model || 'gpt-3.5-turbo',
           },
         });
         setTemperature(config.responseRules.temperature || 0.7);
@@ -179,6 +191,31 @@ export default function BotConfigForm({
             className={styles.range}
           />
           <div className={styles.helpText}>控制回覆的創造性（0-2）</div>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Model</label>
+          <select
+            value={formData.responseRules.model || 'gpt-3.5-turbo'}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                responseRules: {
+                  ...formData.responseRules,
+                  model: e.target.value,
+                },
+              })
+            }
+            className={styles.input}
+            required
+          >
+            {AVAILABLE_MODELS.map((model) => (
+              <option key={model.value} value={model.value}>
+                {model.label}
+              </option>
+            ))}
+          </select>
+          <div className={styles.helpText}>選擇使用的 OpenAI 模型</div>
         </div>
       </div>
 

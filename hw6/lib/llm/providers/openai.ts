@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { LLMClient, LLMResponse, LLMErrorInfo, LLMConfig } from '../types';
+import BotConfig from '@/lib/db/models/BotConfig';
 
 export class OpenAIClient implements LLMClient {
   private client: OpenAI;
@@ -11,6 +12,22 @@ export class OpenAIClient implements LLMClient {
       apiKey: config.apiKey,
       timeout: config.timeout,
     });
+  }
+
+  /**
+   * Gets the model from BotConfig or falls back to config
+   */
+  private async getModel(): Promise<string> {
+    try {
+      const config = await BotConfig.findOne({ isActive: true }).lean().exec();
+      if (config?.responseRules?.model) {
+        return config.responseRules.model;
+      }
+    } catch (error) {
+      console.error('Error fetching bot config for model:', error);
+    }
+    // Fallback to config model (from environment variable or default)
+    return this.config.model;
   }
 
   /**
@@ -29,9 +46,12 @@ export class OpenAIClient implements LLMClient {
         'You are a friendly and helpful learning assistant. Provide clear, well-structured answers.';
       const temperature = options?.temperature ?? 0.7;
       const maxTokens = options?.maxTokens ?? this.config.maxTokens;
+      
+      // Get model from BotConfig or fallback to config
+      const model = await this.getModel();
 
       const completion = await this.client.chat.completions.create({
-        model: this.config.model,
+        model: model,
         messages: [
           {
             role: 'system',
@@ -56,11 +76,12 @@ export class OpenAIClient implements LLMClient {
       return {
         content,
         provider: 'openai',
-        model: this.config.model,
+        model: model,
         tokensUsed,
       };
     } catch (error) {
       const errorInfo = this.handleError(error);
+      // Use config model as fallback for error response
       return {
         content: getFallbackMessage(errorInfo.type),
         provider: 'openai',

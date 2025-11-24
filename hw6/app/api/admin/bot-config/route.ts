@@ -49,6 +49,7 @@ export async function GET() {
           maxResponseLength: 500,
           temperature: 0.7,
           customInstructions: '',
+          model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
         },
         isActive: true,
         version: 1,
@@ -109,6 +110,9 @@ export async function GET() {
  *                     maximum: 2
  *                   customInstructions:
  *                     type: string
+ *                   model:
+ *                     type: string
+ *                     description: OpenAI model name (e.g., gpt-3.5-turbo, gpt-4)
  *     responses:
  *       200:
  *         description: Configuration updated successfully
@@ -176,6 +180,7 @@ export async function PUT(request: NextRequest) {
         maxResponseLength: responseRules?.maxResponseLength ?? 500,
         temperature: responseRules?.temperature ?? 0.7,
         customInstructions: responseRules?.customInstructions || '',
+        model: responseRules?.model || process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
       },
       isActive: true,
       version: nextVersion,

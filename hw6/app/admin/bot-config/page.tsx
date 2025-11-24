@@ -68,9 +68,9 @@ export default function BotConfigPage() {
   const handleViewHistoryDetail = (historyConfig: BotConfigHistoryItem) => {
     setSelectedHistoryConfig(historyConfig);
     // You can show another modal or expand the row to show full details
-    alert(
-      `版本 ${historyConfig.version}\n\nSystem Prompt:\n${historyConfig.systemPrompt}\n\nPersonality:\n${historyConfig.personality}\n\nTemperature: ${historyConfig.responseRules.temperature}\nMax Length: ${historyConfig.responseRules.maxResponseLength}`
-    );
+      alert(
+        `版本 ${historyConfig.version}\n\nSystem Prompt:\n${historyConfig.systemPrompt}\n\nPersonality:\n${historyConfig.personality}\n\nTemperature: ${historyConfig.responseRules.temperature}\nMax Length: ${historyConfig.responseRules.maxResponseLength}\nModel: ${historyConfig.responseRules.model || 'gpt-3.5-turbo'}`
+      );
   };
 
   if (loading && !config) {

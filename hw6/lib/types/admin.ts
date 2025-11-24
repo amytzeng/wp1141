@@ -152,6 +152,7 @@ export interface BotConfig {
     maxResponseLength?: number;
     temperature?: number;
     customInstructions?: string;
+    model?: string;
   };
   isActive: boolean;
   version: number;
@@ -171,6 +172,7 @@ export interface BotConfigInput {
     maxResponseLength?: number;
     temperature?: number;
     customInstructions?: string;
+    model?: string;
   };
 }
 

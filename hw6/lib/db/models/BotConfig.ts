@@ -8,6 +8,7 @@ export interface IBotConfig extends Document {
     maxResponseLength?: number;
     temperature?: number;
     customInstructions?: string;
+    model?: string;
   };
   isActive: boolean;
   version: number;
@@ -46,6 +47,10 @@ const BotConfigSchema: Schema = new Schema(
       customInstructions: {
         type: String,
         default: '',
+      },
+      model: {
+        type: String,
+        default: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
       },
     },
     isActive: {
