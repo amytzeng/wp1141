@@ -34,7 +34,7 @@ export async function createLLMClient(): Promise<LLMClient> {
 
   if (provider === 'gemini') {
     const apiKey = process.env.GEMINI_API_KEY;
-    const model = process.env.GEMINI_MODEL || 'gemini-1.5-pro';
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5';
     const maxTokens = parseInt(process.env.GEMINI_MAX_TOKENS || '500', 10);
     const timeout = parseInt(process.env.GEMINI_TIMEOUT || '10000', 10);
 
@@ -54,7 +54,7 @@ export async function createLLMClient(): Promise<LLMClient> {
   } else {
     // Default to OpenAI
     const apiKey = process.env.OPENAI_API_KEY;
-    const model = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
+    const model = process.env.OPENAI_MODEL || 'gpt-4.0';
     const maxTokens = parseInt(process.env.OPENAI_MAX_TOKENS || '500', 10);
     const timeout = parseInt(process.env.OPENAI_TIMEOUT || '10000', 10);
 

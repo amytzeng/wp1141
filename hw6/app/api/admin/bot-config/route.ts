@@ -193,7 +193,7 @@ export async function PUT(request: NextRequest) {
         customInstructions: responseRules?.customInstructions || '',
         provider: responseRules?.provider || 'openai',
         model: responseRules?.model || (responseRules?.provider === 'gemini' 
-          ? (process.env.GEMINI_MODEL || 'gemini-2.5-pro')
+          ? (process.env.GEMINI_MODEL || 'gemini-2.5')
           : (process.env.OPENAI_MODEL || 'gpt-4.0')),
       },
       isActive: true,

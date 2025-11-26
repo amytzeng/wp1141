@@ -57,7 +57,7 @@ const BotConfigSchema: Schema = new Schema(
       model: {
         type: String,
         default: function() {
-          return process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
+          return process.env.OPENAI_MODEL || 'gpt-4.0';
         },
       },
     },

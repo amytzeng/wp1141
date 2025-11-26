@@ -24,6 +24,8 @@ const AVAILABLE_MODELS: Record<'openai' | 'gemini', Array<{ value: string; label
     { value: 'gemini-pro', label: 'Gemini Pro' },
     { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
     { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
+    { value: 'gemini-2.5', label: 'Gemini 2.5' },
+    { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
   ],
 };
 
@@ -36,7 +38,7 @@ const DEFAULT_CONFIG: BotConfigInput = {
     temperature: 0.7,
     customInstructions: '',
     provider: 'openai',
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4.0',
   },
 };
 
@@ -52,7 +54,7 @@ export default function BotConfigForm({
   useEffect(() => {
     if (config) {
       const provider = config.responseRules.provider || 'openai';
-      const defaultModel = provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-3.5-turbo';
+      const defaultModel = provider === 'gemini' ? 'gemini-2.5' : 'gpt-4.0';
       setFormData({
         systemPrompt: config.systemPrompt,
         personality: config.personality,
@@ -78,7 +80,7 @@ export default function BotConfigForm({
     if (confirm('確定要重置表單嗎？未儲存的變更將會遺失。')) {
       if (config) {
         const provider = config.responseRules.provider || 'openai';
-        const defaultModel = provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-3.5-turbo';
+        const defaultModel = provider === 'gemini' ? 'gemini-2.5' : 'gpt-4.0';
         setFormData({
           systemPrompt: config.systemPrompt,
           personality: config.personality,
@@ -213,7 +215,7 @@ export default function BotConfigForm({
             value={formData.responseRules.provider || 'openai'}
             onChange={(e) => {
               const newProvider = e.target.value as 'openai' | 'gemini';
-              const defaultModel = newProvider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-3.5-turbo';
+              const defaultModel = newProvider === 'gemini' ? 'gemini-2.5' : 'gpt-4o';
               setFormData({
                 ...formData,
                 responseRules: {
@@ -235,7 +237,7 @@ export default function BotConfigForm({
         <div className={styles.formGroup}>
           <label className={styles.label}>Model</label>
           <select
-            value={formData.responseRules.model || (formData.responseRules.provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-3.5-turbo')}
+            value={formData.responseRules.model || (formData.responseRules.provider === 'gemini' ? 'gemini-2.5' : 'gpt-4.0')}
             onChange={(e) =>
               setFormData({
                 ...formData,
