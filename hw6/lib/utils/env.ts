@@ -41,7 +41,7 @@ export function getEnvConfig() {
     lineChannelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN!,
     lineChannelSecret: process.env.LINE_CHANNEL_SECRET!,
     openaiApiKey: process.env.OPENAI_API_KEY,
-    openaiModel: process.env.OPENAI_MODEL || 'gpt-4.0',
+    openaiModel: process.env.OPENAI_MODEL || 'gpt-4o',
     openaiMaxTokens: parseInt(process.env.OPENAI_MAX_TOKENS || '500', 10),
     openaiTimeout: parseInt(process.env.OPENAI_TIMEOUT || '10000', 10),
     geminiApiKey: process.env.GEMINI_API_KEY,

@@ -53,24 +53,24 @@ export async function createLLMClient(): Promise<LLMClient> {
     return new GeminiClient(config);
   } else {
     // Default to OpenAI
-    const apiKey = process.env.OPENAI_API_KEY;
-    const model = process.env.OPENAI_MODEL || 'gpt-4.0';
-    const maxTokens = parseInt(process.env.OPENAI_MAX_TOKENS || '500', 10);
-    const timeout = parseInt(process.env.OPENAI_TIMEOUT || '10000', 10);
+  const apiKey = process.env.OPENAI_API_KEY;
+    const model = process.env.OPENAI_MODEL || 'gpt-4o';
+  const maxTokens = parseInt(process.env.OPENAI_MAX_TOKENS || '500', 10);
+  const timeout = parseInt(process.env.OPENAI_TIMEOUT || '10000', 10);
 
-    if (!apiKey) {
-      throw new Error('OPENAI_API_KEY is not set in environment variables');
-    }
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is not set in environment variables');
+  }
 
-    const config: LLMConfig = {
+  const config: LLMConfig = {
       provider: 'openai',
-      apiKey,
-      model,
-      maxTokens,
-      timeout,
-    };
+    apiKey,
+    model,
+    maxTokens,
+    timeout,
+  };
 
-    return new OpenAIClient(config);
+  return new OpenAIClient(config);
   }
 }
 

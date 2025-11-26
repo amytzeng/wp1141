@@ -14,11 +14,11 @@ interface BotConfigFormProps {
 // Available models by provider
 const AVAILABLE_MODELS: Record<'openai' | 'gemini', Array<{ value: string; label: string }>> = {
   openai: [
-    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-    { value: 'gpt-4', label: 'GPT-4' },
-    { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-    { value: 'gpt-4o', label: 'GPT-4o' },
-    { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+  { value: 'gpt-4', label: 'GPT-4' },
+  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+  { value: 'gpt-4o', label: 'GPT-4o' },
+  { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
   ],
   gemini: [
     { value: 'gemini-pro', label: 'Gemini Pro' },
@@ -38,7 +38,7 @@ const DEFAULT_CONFIG: BotConfigInput = {
     temperature: 0.7,
     customInstructions: '',
     provider: 'openai',
-    model: 'gpt-4.0',
+    model: 'gpt-4o',
   },
 };
 
@@ -54,7 +54,7 @@ export default function BotConfigForm({
   useEffect(() => {
     if (config) {
       const provider = config.responseRules.provider || 'openai';
-      const defaultModel = provider === 'gemini' ? 'gemini-2.5' : 'gpt-4.0';
+      const defaultModel = provider === 'gemini' ? 'gemini-2.5' : 'gpt-4o';
       setFormData({
         systemPrompt: config.systemPrompt,
         personality: config.personality,
@@ -80,7 +80,7 @@ export default function BotConfigForm({
     if (confirm('確定要重置表單嗎？未儲存的變更將會遺失。')) {
       if (config) {
         const provider = config.responseRules.provider || 'openai';
-        const defaultModel = provider === 'gemini' ? 'gemini-2.5' : 'gpt-4.0';
+        const defaultModel = provider === 'gemini' ? 'gemini-2.5' : 'gpt-4o';
         setFormData({
           systemPrompt: config.systemPrompt,
           personality: config.personality,
@@ -237,7 +237,7 @@ export default function BotConfigForm({
         <div className={styles.formGroup}>
           <label className={styles.label}>Model</label>
           <select
-            value={formData.responseRules.model || (formData.responseRules.provider === 'gemini' ? 'gemini-2.5' : 'gpt-4.0')}
+            value={formData.responseRules.model || (formData.responseRules.provider === 'gemini' ? 'gemini-2.5' : 'gpt-4o')}
             onChange={(e) =>
               setFormData({
                 ...formData,

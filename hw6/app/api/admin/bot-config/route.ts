@@ -53,7 +53,7 @@ export async function GET() {
           temperature: 0.7,
           customInstructions: '',
           provider: 'openai',
-          model: process.env.OPENAI_MODEL || 'gpt-4.0',
+          model: process.env.OPENAI_MODEL || 'gpt-4o',
         },
         isActive: true,
         version: 1,
@@ -194,7 +194,7 @@ export async function PUT(request: NextRequest) {
         provider: responseRules?.provider || 'openai',
         model: responseRules?.model || (responseRules?.provider === 'gemini' 
           ? (process.env.GEMINI_MODEL || 'gemini-2.5')
-          : (process.env.OPENAI_MODEL || 'gpt-4.0')),
+          : (process.env.OPENAI_MODEL || 'gpt-4o')),
       },
       isActive: true,
       version: nextVersion,
