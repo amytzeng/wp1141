@@ -29,6 +29,7 @@ export interface MessageMetadata {
   tokensUsed?: number;
   error?: string;
   processingTime?: number;
+  action?: string; // Action type from Rich Menu or command (e.g., 'summarize', 'clear', 'help')
   category?: {
     mainCategory: string;
     subCategory: string;

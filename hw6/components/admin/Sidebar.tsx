@@ -9,6 +9,7 @@ const navItems = [
   { href: '/admin/conversations', label: '對話列表', icon: '💬' },
   { href: '/admin/categories', label: '分類統計', icon: '📈' },
   { href: '/admin/bot-config', label: 'Bot 配置', icon: '⚙️' },
+  { href: '/admin/rich-menu', label: 'Rich Menu', icon: '📱' },
 ];
 
 export default function Sidebar() {

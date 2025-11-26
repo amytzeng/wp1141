@@ -60,20 +60,44 @@ export async function getOrCreateConversation(
 
 /**
  * Loads recent messages for context (last N messages)
+ * If there's a clear command in the conversation, only loads messages after the last clear
  */
 export async function loadContextMessages(
   conversationId: string,
-  maxMessages: number = 5
+  maxMessages: number = 10
 ): Promise<IMessage[]> {
-  const messages = await Message.find({
+  // Find all messages in chronological order
+  const allMessages = await Message.find({
     conversationId,
   })
-    .sort({ timestamp: -1 })
-    .limit(maxMessages * 2) // Load more to account for compression
+    .sort({ timestamp: 1 }) // Sort ascending to find clear command
     .exec();
 
-  // Reverse to get chronological order
-  const chronologicalMessages = messages.reverse();
+  // Find the last clear command or clear action
+  let lastClearIndex = -1;
+  for (let i = allMessages.length - 1; i >= 0; i--) {
+    const msg = allMessages[i];
+    // Check if it's a clear command (text message with /clear) or clear action (from postback or rich menu)
+    const isClearCommand = msg.type === 'user' && 
+      (msg.content.trim().toLowerCase() === '/clear' || 
+       msg.content === '[clear]' ||
+       msg.metadata?.action === 'clear');
+    if (isClearCommand) {
+      lastClearIndex = i;
+      break;
+    }
+  }
+
+  // Get messages after the last clear (or all messages if no clear found)
+  const messagesAfterClear = lastClearIndex >= 0
+    ? allMessages.slice(lastClearIndex + 1)
+    : allMessages;
+
+  // Get the most recent N messages
+  const recentMessages = messagesAfterClear.slice(-maxMessages * 2);
+
+  // Reverse to get chronological order for compression
+  const chronologicalMessages = recentMessages;
 
   // Compress if needed
   return compressContext(chronologicalMessages, maxMessages);

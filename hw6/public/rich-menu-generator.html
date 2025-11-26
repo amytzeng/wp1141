@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rich Menu Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 2600px;
+            width: 100%;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .instructions h2 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #1976d2;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 2500px;
+            height: 1686px;
+            margin: 0 auto;
+            background: #c4dcd3;
+            border: 2px solid #333;
+            overflow: hidden;
+        }
+
+        /* Button areas */
+        .button {
+            position: absolute;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        /* Button positions - 3 columns x 2 rows */
+        /* Row 1: Top three buttons */
+        .button-1 {
+            top: 0;
+            left: 0;
+            width: 833px;
+            height: 843px;
+        }
+
+        .button-2 {
+            top: 0;
+            left: 833px;
+            width: 833px;
+            height: 843px;
+        }
+
+        .button-3 {
+            top: 0;
+            left: 1666px;
+            width: 834px;
+            height: 843px;
+        }
+
+        /* Row 2: Bottom three buttons */
+        .button-4 {
+            top: 843px;
+            left: 0;
+            width: 833px;
+            height: 843px;
+        }
+
+        .button-5 {
+            top: 843px;
+            left: 833px;
+            width: 833px;
+            height: 843px;
+        }
+
+        .button-6 {
+            top: 843px;
+            left: 1666px;
+            width: 834px;
+            height: 843px;
+        }
+
+        /* Icon styling */
+        .button-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .button-icon {
+            font-size: 80px;
+            opacity: 0.9;
+        }
+
+        .button-label {
+            font-size: 56px;
+            letter-spacing: 2px;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 4px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .controls button:hover {
+            background: #1976d2;
+        }
+
+        .download-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        /* Grid overlay for alignment */
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .grid-line {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .grid-line.vertical {
+            width: 2px;
+            height: 100%;
+        }
+
+        .grid-line.vertical-1 {
+            left: 833px;
+        }
+
+        .grid-line.vertical-2 {
+            left: 1666px;
+        }
+
+        .grid-line.horizontal {
+            width: 100%;
+            height: 2px;
+        }
+
+        .grid-line.horizontal-1 {
+            top: 843px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LINE Bot Rich Menu 圖片產生器</h1>
+        
+            <div class="instructions">
+            <h2>使用說明</h2>
+            <ol>
+                <li>此頁面顯示 Rich Menu 的設計預覽（尺寸：2500 x 1686 像素，3 列 x 2 行）</li>
+                <li>可以下載完整的大圖，或分別下載六張獨立的按鈕圖片</li>
+                <li>每張按鈕圖片尺寸約為 833 x 843 像素（第三列為 834 x 843 像素）</li>
+                <li>圖片格式：PNG 或 JPEG，檔案大小需小於 1MB</li>
+                <li>如果使用截圖，請確保截圖範圍精確包含整個畫布（不包含頁面其他元素）</li>
+                <li>將生成的圖片儲存並放在 <code>public/</code> 目錄下</li>
+            </ol>
+        </div>
+
+        <div class="canvas-container" id="canvas">
+            <!-- Grid overlay for alignment -->
+            <div class="grid-overlay">
+                <div class="grid-line vertical vertical-1"></div>
+                <div class="grid-line vertical vertical-2"></div>
+                <div class="grid-line horizontal horizontal-1"></div>
+            </div>
+
+            <!-- Button 1: 重點整理 -->
+            <div class="button button-1">
+                <div class="button-content">
+                    <div class="button-icon">📝</div>
+                    <div class="button-label">重點整理</div>
+                </div>
+            </div>
+
+            <!-- Button 2: 快速複習 -->
+            <div class="button button-2">
+                <div class="button-content">
+                    <div class="button-icon">⚡</div>
+                    <div class="button-label">快速複習</div>
+                </div>
+            </div>
+
+            <!-- Button 3: 例題示範 -->
+            <div class="button button-3">
+                <div class="button-content">
+                    <div class="button-icon">📚</div>
+                    <div class="button-label">例題示範</div>
+                </div>
+            </div>
+
+            <!-- Button 4: 再解釋一次 -->
+            <div class="button button-4">
+                <div class="button-content">
+                    <div class="button-icon">🔄</div>
+                    <div class="button-label">再解釋一次</div>
+                </div>
+            </div>
+
+            <!-- Button 5: 清除 -->
+            <div class="button button-5">
+                <div class="button-content">
+                    <div class="button-icon">🗑️</div>
+                    <div class="button-label">清除</div>
+                </div>
+            </div>
+
+            <!-- Button 6: 幫助 -->
+            <div class="button button-6">
+                <div class="button-content">
+                    <div class="button-icon">❓</div>
+                    <div class="button-label">幫助</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="downloadFullImage()">下載完整大圖</button>
+            <button onclick="downloadAllButtons()">下載六張按鈕圖片</button>
+            <button onclick="toggleGrid()">切換網格顯示</button>
+            <span style="margin-left: 20px; color: #666;">
+                尺寸：2500 x 1686 像素 | 按鈕：3 列 x 2 行
+            </span>
+        </div>
+
+        <div class="download-info">
+            <strong>提示：</strong>如果下載按鈕無法使用，請使用瀏覽器內建的「全頁截圖」功能：
+            <ul style="margin-top: 5px; margin-left: 20px;">
+                <li>Chrome: 按 F12 開啟開發者工具 → 按 Ctrl+Shift+P → 輸入 "Capture full size screenshot"</li>
+                <li>Firefox: 按 F12 → 點擊三點選單 → "截圖" → "截取整個頁面"</li>
+                <li>Safari: 按 Cmd+Shift+4 → 拖曳選擇整個畫布區域</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Button configurations for 3 columns x 2 rows layout
+        const BUTTON_CONFIG = [
+            { id: 1, label: '重點整理', icon: '📝', x: 0, y: 0, width: 833, height: 843, filename: 'button-1-summarize.png' },
+            { id: 2, label: '快速複習', icon: '⚡', x: 833, y: 0, width: 833, height: 843, filename: 'button-2-review.png' },
+            { id: 3, label: '例題示範', icon: '📚', x: 1666, y: 0, width: 834, height: 843, filename: 'button-3-example.png' },
+            { id: 4, label: '再解釋一次', icon: '🔄', x: 0, y: 843, width: 833, height: 843, filename: 'button-4-reexplain.png' },
+            { id: 5, label: '清除', icon: '🗑️', x: 833, y: 843, width: 833, height: 843, filename: 'button-5-clear.png' },
+            { id: 6, label: '幫助', icon: '❓', x: 1666, y: 843, width: 834, height: 843, filename: 'button-6-help.png' },
+        ];
+
+        /**
+         * Creates a canvas with the specified dimensions and background color
+         */
+        function createCanvas(width, height, bgColor) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, width, height);
+            return { canvas, ctx };
+        }
+
+        /**
+         * Draws a button on the canvas context
+         */
+        function drawButton(ctx, button, offsetX = 0, offsetY = 0) {
+            const x = button.x - offsetX;
+            const y = button.y - offsetY;
+            
+            // Draw button background
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(x, y, button.width, button.height);
+            
+            // Draw button border
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 6;
+            ctx.strokeRect(x, y, button.width, button.height);
+            
+            // Draw icon (as text)
+            ctx.fillStyle = 'white';
+            ctx.font = '80px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(button.icon, x + button.width / 2, y + button.height / 2 - 50);
+            
+            // Draw label
+            ctx.font = 'bold 56px -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif';
+            ctx.fillText(button.label, x + button.width / 2, y + button.height / 2 + 50);
+        }
+
+        /**
+         * Downloads a canvas as PNG file
+         */
+        function downloadCanvas(canvas, filename) {
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        }
+
+        /**
+         * Downloads the full Rich Menu image
+         */
+        function downloadFullImage() {
+            const { canvas, ctx } = createCanvas(2500, 1686, '#c4dcd3');
+            
+            // Draw all buttons
+            BUTTON_CONFIG.forEach(btn => {
+                drawButton(ctx, btn);
+            });
+            
+            downloadCanvas(canvas, 'rich-menu-full.png');
+        }
+
+        /**
+         * Downloads all six individual button images
+         */
+        function downloadAllButtons() {
+            BUTTON_CONFIG.forEach((button, index) => {
+                setTimeout(() => {
+                    const { canvas, ctx } = createCanvas(button.width, button.height, '#c4dcd3');
+                    
+                    // Draw single button centered
+                    const centeredButton = {
+                        ...button,
+                        x: 0,
+                        y: 0
+                    };
+                    drawButton(ctx, centeredButton);
+                    
+                    downloadCanvas(canvas, button.filename);
+                }, index * 200); // Stagger downloads to avoid browser blocking
+            });
+            
+            setTimeout(() => {
+                alert('六張按鈕圖片已開始下載！\n如果瀏覽器阻擋了多個下載，請允許下載權限。');
+            }, BUTTON_CONFIG.length * 200);
+        }
+
+        /**
+         * Toggles grid overlay visibility
+         */
+        function toggleGrid() {
+            const gridOverlay = document.querySelector('.grid-overlay');
+            if (gridOverlay) {
+                const currentOpacity = window.getComputedStyle(gridOverlay).opacity;
+                gridOverlay.style.opacity = currentOpacity === '0' ? '0.3' : '0';
+            }
+        }
+    </script>
+</body>
+</html>
