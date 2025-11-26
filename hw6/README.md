@@ -1,13 +1,13 @@
 # Line AI Chatbot - Learning Assistant
 
-一個整合 Line Messaging API 的智慧聊天機器人系統，使用 Next.js 與 TypeScript 開發，提供 AI 驅動的學習助手功能，並包含完整的管理後台與 API 文件系統。
+一個整合 Line Messaging API 的智慧聊天機器人系統，使用 Next.js 與 TypeScript 開發，提供 AI 驅動的學習助手功能，並包含完整的管理後臺與 API 文件系統。
 
 ## 專案概述
 
 本專案實作了一個完整的 Line Bot 系統，包含兩大核心組件：
 
 1. **Webhook 式的 AI Bot 後端**：接收 Line 訊息、呼叫 LLM、回覆使用者
-2. **Chat 管理後台**：監控對話、檢視統計、管理歷程
+2. **Chat 管理後臺**：監控對話、檢視統計、管理歷程
 
 系統主題為「學習助手」（Learning Assistant），可協助使用者理解概念、整理筆記、回答問題，並提供重點整理、快速複習、例題示範等進階功能。
 
@@ -15,7 +15,7 @@
 
 ### 首頁導覽
 
-當您訪問專案首頁（`http://localhost:3000` 或部署後的網址）時，您會看到以下選項：
+當您訪問專案首頁（`https://wp1141-hw6-five.vercel.app/`）時，您會看到以下選項：
 
 #### 1. Swagger UI 文件
 
@@ -34,11 +34,11 @@ Swagger UI 提供了完整的 API 文件，包含：
 - 了解每個端點的參數要求和回應格式
 - 查看系統的健康狀態和效能指標
 
-#### 2. 管理後台
+#### 2. 管理後臺
 
-點擊首頁的「前往管理後台 Dashboard」連結，或直接訪問 `/admin`，即可進入管理後台。
+點擊首頁的「前往管理後臺 Dashboard」連結，或直接訪問 `/admin`，即可進入管理後臺。
 
-管理後台提供以下功能模組：
+管理後臺提供以下功能模組：
 
 - **Dashboard**：統計總覽與五大方向分類圓餅圖
 - **對話列表**：搜尋與篩選對話記錄，支援使用者 ID、關鍵字、日期區間篩選
@@ -70,7 +70,7 @@ test_frontend/
 │   └── api/                   # API 封裝函數測試
 │       └── conversations.test.ts
 ├── components/                # 組件測試
-│   └── admin/                # 管理後台組件測試
+│   └── admin/                # 管理後臺組件測試
 │       ├── ConversationTable.test.tsx
 │       ├── CategoryBadge.test.tsx
 │       ├── StatCard.test.tsx
@@ -116,7 +116,7 @@ npm run test:coverage
 
 1. **工具函數測試**：日期格式化、文字處理等工具函數
 2. **API 封裝測試**：前端 API 呼叫函數的測試
-3. **組件測試**：管理後台組件的渲染與互動測試
+3. **組件測試**：管理後臺組件的渲染與互動測試
 4. **頁面測試**：完整頁面的功能測試
 
 ## Rich Menu 實作機制
@@ -165,7 +165,7 @@ Rich Menu 的實作包含以下步驟：
 
 1. **Webhook 首次請求時**：當 Line 發送第一個 webhook 請求時，系統會在背景自動檢查 Rich Menu 是否存在，如果不存在則自動建立。
 
-2. **手動初始化**：可以透過管理後台的 Rich Menu 頁面手動初始化，或使用 `scripts/init-rich-menu.ts` 腳本。
+2. **手動初始化**：可以透過管理後臺的 Rich Menu 頁面手動初始化，或使用 `scripts/init-rich-menu.ts` 腳本。
 
 自動初始化機制具有以下特點：
 
@@ -205,7 +205,7 @@ hw6/
 │   │   ├── webhook/          # Webhook 端點
 │   │   │   ├── line/         # Line Webhook
 │   │   │   └── health/       # Webhook 健康檢查
-│   │   ├── admin/            # 管理後台 API
+│   │   ├── admin/            # 管理後臺 API
 │   │   │   ├── conversations/ # 對話管理 API
 │   │   │   ├── stats/        # 統計 API
 │   │   │   ├── bot-config/   # Bot 配置 API
@@ -213,7 +213,7 @@ hw6/
 │   │   ├── health/            # 系統健康檢查
 │   │   ├── swagger/          # OpenAPI 規格
 │   │   └── swagger-ui/       # Swagger UI 頁面
-│   ├── admin/                # 管理後台頁面
+│   ├── admin/                # 管理後臺頁面
 │   │   ├── page.tsx          # Dashboard
 │   │   ├── conversations/    # 對話列表與詳情
 │   │   ├── categories/       # 分類統計
@@ -221,7 +221,7 @@ hw6/
 │   │   └── rich-menu/        # Rich Menu 管理
 │   └── page.tsx              # 首頁
 ├── components/               # React 組件
-│   └── admin/               # 管理後台組件
+│   └── admin/               # 管理後臺組件
 │       ├── ConversationTable.tsx
 │       ├── CategoryBadge.tsx
 │       ├── StatCard.tsx
@@ -492,7 +492,7 @@ Webhook 端點包含以下安全機制：
 
 這些資料用於：
 
-- **管理後台顯示**：在管理後台查看對話記錄
+- **管理後臺顯示**：在管理後臺查看對話記錄
 - **統計分析**：計算總訊息數、活躍使用者數、分類統計等
 - **效能監控**：計算平均回應時間、失敗率等指標
 
@@ -587,12 +587,12 @@ Webhook 端點包含以下安全機制：
 
 ### 進階篩選
 
-管理後台的對話列表支援多種篩選條件：
+管理後臺的對話列表支援多種篩選條件：
 
 1. **使用者篩選**：`lineUserId` 參數可精確匹配特定使用者
 2. **日期區間篩選**：`startDate` 與 `endDate` 參數可篩選特定時間範圍的對話
 3. **訊息內容搜尋**：`search` 參數可在所有使用者訊息中進行關鍵字搜尋（不區分大小寫）
-4. **平台篩選**：`platform` 參數已預留（目前僅支援 Line）
+4. **平臺篩選**：`platform` 參數已預留（目前僅支援 Line）
 
 所有篩選條件都支援組合使用，並配合分頁功能。
 
@@ -608,7 +608,7 @@ Webhook 端點包含以下安全機制：
 
 ### 回應客製化
 
-管理後台提供了完整的 Bot 設定介面（`app/admin/bot-config/page.tsx`）：
+管理後臺提供了完整的 Bot 設定介面（`app/admin/bot-config/page.tsx`）：
 
 1. **系統提示**：可自訂 LLM 的系統提示詞，定義 AI 的角色與行為
 2. **個性設定**：可調整 AI 的個性描述，影響回應的風格
@@ -671,7 +671,7 @@ Webhook 端點包含以下安全機制：
 3. **驗證機制**：會驗證 ObjectId 格式，過濾無效 ID
 4. **回傳統計**：回傳刪除的對話數與訊息數
 
-**注意**：目前後台 UI 尚未實作多選與批次刪除的介面，但 API 端點已完整實作。
+**注意**：目前後臺 UI 尚未實作多選與批次刪除的介面，但 API 端點已完整實作。
 
 ### 使用者分析
 
@@ -748,7 +748,7 @@ Webhook 端點包含以下安全機制：
 - **MongoDB Atlas** + **Mongoose ODM**
 - **Line Messaging API**
 - **OpenAI API** 或 **Google Gemini API**
-- **Vercel**（部署平台）
+- **Vercel**（部署平臺）
 
 ### 建議技術
 
@@ -800,7 +800,7 @@ npm run lint
 
 1. 確認 Rich Menu 圖片已上傳到 `public/rich-menu-full.png`
 2. 檢查 Line Channel Access Token 是否正確
-3. 使用管理後台的 Rich Menu 頁面手動初始化
+3. 使用管理後臺的 Rich Menu 頁面手動初始化
 4. 檢查 Vercel Function Logs 是否有錯誤訊息
 
 ### LLM 回應失敗
@@ -823,5 +823,5 @@ npm run lint
 
 ## 聯絡資訊
 
-如有問題或建議，請透過 GitHub Issues 提出。
+如有問題或建議，請透過 GitHub Issues 提出
 

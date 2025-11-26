@@ -19,7 +19,7 @@ test_frontend/
 │   └── api/                  # API 封裝函數測試
 │       └── conversations.test.ts
 ├── components/                # 組件測試
-│   └── admin/                # 管理後台組件測試
+│   └── admin/                # 管理後臺組件測試
 │       ├── ConversationTable.test.tsx
 │       ├── CategoryBadge.test.tsx
 │       ├── StatCard.test.tsx

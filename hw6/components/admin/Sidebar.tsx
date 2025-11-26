@@ -18,7 +18,7 @@ export default function Sidebar() {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.sidebarHeader}>
-        <h1>管理後台</h1>
+        <h1>管理後臺</h1>
       </div>
       <nav>
         {navItems.map((item) => {

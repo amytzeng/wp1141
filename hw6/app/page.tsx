@@ -52,7 +52,7 @@ export default function Home() {
         </ul>
       </div>
       <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: '#e2f0ef', borderRadius: '8px', border: '1px solid #a9d4d6' }}>
-        <h2 style={{ color: '#065758', marginBottom: '1rem' }}>管理後台</h2>
+        <h2 style={{ color: '#065758', marginBottom: '1rem' }}>管理後臺</h2>
         <p style={{ marginBottom: '1rem' }}>
           <Link
             href="/admin"
@@ -63,11 +63,11 @@ export default function Home() {
               fontWeight: '600',
             }}
           >
-            前往管理後台 Dashboard →
+            前往管理後臺 Dashboard →
           </Link>
         </p>
         <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#666' }}>
-          <p>管理後台功能：</p>
+          <p>管理後臺功能：</p>
           <ul style={{ marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
             <li>Dashboard - 統計總覽與五大方向分類</li>
             <li>對話列表 - 搜尋與篩選對話記錄</li>
