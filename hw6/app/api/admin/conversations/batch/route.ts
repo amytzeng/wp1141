@@ -8,10 +8,11 @@ import mongoose from 'mongoose';
  * @swagger
  * /api/admin/conversations/batch:
  *   delete:
- *     summary: Batch delete conversations
+ *     summary: Batch soft delete conversations (move to trash)
  *     description: |
- *       Deletes multiple conversations and their associated messages.
- *       This operation is irreversible. Use with caution.
+ *       Soft deletes multiple conversations by setting deletedAt timestamp.
+ *       Conversations are moved to trash and can be restored.
+ *       Data is preserved - nothing is permanently deleted.
  *       
  *       **Security Note**: In production, you should add authentication/authorization
  *       to prevent unauthorized deletion.
@@ -98,27 +99,33 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Count messages that will be deleted
-    const messagesToDelete = await Message.countDocuments({
+    // Count messages in conversations that will be moved to trash
+    const messagesCount = await Message.countDocuments({
       conversationId: { $in: validIds },
     }).exec();
 
-    // Delete messages first (to maintain referential integrity)
-    const messagesDeleteResult = await Message.deleteMany({
-      conversationId: { $in: validIds },
-    }).exec();
-
-    // Delete conversations
-    const conversationsDeleteResult = await Conversation.deleteMany({
-      _id: { $in: validIds },
-    }).exec();
+    // Soft delete: Set deletedAt timestamp instead of actually deleting
+    // This preserves all data for recovery
+    const now = new Date();
+    const conversationsUpdateResult = await Conversation.updateMany(
+      {
+        _id: { $in: validIds },
+        deletedAt: null, // Only update conversations that are not already deleted
+      },
+      {
+        $set: {
+          deletedAt: now,
+        },
+      }
+    ).exec();
 
     return NextResponse.json({
       success: true,
-      deleted: conversationsDeleteResult.deletedCount,
-      messagesDeleted: messagesDeleteResult.deletedCount,
+      deleted: conversationsUpdateResult.modifiedCount,
+      messagesCount: messagesCount,
       requested: conversationIds.length,
       valid: validIds.length,
+      message: 'Conversations moved to trash (soft delete - data preserved)',
     });
   } catch (error) {
     console.error('Error in batch delete:', error);

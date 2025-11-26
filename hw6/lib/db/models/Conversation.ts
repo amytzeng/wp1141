@@ -12,6 +12,7 @@ export interface IConversation extends Document {
   updatedAt: Date;
   messageCount: number;
   lastActivityAt: Date;
+  deletedAt?: Date; // Soft delete timestamp - if set, conversation is in trash
   metadata: {
     lastTopic?: string;
     context?: string[];
@@ -57,6 +58,11 @@ const ConversationSchema: Schema = new Schema(
       default: Date.now,
       index: true,
     },
+    deletedAt: {
+      type: Date,
+      default: null,
+      index: true,
+    },
     metadata: {
       lastTopic: {
         type: String,
@@ -88,6 +94,7 @@ const ConversationSchema: Schema = new Schema(
 // Compound index for efficient queries
 ConversationSchema.index({ lineUserId: 1, createdAt: -1 });
 ConversationSchema.index({ sessionId: 1 });
+ConversationSchema.index({ deletedAt: 1 }); // Index for trash queries
 
 // Virtual for getting messages count (if needed)
 ConversationSchema.virtual('messages', {

@@ -86,7 +86,13 @@ export async function GET(request: NextRequest) {
     const platform = searchParams.get('platform') || 'line'; // Platform filter
 
     // Build base query
-    const query: any = {};
+    // IMPORTANT: Always exclude soft-deleted conversations (deletedAt is null or undefined)
+    const query: any = {
+      $or: [
+        { deletedAt: null },
+        { deletedAt: { $exists: false } },
+      ],
+    };
     if (lineUserId) {
       query.lineUserId = lineUserId;
     }

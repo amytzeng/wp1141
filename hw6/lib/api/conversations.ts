@@ -83,14 +83,15 @@ export async function getUserConversations(userId: string): Promise<UserConversa
 }
 
 /**
- * Delete multiple conversations
+ * Delete multiple conversations (soft delete - moves to trash)
  */
 export async function deleteConversations(ids: string[]): Promise<{
   success: boolean;
   deleted: number;
-  messagesDeleted: number;
+  messagesCount: number;
   requested: number;
   valid: number;
+  message: string;
 }> {
   if (ids.length === 0) {
     throw new Error('No conversation IDs provided');
@@ -111,6 +112,63 @@ export async function deleteConversations(ids: string[]): Promise<{
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || `Failed to delete conversations: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Get list of deleted conversations (trash)
+ */
+export async function getTrashConversations(params: {
+  page?: number;
+  limit?: number;
+  lineUserId?: string;
+}): Promise<ConversationListResponse> {
+  const searchParams = new URLSearchParams();
+  
+  if (params.page) searchParams.set('page', params.page.toString());
+  if (params.limit) searchParams.set('limit', params.limit.toString());
+  if (params.lineUserId) searchParams.set('lineUserId', params.lineUserId);
+
+  const response = await fetch(`${API_BASE}/conversations/trash?${searchParams.toString()}`);
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch trash conversations: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Restore conversations from trash
+ */
+export async function restoreConversations(ids: string[]): Promise<{
+  success: boolean;
+  restored: number;
+  requested: number;
+  valid: number;
+  message: string;
+}> {
+  if (ids.length === 0) {
+    throw new Error('No conversation IDs provided');
+  }
+
+  if (ids.length > 100) {
+    throw new Error('Cannot restore more than 100 conversations at once');
+  }
+
+  const response = await fetch(`${API_BASE}/conversations/trash`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ conversationIds: ids }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || `Failed to restore conversations: ${response.statusText}`);
   }
 
   return response.json();

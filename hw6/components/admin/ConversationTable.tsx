@@ -10,6 +10,7 @@ interface ConversationTableProps {
   onViewDetail: (conversation: Conversation) => void;
   onDelete?: (ids: string[]) => Promise<void>;
   isDeleting?: boolean;
+  showRestoreButton?: boolean; // If true, show restore button instead of delete
 }
 
 export default function ConversationTable({
@@ -17,6 +18,7 @@ export default function ConversationTable({
   onViewDetail,
   onDelete,
   isDeleting = false,
+  showRestoreButton = false,
 }: ConversationTableProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -42,8 +44,11 @@ export default function ConversationTable({
     if (!onDelete || selectedIds.size === 0) return;
 
     const idsArray = Array.from(selectedIds);
+    const actionText = showRestoreButton ? '還原' : '刪除';
     const confirmed = window.confirm(
-      `確定要刪除 ${idsArray.length} 個對話嗎？此操作無法復原。`
+      showRestoreButton
+        ? `確定要還原 ${idsArray.length} 個對話嗎？還原後對話將重新出現在對話列表中。`
+        : `確定要刪除 ${idsArray.length} 個對話嗎？對話將移至垃圾桶。`
     );
 
     if (confirmed) {
@@ -51,8 +56,8 @@ export default function ConversationTable({
         await onDelete(idsArray);
         setSelectedIds(new Set());
       } catch (error) {
-        console.error('Failed to delete conversations:', error);
-        alert('刪除失敗，請稍後再試。');
+        console.error(`Failed to ${actionText} conversations:`, error);
+        alert(`${actionText}失敗，請稍後再試。`);
       }
     }
   };
@@ -60,14 +65,19 @@ export default function ConversationTable({
   const handleDeleteOne = async (id: string) => {
     if (!onDelete) return;
 
-    const confirmed = window.confirm('確定要刪除這個對話嗎？此操作無法復原。');
+    const actionText = showRestoreButton ? '還原' : '刪除';
+    const confirmed = window.confirm(
+      showRestoreButton
+        ? '確定要還原這個對話嗎？還原後對話將重新出現在對話列表中。'
+        : '確定要刪除這個對話嗎？對話將移至垃圾桶。'
+    );
 
     if (confirmed) {
       try {
         await onDelete([id]);
       } catch (error) {
-        console.error('Failed to delete conversation:', error);
-        alert('刪除失敗，請稍後再試。');
+        console.error(`Failed to ${actionText} conversation:`, error);
+        alert(`${actionText}失敗，請稍後再試。`);
       }
     }
   };
@@ -84,11 +94,15 @@ export default function ConversationTable({
             已選中 {selectedIds.size} 個對話
           </span>
           <button
-            className={styles.deleteButton}
+            className={showRestoreButton ? styles.restoreButton : styles.deleteButton}
             onClick={handleDeleteSelected}
             disabled={isDeleting}
           >
-            {isDeleting ? '刪除中...' : `批次刪除 (${selectedIds.size})`}
+            {isDeleting 
+              ? (showRestoreButton ? '還原中...' : '刪除中...') 
+              : showRestoreButton 
+                ? `批次還原 (${selectedIds.size})` 
+                : `批次刪除 (${selectedIds.size})`}
           </button>
           <button
             className={styles.cancelButton}
@@ -158,12 +172,12 @@ export default function ConversationTable({
                     </button>
                     {onDelete && (
                       <button
-                        className={styles.deleteOneButton}
+                        className={showRestoreButton ? styles.restoreOneButton : styles.deleteOneButton}
                         onClick={() => handleDeleteOne(conv._id)}
                         disabled={isDeleting}
-                        title="刪除對話"
+                        title={showRestoreButton ? "還原對話" : "刪除對話"}
                       >
-                        刪除
+                        {showRestoreButton ? '還原' : '刪除'}
                       </button>
                     )}
                   </div>

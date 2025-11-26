@@ -35,9 +35,13 @@ export async function GET(
     const { userId } = await params;
     const decodedUserId = decodeURIComponent(userId);
 
-    // Get all conversations for this user
+    // Get all conversations for this user (exclude soft-deleted)
     const conversations = await Conversation.find({
       lineUserId: decodedUserId,
+      $or: [
+        { deletedAt: null },
+        { deletedAt: { $exists: false } },
+      ],
     })
       .sort({ createdAt: -1 })
       .lean()

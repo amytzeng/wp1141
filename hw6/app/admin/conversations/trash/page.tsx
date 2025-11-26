@@ -1,24 +1,21 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ConversationTable from '@/components/admin/ConversationTable';
-import { getConversations, deleteConversations } from '@/lib/api';
+import { getTrashConversations, restoreConversations } from '@/lib/api';
 import type { Conversation } from '@/lib/types/admin';
-import styles from './conversations.module.css';
+import styles from '../conversations.module.css';
 
-export default function ConversationsPage() {
+export default function TrashPage() {
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
   const [filters, setFilters] = useState({
     lineUserId: '',
-    search: '',
-    startDate: '',
-    endDate: '',
   });
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
@@ -26,27 +23,15 @@ export default function ConversationsPage() {
     totalPages: 0,
     limit: 20,
   });
-  
-  // Ref to track if polling should be active
-  const pollingEnabledRef = useRef(true);
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const loadingRef = useRef(false);
-  const isDeletingRef = useRef(false);
 
-  const fetchConversations = async (silent = false) => {
+  const fetchConversations = async () => {
     try {
-      if (!silent) {
-        setLoading(true);
-        loadingRef.current = true;
-      }
+      setLoading(true);
       setError(null);
-      const response = await getConversations({
+      const response = await getTrashConversations({
         page,
         limit: pagination.limit,
         lineUserId: filters.lineUserId || undefined,
-        search: filters.search || undefined,
-        startDate: filters.startDate || undefined,
-        endDate: filters.endDate || undefined,
       });
       setConversations(response.conversations);
       setPagination({
@@ -55,69 +40,16 @@ export default function ConversationsPage() {
         limit: response.pagination.limit,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load conversations');
-      console.error('Error fetching conversations:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load trash conversations');
+      console.error('Error fetching trash conversations:', err);
     } finally {
-      if (!silent) {
-        setLoading(false);
-        loadingRef.current = false;
-      }
+      setLoading(false);
     }
   };
 
-  // Initial fetch
   useEffect(() => {
     fetchConversations();
-  }, [page, filters]);
-
-  // Set up polling (every 5 seconds)
-  useEffect(() => {
-    // Clear any existing interval
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-    }
-
-    // Set up polling (every 5 seconds)
-    // Since this effect runs whenever page or filters change,
-    // the interval will always use the latest values
-    if (pollingEnabledRef.current) {
-      pollingIntervalRef.current = setInterval(() => {
-        if (pollingEnabledRef.current && !loadingRef.current && !isDeletingRef.current) {
-          // Fetch with current page and filters
-          // This will use the latest values because the effect re-runs when they change
-          fetchConversations(true); // Silent fetch (no loading indicator)
-        }
-      }, 5000);
-    }
-
-    // Cleanup on unmount or when dependencies change
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
-    };
-  }, [page, filters]); // Re-run when page or filters change to use latest values
-
-  // Update refs when state changes
-  useEffect(() => {
-    loadingRef.current = loading;
-  }, [loading]);
-
-  useEffect(() => {
-    isDeletingRef.current = isDeleting;
-  }, [isDeleting]);
-
-  // Disable polling when page loses focus, re-enable when it gains focus
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      pollingEnabledRef.current = !document.hidden;
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
+  }, [page, filters.lineUserId]);
 
   const handleSearch = () => {
     setPage(1);
@@ -125,7 +57,6 @@ export default function ConversationsPage() {
   };
 
   const handleViewDetail = (conversation: Conversation) => {
-    // Directly navigate to the user's conversation list with fromList flag
     router.push(`/admin/conversations/detail?view=conversations&userId=${encodeURIComponent(conversation.lineUserId)}&fromList=true`);
   };
 
@@ -135,38 +66,60 @@ export default function ConversationsPage() {
     }
   };
 
-  const handleDelete = async (ids: string[]) => {
+  const handleRestore = async (ids: string[]) => {
     if (ids.length === 0) return;
 
+    const confirmed = window.confirm(
+      `確定要還原 ${ids.length} 個對話嗎？還原後對話將重新出現在對話列表中。`
+    );
+
+    if (!confirmed) return;
+
     try {
-      setIsDeleting(true);
-      const result = await deleteConversations(ids);
+      setIsRestoring(true);
+      const result = await restoreConversations(ids);
       
       // Show success message
-      alert(`成功將 ${result.deleted} 個對話移至垃圾桶（包含 ${result.messagesCount} 則訊息）`);
+      alert(`成功還原 ${result.restored} 個對話！`);
       
       // Refresh the list
       await fetchConversations();
       
-      // If current page becomes empty after deletion, go to previous page
+      // If current page becomes empty after restoration, go to previous page
       if (conversations.length === ids.length && page > 1) {
         setPage(page - 1);
       }
     } catch (err) {
-      console.error('Error deleting conversations:', err);
-      alert(err instanceof Error ? err.message : '刪除失敗，請稍後再試。');
+      console.error('Error restoring conversations:', err);
+      alert(err instanceof Error ? err.message : '還原失敗，請稍後再試。');
     } finally {
-      setIsDeleting(false);
+      setIsRestoring(false);
     }
   };
 
   return (
     <div className={styles.conversations}>
       <div className={styles.header}>
-        <h1 className={styles.pageTitle}>對話列表</h1>
-        <Link href="/admin/conversations/trash" className={styles.trashButton}>
-          🗑️ 垃圾桶
+        <h1 className={styles.pageTitle}>🗑️ 垃圾桶</h1>
+        <Link href="/admin/conversations" className={styles.trashButton}>
+          ← 返回對話列表
         </Link>
+      </div>
+
+      <div style={{ 
+        padding: '1rem', 
+        backgroundColor: '#fff3cd', 
+        border: '1px solid #ffc107', 
+        borderRadius: '8px',
+        marginBottom: '1.5rem',
+        color: '#856404'
+      }}>
+        <p style={{ margin: 0, fontWeight: 600 }}>
+          ⚠️ 重要提示：此頁面顯示已刪除的對話。所有資料都已保留，您可以隨時還原對話。
+          <strong style={{ display: 'block', marginTop: '0.5rem' }}>
+            此系統不支援永久刪除功能，所有資料都會被保留。
+          </strong>
+        </p>
       </div>
 
       {/* Filters */}
@@ -179,32 +132,6 @@ export default function ConversationsPage() {
             value={filters.lineUserId}
             onChange={(e) => setFilters({ ...filters, lineUserId: e.target.value })}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          />
-        </div>
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>關鍵字</label>
-          <input
-            type="text"
-            placeholder="搜尋訊息內容"
-            value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          />
-        </div>
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>開始日期</label>
-          <input
-            type="date"
-            value={filters.startDate}
-            onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-          />
-        </div>
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>結束日期</label>
-          <input
-            type="date"
-            value={filters.endDate}
-            onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
           />
         </div>
         <div className={styles.filterGroup} style={{ justifyContent: 'flex-end' }}>
@@ -232,8 +159,9 @@ export default function ConversationsPage() {
           <ConversationTable
             conversations={conversations}
             onViewDetail={handleViewDetail}
-            onDelete={handleDelete}
-            isDeleting={isDeleting}
+            onDelete={handleRestore}
+            isDeleting={isRestoring}
+            showRestoreButton={true}
           />
 
           {/* Pagination */}
