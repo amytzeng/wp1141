@@ -6,7 +6,7 @@ import styles from './ConversationTable.module.css';
 
 interface ConversationTableProps {
   conversations: Conversation[];
-  onViewDetail: (conversationId: string) => void;
+  onViewDetail: (conversation: Conversation) => void;
 }
 
 export default function ConversationTable({
@@ -42,7 +42,7 @@ export default function ConversationTable({
                 <td className={styles.tableCell}>
                   <button
                     className={styles.viewButton}
-                    onClick={() => onViewDetail(conv._id)}
+                    onClick={() => onViewDetail(conv)}
                   >
                     查看詳情
                   </button>

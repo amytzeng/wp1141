@@ -60,8 +60,9 @@ export default function ConversationsPage() {
     fetchConversations();
   };
 
-  const handleViewDetail = (conversationId: string) => {
-    router.push(`/admin/conversations/detail?view=users`);
+  const handleViewDetail = (conversation: Conversation) => {
+    // Directly navigate to the user's conversation list
+    router.push(`/admin/conversations/detail?view=conversations&userId=${encodeURIComponent(conversation.lineUserId)}`);
   };
 
   const handlePageChange = (newPage: number) => {

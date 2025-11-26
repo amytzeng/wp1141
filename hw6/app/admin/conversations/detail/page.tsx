@@ -25,6 +25,8 @@ function ConversationDetailContent() {
   const viewMode = (searchParams.get('view') as ViewMode) || 'users';
   const userId = searchParams.get('userId') || '';
   const conversationId = searchParams.get('conversationId') || '';
+  // Track if user came directly from conversation list (not from user selection)
+  const cameFromConversationList = searchParams.get('fromList') === 'true';
 
   const [users, setUsers] = useState<User[]>([]);
   const [conversations, setConversations] = useState<
@@ -114,6 +116,10 @@ function ConversationDetailContent() {
   const handleBackToUsers = () => {
     router.push('/admin/conversations/detail?view=users');
     setConversations([]);
+  };
+
+  const handleBackToConversationList = () => {
+    router.push('/admin/conversations');
   };
 
   const handleCloseModal = () => {
