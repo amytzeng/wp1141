@@ -82,3 +82,37 @@ export async function getUserConversations(userId: string): Promise<UserConversa
   return response.json();
 }
 
+/**
+ * Delete multiple conversations
+ */
+export async function deleteConversations(ids: string[]): Promise<{
+  success: boolean;
+  deleted: number;
+  messagesDeleted: number;
+  requested: number;
+  valid: number;
+}> {
+  if (ids.length === 0) {
+    throw new Error('No conversation IDs provided');
+  }
+
+  if (ids.length > 100) {
+    throw new Error('Cannot delete more than 100 conversations at once');
+  }
+
+  const response = await fetch(`${API_BASE}/conversations/batch`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ conversationIds: ids }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || `Failed to delete conversations: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+

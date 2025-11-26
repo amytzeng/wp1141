@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ConversationTable from '@/components/admin/ConversationTable';
-import { getConversations } from '@/lib/api';
+import { getConversations, deleteConversations } from '@/lib/api';
 import type { Conversation } from '@/lib/types/admin';
 import styles from './conversations.module.css';
 
@@ -12,6 +12,7 @@ export default function ConversationsPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [filters, setFilters] = useState({
     lineUserId: '',
     search: '',
@@ -24,10 +25,19 @@ export default function ConversationsPage() {
     totalPages: 0,
     limit: 20,
   });
+  
+  // Ref to track if polling should be active
+  const pollingEnabledRef = useRef(true);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingRef = useRef(false);
+  const isDeletingRef = useRef(false);
 
-  const fetchConversations = async () => {
+  const fetchConversations = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true);
+        loadingRef.current = true;
+      }
       setError(null);
       const response = await getConversations({
         page,
@@ -47,13 +57,62 @@ export default function ConversationsPage() {
       setError(err instanceof Error ? err.message : 'Failed to load conversations');
       console.error('Error fetching conversations:', err);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+        loadingRef.current = false;
+      }
     }
   };
 
+  // Initial fetch
   useEffect(() => {
     fetchConversations();
   }, [page, filters]);
+
+  // Set up polling (every 5 seconds)
+  useEffect(() => {
+    // Clear any existing interval
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+
+    // Set up polling (every 5 seconds)
+    if (pollingEnabledRef.current) {
+      pollingIntervalRef.current = setInterval(() => {
+        if (pollingEnabledRef.current && !loadingRef.current && !isDeletingRef.current) {
+          fetchConversations(true); // Silent fetch (no loading indicator)
+        }
+      }, 5000);
+    }
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, [page, filters]);
+
+  // Update refs when state changes
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
+  useEffect(() => {
+    isDeletingRef.current = isDeleting;
+  }, [isDeleting]);
+
+  // Disable polling when page loses focus, re-enable when it gains focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      pollingEnabledRef.current = !document.hidden;
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const handleSearch = () => {
     setPage(1);
@@ -68,6 +127,31 @@ export default function ConversationsPage() {
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       setPage(newPage);
+    }
+  };
+
+  const handleDelete = async (ids: string[]) => {
+    if (ids.length === 0) return;
+
+    try {
+      setIsDeleting(true);
+      const result = await deleteConversations(ids);
+      
+      // Show success message
+      alert(`成功刪除 ${result.deleted} 個對話（包含 ${result.messagesDeleted} 則訊息）`);
+      
+      // Refresh the list
+      await fetchConversations();
+      
+      // If current page becomes empty after deletion, go to previous page
+      if (conversations.length === ids.length && page > 1) {
+        setPage(page - 1);
+      }
+    } catch (err) {
+      console.error('Error deleting conversations:', err);
+      alert(err instanceof Error ? err.message : '刪除失敗，請稍後再試。');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -138,6 +222,8 @@ export default function ConversationsPage() {
           <ConversationTable
             conversations={conversations}
             onViewDetail={handleViewDetail}
+            onDelete={handleDelete}
+            isDeleting={isDeleting}
           />
 
           {/* Pagination */}
