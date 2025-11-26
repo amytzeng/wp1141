@@ -34,6 +34,8 @@ Rich Menu 那個頁面可以不用理他，只是在講我的 line bot 頁面底
 
 Line ID: @067xchih
 
+![qr_code](067xchih.png)
+
 ---
 
 以下是 Cursor 同學的話：
