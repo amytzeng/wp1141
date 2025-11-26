@@ -61,8 +61,8 @@ export default function ConversationsPage() {
   };
 
   const handleViewDetail = (conversation: Conversation) => {
-    // Directly navigate to the user's conversation list
-    router.push(`/admin/conversations/detail?view=conversations&userId=${encodeURIComponent(conversation.lineUserId)}`);
+    // Directly navigate to the user's conversation list with fromList flag
+    router.push(`/admin/conversations/detail?view=conversations&userId=${encodeURIComponent(conversation.lineUserId)}&fromList=true`);
   };
 
   const handlePageChange = (newPage: number) => {
