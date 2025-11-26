@@ -173,9 +173,9 @@ function ConversationDetailContent() {
       <div className={styles.infoBox}>
         <button 
           className={styles.backButton} 
-          onClick={cameFromConversationList ? handleBackToConversationList : handleBackToUsers}
+          onClick={handleBackToConversationList}
         >
-          {cameFromConversationList ? '← 返回對話列表' : '← 返回使用者列表'}
+          ← 返回對話列表
         </button>
         <div className={styles.infoText}>
           <div className={styles.infoTitle}>使用者 ID: {userId}</div>
