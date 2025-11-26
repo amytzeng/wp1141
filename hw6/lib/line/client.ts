@@ -50,3 +50,17 @@ export async function replyTextMessage(
   });
 }
 
+/**
+ * Sends a push message to a user (can be called multiple times)
+ */
+export async function pushTextMessage(
+  userId: string,
+  text: string
+): Promise<MessageAPIResponseBase> {
+  const client = getLineClient();
+  return await client.pushMessage(userId, {
+    type: 'text',
+    text,
+  });
+}
+

@@ -1,11 +1,12 @@
 import { LineEvent, RichMenuAction, PostbackData } from './types';
-import { getLineClient, replyTextMessage } from './client';
+import { getLineClient, replyTextMessage, pushTextMessage } from './client';
 import { getOrCreateConversation, loadContextMessages, incrementMessageCount } from '@/lib/context/manager';
 import Message from '@/lib/db/models/Message';
 import { getLLMClient } from '@/lib/llm/client';
 import { buildPrompt } from '@/lib/llm/prompt';
 import { getFallbackResponse } from '@/lib/llm/fallback';
 import { classifyMessage } from '@/lib/classification/classifier';
+import { ACTION_MESSAGES, ACTION_DESCRIPTIONS } from './rich-menu-messages';
 
 /**
  * Checks if a message is a command (starts with /)
@@ -217,6 +218,37 @@ export async function handlePostbackEvent(event: LineEvent): Promise<void> {
     // Get or create conversation
     const conversation = await getOrCreateConversation(lineUserId);
 
+    // Get the action message that will appear in chat
+    const actionMessage = ACTION_MESSAGES[action] || `[${action}]`;
+    const actionDescription = ACTION_DESCRIPTIONS[action] || '正在處理您的請求...';
+
+    // First, send the action message to chat (appears as if user typed it)
+    // Use pushMessage so we can send it separately
+    try {
+      await pushTextMessage(lineUserId, actionMessage);
+    } catch (error) {
+      console.error('Failed to push action message:', error);
+      // Continue even if push fails
+    }
+
+    // Save the action as a user message in database (for chat history)
+    const userActionMessage = new Message({
+      conversationId: conversation._id,
+      lineUserId,
+      type: 'user',
+      content: actionMessage,
+      timestamp: new Date(),
+      metadata: {
+        replyToken,
+        action,
+        isRichMenuAction: true,
+      },
+    });
+    await userActionMessage.save();
+
+    // Increment message count
+    await incrementMessageCount(conversation._id.toString());
+
     // Handle different actions
     let botResponse: string;
     let llmProvider = 'richmenu';
@@ -270,21 +302,7 @@ export async function handlePostbackEvent(event: LineEvent): Promise<void> {
       }
     }
 
-    // Save user action as a message (for tracking clear commands)
-    const userMessage = new Message({
-      conversationId: conversation._id,
-      lineUserId,
-      type: 'user',
-      content: `[${action}]`,
-      timestamp: new Date(),
-      metadata: {
-        replyToken,
-        action,
-      },
-    });
-    await userMessage.save();
-
-    // Send reply to user
+    // Send reply to user (the actual response)
     await replyTextMessage(replyToken, botResponse);
 
     // Save bot response to database
