@@ -30,6 +30,12 @@ Rich Menu 那個頁面可以不用理他，只是在講我的 line bot 頁面底
 
 ---
 
+部署網址：`https://wp1141-hw6-five.vercel.app/`
+
+Line ID: @067xchih
+
+---
+
 以下是 Cursor 同學的話：
 
 一個整合 Line Messaging API 的智慧聊天機器人系統，使用 Next.js 與 TypeScript 開發，提供 AI 驅動的學習助手功能，並包含完整的管理後臺與 API 文件系統。
@@ -289,8 +295,10 @@ hw6/
 │   ├── api/                  # API 封裝函數
 │   │   ├── conversations.ts
 │   │   ├── stats.ts
+│   │   ├── categories.ts
 │   │   ├── bot-config.ts
-│   │   └── rich-menu.ts
+│   │   ├── rich-menu.ts
+│   │   └── index.ts
 │   └── utils/                # 工具函數
 │       ├── date.ts           # 日期處理
 │       ├── format.ts          # 格式化
@@ -302,7 +310,8 @@ hw6/
 │   └── lib/                  # 工具函數測試
 └── scripts/                  # 工具腳本
     ├── init-rich-menu.ts     # Rich Menu 初始化
-    └── test-db-connection.ts  # 資料庫連線測試
+    ├── test-db-connection.ts  # 資料庫連線測試
+    └── preview-cleanup.ts     # Rich Menu 預覽清理工具
 ```
 
 ### 核心模組說明
