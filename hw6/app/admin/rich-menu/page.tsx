@@ -32,8 +32,13 @@ export default function RichMenuPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ imagePath }),
+        body: JSON.stringify({ imagePath: imagePath || undefined }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
 
@@ -51,6 +56,7 @@ export default function RichMenuPage() {
         });
       }
     } catch (error) {
+      console.error('Initialize error:', error);
       setMessage({
         type: 'error',
         text: error instanceof Error ? error.message : '發生未知錯誤',
@@ -107,9 +113,61 @@ export default function RichMenuPage() {
     }
   };
 
-  // Load info on mount
+  // Auto-initialize Rich Menu on mount if needed
   useEffect(() => {
-    fetchRichMenuInfo();
+    async function autoInitializeIfNeeded() {
+      try {
+        // First fetch current status
+        const response = await fetch('/api/admin/rich-menu');
+        const info: RichMenuInfo = await response.json();
+        setRichMenuInfo(info);
+
+        // If no Rich Menu exists, auto-initialize
+        if (!info.defaultRichMenuId && !loading) {
+          setMessage({
+            type: 'success',
+            text: '正在自動初始化 Rich Menu，請稍候...',
+          });
+          setLoading(true);
+
+          try {
+            const initResponse = await fetch('/api/admin/rich-menu', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ imagePath: 'public/rich-menu.png' }),
+            });
+
+            const initData = await initResponse.json();
+
+            if (initData.success) {
+              setMessage({
+                type: 'success',
+                text: `✅ Rich Menu 已自動初始化完成！Rich Menu ID: ${initData.richMenuId}`,
+              });
+              await fetchRichMenuInfo();
+            } else {
+              setMessage({
+                type: 'error',
+                text: `自動初始化失敗：${initData.error || '未知錯誤'}`,
+              });
+            }
+          } catch (error) {
+            setMessage({
+              type: 'error',
+              text: `自動初始化失敗：${error instanceof Error ? error.message : '未知錯誤'}`,
+            });
+          } finally {
+            setLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking Rich Menu status:', error);
+      }
+    }
+
+    autoInitializeIfNeeded();
   }, []);
 
   return (
@@ -123,61 +181,32 @@ export default function RichMenuPage() {
         </div>
       )}
 
-      {/* Initialize Section */}
+      {/* Auto-Initialization Status */}
       <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>初始化 Rich Menu</h2>
+        <h2 className={styles.sectionTitle}>Rich Menu 狀態</h2>
         <p className={styles.description}>
-          此功能會建立新的 Rich Menu、上傳圖片、設定所有按鈕的 Postback 動作，並設為預設選單。
+          Rich Menu 會自動初始化，無需手動操作。系統會在需要時自動檢查並設定 Rich Menu。
         </p>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="imagePathSelect" className={styles.label}>
-            圖片路徑：
-          </label>
-          <select
-            id="imagePathSelect"
-            value={imagePathSelect}
-            onChange={(e) => {
-              setImagePathSelect(e.target.value);
-              if (e.target.value !== 'custom') {
-                setImagePath(e.target.value);
-              } else {
-                setImagePath(customPath || 'public/rich-menu.png');
-              }
-            }}
-            className={styles.input}
-          >
-            <option value="public/rich-menu.png">public/rich-menu.png (預設)</option>
-            <option value="public/rich-menu-full.png">public/rich-menu-full.png (完整大圖)</option>
-            <option value="custom">自訂路徑...</option>
-          </select>
-          {imagePathSelect === 'custom' && (
-            <input
-              type="text"
-              value={customPath}
-              onChange={(e) => {
-                setCustomPath(e.target.value);
-                setImagePath(e.target.value || 'public/rich-menu.png');
-              }}
-              className={styles.input}
-              placeholder="public/rich-menu.png"
-              style={{ marginTop: '0.5rem' }}
-            />
-          )}
-          <small className={styles.hint}>
-            圖片必須位於伺服器的 <code>public/</code> 目錄下，尺寸應為 2500x1686 像素。
-            <br />
-            <strong>注意：</strong>如果應用程式部署在雲端（如 Vercel、Netlify），請確保圖片已透過 Git 包含在部署中。
-          </small>
-        </div>
-
-        <button
-          onClick={handleInitialize}
-          disabled={loading}
-          className={styles.button}
-        >
-          {loading ? '初始化中...' : '初始化 Rich Menu'}
-        </button>
+        
+        {loading ? (
+          <div className={styles.infoBox} style={{ background: '#fff3cd', borderColor: '#ffeaa7' }}>
+            <p style={{ color: '#856404', margin: 0 }}>
+              ⏳ 正在自動初始化 Rich Menu，請稍候...
+            </p>
+          </div>
+        ) : richMenuInfo?.defaultRichMenuId ? (
+          <div className={styles.infoBox} style={{ background: '#d4edda', borderColor: '#c3e6cb' }}>
+            <p style={{ color: '#155724', margin: 0 }}>
+              ✅ Rich Menu 已自動初始化並正常運作
+            </p>
+          </div>
+        ) : (
+          <div className={styles.infoBox} style={{ background: '#fff3cd', borderColor: '#ffeaa7' }}>
+            <p style={{ color: '#856404', margin: 0 }}>
+              ⏳ 正在檢查 Rich Menu 狀態...
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Rich Menu Info Section */}

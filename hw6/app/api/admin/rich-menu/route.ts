@@ -30,7 +30,18 @@ export async function POST(request: NextRequest) {
   try {
     await connectDB();
 
-    const body = await request.json().catch(() => ({}));
+    // Try to parse body, but handle empty body gracefully
+    let body: { imagePath?: string } = {};
+    try {
+      const text = await request.text();
+      if (text) {
+        body = JSON.parse(text);
+      }
+    } catch (parseError) {
+      // If body is empty or invalid JSON, use defaults
+      console.warn('Could not parse request body, using defaults');
+    }
+
     const imagePath = body.imagePath || 'public/rich-menu.png';
 
     // Try to find image file
@@ -38,6 +49,7 @@ export async function POST(request: NextRequest) {
       imagePath,
       path.join(process.cwd(), imagePath),
       path.join(process.cwd(), 'public', 'rich-menu.png'),
+      path.join(process.cwd(), 'public', 'rich-menu-full.png'),
       path.join(process.cwd(), 'public', 'rich-menu.jpg'),
     ];
 
@@ -72,10 +84,11 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error initializing Rich Menu:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
       },
       { status: 500 }
     );
@@ -96,6 +109,10 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     await connectDB();
+
+    // Auto-initialize Rich Menu if it doesn't exist
+    const { autoInitializeRichMenu } = await import('@/lib/line/rich-menu-auto-init');
+    await autoInitializeRichMenu();
 
     const richMenus = await listRichMenus();
     const defaultRichMenuId = await getDefaultRichMenuId();

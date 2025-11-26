@@ -83,6 +83,13 @@ export async function POST(request: NextRequest) {
     // Connect to database
     await connectDB();
 
+    // Auto-initialize Rich Menu on first request (in background, non-blocking)
+    import('@/lib/line/rich-menu-auto-init').then((module) => {
+      module.autoInitializeRichMenu().catch((error) => {
+        console.error('Background Rich Menu auto-initialization failed:', error);
+      });
+    });
+
     // Read request body as text (needed for signature validation)
     const body = await request.text();
     const signature = request.headers.get('x-line-signature');
