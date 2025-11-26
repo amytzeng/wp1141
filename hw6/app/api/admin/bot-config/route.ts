@@ -52,6 +52,7 @@ export async function GET() {
           maxResponseLength: 500,
           temperature: 0.7,
           customInstructions: '',
+          provider: 'openai',
           model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
         },
         isActive: true,
@@ -190,7 +191,10 @@ export async function PUT(request: NextRequest) {
         maxResponseLength: responseRules?.maxResponseLength ?? 500,
         temperature: responseRules?.temperature ?? 0.7,
         customInstructions: responseRules?.customInstructions || '',
-        model: responseRules?.model || process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+        provider: responseRules?.provider || 'openai',
+        model: responseRules?.model || (responseRules?.provider === 'gemini' 
+          ? (process.env.GEMINI_MODEL || 'gemini-1.5-pro')
+          : (process.env.OPENAI_MODEL || 'gpt-3.5-turbo')),
       },
       isActive: true,
       version: nextVersion,

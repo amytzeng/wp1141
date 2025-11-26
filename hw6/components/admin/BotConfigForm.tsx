@@ -11,14 +11,21 @@ interface BotConfigFormProps {
   loading?: boolean;
 }
 
-// Available OpenAI models
-const AVAILABLE_MODELS = [
-  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-  { value: 'gpt-4', label: 'GPT-4' },
-  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-  { value: 'gpt-4o', label: 'GPT-4o' },
-  { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
-];
+// Available models by provider
+const AVAILABLE_MODELS: Record<'openai' | 'gemini', Array<{ value: string; label: string }>> = {
+  openai: [
+    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+    { value: 'gpt-4', label: 'GPT-4' },
+    { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+    { value: 'gpt-4o', label: 'GPT-4o' },
+    { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+  ],
+  gemini: [
+    { value: 'gemini-pro', label: 'Gemini Pro' },
+    { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
+    { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
+  ],
+};
 
 const DEFAULT_CONFIG: BotConfigInput = {
   systemPrompt: 'You are a friendly and helpful learning assistant. Provide clear, well-structured answers.',
@@ -28,6 +35,7 @@ const DEFAULT_CONFIG: BotConfigInput = {
     maxResponseLength: 500,
     temperature: 0.7,
     customInstructions: '',
+    provider: 'openai',
     model: 'gpt-3.5-turbo',
   },
 };
@@ -43,6 +51,8 @@ export default function BotConfigForm({
 
   useEffect(() => {
     if (config) {
+      const provider = config.responseRules.provider || 'openai';
+      const defaultModel = provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-3.5-turbo';
       setFormData({
         systemPrompt: config.systemPrompt,
         personality: config.personality,
@@ -51,7 +61,8 @@ export default function BotConfigForm({
           maxResponseLength: config.responseRules.maxResponseLength || 500,
           temperature: config.responseRules.temperature || 0.7,
           customInstructions: config.responseRules.customInstructions || '',
-          model: config.responseRules.model || 'gpt-3.5-turbo',
+          provider,
+          model: config.responseRules.model || defaultModel,
         },
       });
       setTemperature(config.responseRules.temperature || 0.7);
@@ -66,6 +77,8 @@ export default function BotConfigForm({
   const handleReset = () => {
     if (confirm('確定要重置表單嗎？未儲存的變更將會遺失。')) {
       if (config) {
+        const provider = config.responseRules.provider || 'openai';
+        const defaultModel = provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-3.5-turbo';
         setFormData({
           systemPrompt: config.systemPrompt,
           personality: config.personality,
@@ -74,7 +87,8 @@ export default function BotConfigForm({
             maxResponseLength: config.responseRules.maxResponseLength || 500,
             temperature: config.responseRules.temperature || 0.7,
             customInstructions: config.responseRules.customInstructions || '',
-            model: config.responseRules.model || 'gpt-3.5-turbo',
+            provider,
+            model: config.responseRules.model || defaultModel,
           },
         });
         setTemperature(config.responseRules.temperature || 0.7);
@@ -194,9 +208,34 @@ export default function BotConfigForm({
         </div>
 
         <div className={styles.formGroup}>
+          <label className={styles.label}>Provider</label>
+          <select
+            value={formData.responseRules.provider || 'openai'}
+            onChange={(e) => {
+              const newProvider = e.target.value as 'openai' | 'gemini';
+              const defaultModel = newProvider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-3.5-turbo';
+              setFormData({
+                ...formData,
+                responseRules: {
+                  ...formData.responseRules,
+                  provider: newProvider,
+                  model: defaultModel,
+                },
+              });
+            }}
+            className={styles.input}
+            required
+          >
+            <option value="openai">OpenAI</option>
+            <option value="gemini">Google Gemini</option>
+          </select>
+          <div className={styles.helpText}>選擇使用的 LLM 提供者</div>
+        </div>
+
+        <div className={styles.formGroup}>
           <label className={styles.label}>Model</label>
           <select
-            value={formData.responseRules.model || 'gpt-3.5-turbo'}
+            value={formData.responseRules.model || (formData.responseRules.provider === 'gemini' ? 'gemini-1.5-pro' : 'gpt-3.5-turbo')}
             onChange={(e) =>
               setFormData({
                 ...formData,
@@ -209,13 +248,15 @@ export default function BotConfigForm({
             className={styles.input}
             required
           >
-            {AVAILABLE_MODELS.map((model) => (
+            {AVAILABLE_MODELS[formData.responseRules.provider || 'openai'].map((model) => (
               <option key={model.value} value={model.value}>
                 {model.label}
               </option>
             ))}
           </select>
-          <div className={styles.helpText}>選擇使用的 OpenAI 模型</div>
+          <div className={styles.helpText}>
+            選擇使用的 {formData.responseRules.provider === 'gemini' ? 'Gemini' : 'OpenAI'} 模型
+          </div>
         </div>
       </div>
 

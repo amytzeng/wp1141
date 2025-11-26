@@ -1,5 +1,7 @@
 // LLM service type definitions
 
+export type LLMProvider = 'openai' | 'gemini';
+
 export interface LLMGenerationOptions {
   temperature?: number;
   maxTokens?: number;
@@ -18,7 +20,7 @@ export interface LLMClient {
 
 export interface LLMResponse {
   content: string;
-  provider: string;
+  provider: LLMProvider;
   model: string;
   tokensUsed?: number;
   error?: string;
@@ -31,6 +33,7 @@ export interface LLMErrorInfo {
 }
 
 export interface LLMConfig {
+  provider: LLMProvider;
   apiKey: string;
   model: string;
   maxTokens: number;

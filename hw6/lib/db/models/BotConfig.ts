@@ -8,6 +8,7 @@ export interface IBotConfig extends Document {
     maxResponseLength?: number;
     temperature?: number;
     customInstructions?: string;
+    provider?: 'openai' | 'gemini';
     model?: string;
   };
   isActive: boolean;
@@ -47,6 +48,11 @@ const BotConfigSchema: Schema = new Schema(
       customInstructions: {
         type: String,
         default: '',
+      },
+      provider: {
+        type: String,
+        enum: ['openai', 'gemini'],
+        default: 'openai',
       },
       model: {
         type: String,

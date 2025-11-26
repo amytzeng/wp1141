@@ -113,7 +113,7 @@ export async function handleTextMessage(event: LineEvent): Promise<void> {
 
       // Try to get LLM response
       try {
-        const llmClient = getLLMClient();
+        const llmClient = await getLLMClient();
         const prompt = await buildPrompt(text, contextMessages);
         const llmResult = await llmClient.generateResponse(prompt, []);
 

@@ -13,6 +13,7 @@
     "test:coverage": "vitest run --coverage --config test_frontend/vitest.config.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@line/bot-sdk": "^9.3.0",
     "date-fns": "^4.1.0",
     "mongodb": "^7.0.0",

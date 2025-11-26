@@ -152,6 +152,7 @@ export interface BotConfig {
     maxResponseLength?: number;
     temperature?: number;
     customInstructions?: string;
+    provider?: 'openai' | 'gemini';
     model?: string;
   };
   isActive: boolean;
@@ -172,6 +173,7 @@ export interface BotConfigInput {
     maxResponseLength?: number;
     temperature?: number;
     customInstructions?: string;
+    provider?: 'openai' | 'gemini';
     model?: string;
   };
 }

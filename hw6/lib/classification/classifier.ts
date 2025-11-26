@@ -222,7 +222,7 @@ export async function classifyByLLM(
 
   try {
     // Get LLM client
-    const llmClient = getLLMClient();
+    const llmClient = await getLLMClient();
 
     // Build classification prompt
     const prompt = buildClassificationPrompt(text);
