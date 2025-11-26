@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import styles from './Sidebar.module.css';
 
 const navItems = [
+  { href: '/', label: '回到首頁', icon: '🏠' },
   { href: '/admin', label: 'Dashboard', icon: '📊' },
   { href: '/admin/conversations', label: '對話列表', icon: '💬' },
   { href: '/admin/categories', label: '分類統計', icon: '📈' },
@@ -22,8 +23,14 @@ export default function Sidebar() {
       </div>
       <nav>
         {navItems.map((item) => {
-          const isActive = pathname === item.href || 
-            (item.href !== '/admin' && pathname.startsWith(item.href));
+          // Special handling for home page - only active when exactly on root path
+          let isActive: boolean;
+          if (item.href === '/') {
+            isActive = pathname === '/';
+          } else {
+            isActive = pathname === item.href || 
+              (item.href !== '/admin' && pathname.startsWith(item.href));
+          }
           
           return (
             <Link

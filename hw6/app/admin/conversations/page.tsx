@@ -77,9 +77,13 @@ export default function ConversationsPage() {
     }
 
     // Set up polling (every 5 seconds)
+    // Since this effect runs whenever page or filters change,
+    // the interval will always use the latest values
     if (pollingEnabledRef.current) {
       pollingIntervalRef.current = setInterval(() => {
         if (pollingEnabledRef.current && !loadingRef.current && !isDeletingRef.current) {
+          // Fetch with current page and filters
+          // This will use the latest values because the effect re-runs when they change
           fetchConversations(true); // Silent fetch (no loading indicator)
         }
       }, 5000);
@@ -91,7 +95,7 @@ export default function ConversationsPage() {
         clearInterval(pollingIntervalRef.current);
       }
     };
-  }, [page, filters]);
+  }, [page, filters]); // Re-run when page or filters change to use latest values
 
   // Update refs when state changes
   useEffect(() => {
