@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react';
 import StatCard from '@/components/admin/StatCard';
 import CategoryPieChart from '@/components/admin/CategoryPieChart';
-import { getStats, getCategoryStats } from '@/lib/api';
+import { getStats, getCategoryStats, getRichMenuInfo } from '@/lib/api';
 import type { StatsResponse, CategoryStatsResponse } from '@/lib/types/admin';
+import type { RichMenuResponse } from '@/lib/api/rich-menu';
 import styles from './dashboard.module.css';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [categoryStats, setCategoryStats] = useState<CategoryStatsResponse | null>(null);
+  const [richMenuInfo, setRichMenuInfo] = useState<RichMenuResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,12 +19,23 @@ export default function DashboardPage() {
     async function fetchData() {
       try {
         setLoading(true);
-        const [statsData, categoryData] = await Promise.all([
+        const [statsData, categoryData, richMenuData] = await Promise.all([
           getStats(),
           getCategoryStats(),
+          getRichMenuInfo().catch((err) => {
+            // If Rich Menu API fails, return a default response
+            console.warn('Failed to fetch Rich Menu info:', err);
+            return {
+              success: false,
+              richMenus: [],
+              defaultRichMenuId: null,
+              error: err instanceof Error ? err.message : 'Unknown error',
+            } as RichMenuResponse;
+          }),
         ]);
         setStats(statsData);
         setCategoryStats(categoryData);
+        setRichMenuInfo(richMenuData);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
@@ -114,6 +127,16 @@ export default function DashboardPage() {
           <div className={`${styles.healthItem} ${styles.healthy}`}>
             <div className={styles.healthItemTitle}>LLM 服務</div>
             <div className={styles.healthItemStatus}>正常運作</div>
+          </div>
+          <div className={`${styles.healthItem} ${richMenuInfo?.success && richMenuInfo.defaultRichMenuId ? styles.healthy : styles.warning}`}>
+            <div className={styles.healthItemTitle}>Rich Menu</div>
+            <div className={styles.healthItemStatus}>
+              {richMenuInfo?.success && richMenuInfo.defaultRichMenuId
+                ? '已設定'
+                : richMenuInfo?.success
+                ? '未設定'
+                : '無法取得狀態'}
+            </div>
           </div>
         </div>
       </div>

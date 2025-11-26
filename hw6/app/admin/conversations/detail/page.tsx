@@ -88,6 +88,14 @@ function ConversationDetailContent() {
     try {
       setError(null);
       const response = await getConversationById(id);
+      
+      // Verify that the conversation belongs to the current user
+      if (response.conversation.lineUserId !== userId) {
+        setError('此對話不屬於當前使用者');
+        setIsModalOpen(false);
+        return;
+      }
+      
       setSelectedConversation(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load conversation');

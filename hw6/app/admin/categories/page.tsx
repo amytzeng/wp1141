@@ -88,6 +88,7 @@ export default function CategoriesPage() {
   );
 
   // Prepare subcategory data grouped by main category
+  // Sort main categories to ensure "others" comes first
   const subCategoriesByMain: Record<string, Array<{ key: string; count: number; percentage: number }>> = {};
   Object.entries(categoryStats.bySubCategory).forEach(([key, data]) => {
     if (!subCategoriesByMain[data.mainCategory]) {
@@ -98,6 +99,13 @@ export default function CategoriesPage() {
       count: data.count,
       percentage: data.percentage,
     });
+  });
+
+  // Sort main categories: "others" first, then others alphabetically
+  const sortedMainCategories = Object.keys(subCategoriesByMain).sort((a, b) => {
+    if (a === 'others') return -1;
+    if (b === 'others') return 1;
+    return a.localeCompare(b);
   });
 
   // Prepare trend data for line chart
@@ -179,31 +187,34 @@ export default function CategoriesPage() {
       <div className={styles.chartContainer}>
         <h2 className={styles.chartTitle}>細分類別統計</h2>
         <div className={styles.subCategoriesGrid}>
-          {Object.entries(subCategoriesByMain).map(([mainCategory, subCats]) => (
-            <div key={mainCategory} className={styles.subCategoryGroup}>
-              <div className={styles.subCategoryTitle}>
-                {categoryStats.categoryDefinitions.find(
-                  (def) => def.mainCategory === mainCategory
-                )?.displayName.zh || mainCategory}
+          {sortedMainCategories.map((mainCategory) => {
+            const subCats = subCategoriesByMain[mainCategory];
+            return (
+              <div key={mainCategory} className={styles.subCategoryGroup}>
+                <div className={styles.subCategoryTitle}>
+                  {categoryStats.categoryDefinitions.find(
+                    (def) => def.mainCategory === mainCategory
+                  )?.displayName.zh || mainCategory}
+                </div>
+                <div className={styles.subCategoryBadges}>
+                  {subCats.map((subCat) => {
+                    const [main, sub] = subCat.key.split('.');
+                    const definition = categoryStats.categoryDefinitions.find(
+                      (def) => def.mainCategory === main && def.subCategory === sub
+                    );
+                    return (
+                      <CategoryBadge
+                        key={subCat.key}
+                        mainCategory={main}
+                        subCategory={sub}
+                        count={subCat.count}
+                      />
+                    );
+                  })}
+                </div>
               </div>
-              <div className={styles.subCategoryBadges}>
-                {subCats.map((subCat) => {
-                  const [main, sub] = subCat.key.split('.');
-                  const definition = categoryStats.categoryDefinitions.find(
-                    (def) => def.mainCategory === main && def.subCategory === sub
-                  );
-                  return (
-                    <CategoryBadge
-                      key={subCat.key}
-                      mainCategory={main}
-                      subCategory={sub}
-                      count={subCat.count}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
